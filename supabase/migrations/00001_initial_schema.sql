@@ -7,7 +7,7 @@
 --   - Added deleted_at soft-delete columns on all domain tables
 --   - Expanded audit trigger coverage to all PII-bearing tables
 --   - Added read-audit triggers for sensitive tables (employees, competency_scores, ojt_evidence, coaching_briefs)
---   - Added data_classifications reference table + classification tags on sensitive tables
+--   - Added data_classification enum type (4 values: public/internal/confidential/restricted) + classification tags on sensitive tables
 --   - Added retention_policies table for client-configurable retention periods
 --   - Added security_events table for authentication and access anomaly logging
 --   - Updated RLS policies to filter soft-deleted rows by default
