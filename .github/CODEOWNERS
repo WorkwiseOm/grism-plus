@@ -1,0 +1,11 @@
+# Paths requiring @WorkwiseOm review (SOC 2-relevant controls).
+# Active once the repo is on GitHub and a branch protection rule on main
+# enables "Require review from Code Owners".
+
+/supabase/migrations/        @WorkwiseOm
+/src/lib/supabase/admin.ts   @WorkwiseOm
+/src/lib/security/           @WorkwiseOm
+/docs/security.md            @WorkwiseOm
+/docs/subprocessors.md       @WorkwiseOm
+/.env.local.example          @WorkwiseOm
+/.github/                    @WorkwiseOm
