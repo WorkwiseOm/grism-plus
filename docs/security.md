@@ -40,6 +40,13 @@ Per-tenant configuration on the `tenants` table controls:
 - `idle_timeout_minutes` — default 30. Inactive sessions are revoked.
 - `mfa_required_roles` — default `['ld_admin', 'superadmin']`. Users with these roles must complete MFA enrolment before accessing production data.
 
+Global auth policies enforced at the Supabase Auth layer (same for every tenant):
+
+- **JWT expiry** — 12 hours (43200 seconds). Set in Supabase Auth dashboard; `supabase/config.toml` documents the intent for local-dev parity.
+- **Password policy** — minimum 12 characters; must include lowercase, uppercase, digit, and symbol.
+- **Rate limiting on sign-in/sign-up** — 5 failed sign-in attempts per 15-minute rolling window per IP, enforced in Next.js middleware against a pg-backed counter (Step 4 deliverable). Supabase Auth's native per-IP limit is kept at the default 30/5-min as a safety net.
+- **Session idle timeout** — 30-minute inactivity threshold enforced in Next.js middleware against `tenants.idle_timeout_minutes` (app-layer, not Supabase Auth — `inactivity_timeout` is a Pro-tier-only feature and per-tenant override needs app logic anyway).
+
 Authentication events — successful logins, failures, password resets, MFA challenges, session revocations — are recorded in the `security_events` table. This stream is append-only at the database level (triggers block UPDATE and DELETE).
 
 ### Role-based access control
