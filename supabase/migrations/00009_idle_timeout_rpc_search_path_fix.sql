@@ -1,22 +1,10 @@
--- Propagate the search_path widening from 00008 to the cloud project.
---
--- 00008 originally set `search_path = public` only. That narrow path
--- caused the audit triggers on user_profiles (which call
--- extensions.uuid_generate_v4() without a schema qualifier) to fail with
--- "function uuid_generate_v4() does not exist" whenever the RPC performed
--- its throttled UPDATE. Discovered during the idle-timeout E2E tests.
---
--- The fix is to include `extensions` in the function's search_path. This
--- migration re-declares the function with the corrected setting. On a
--- fresh environment, 00008 already carries the correct path (the file
--- was amended to match this migration), so 00009 applies as a no-op
--- CREATE OR REPLACE — the function body is byte-identical to what 00008
--- would produce. On the existing cloud project, which was provisioned
--- with the buggy version, this migration supplies the functional fix.
---
--- Kept as a separate migration file rather than silently amending 00008
--- because 00008 was already applied and Supabase tracks migrations by
--- version number; a retroactive edit would not re-run against cloud.
+-- Corrective migration. 00008 was applied to cloud before the search_path
+-- interaction with the audit trigger on user_profiles was discovered (audit
+-- trigger calls extensions.uuid_generate_v4(), which fails under
+-- search_path = public only). Rather than edit 00008 in place (which would
+-- rewrite audit history), this migration uses CREATE OR REPLACE to propagate
+-- the widened search_path to the cloud project. Fresh resets apply 00008
+-- then 00009 in sequence.
 
 create or replace function public.check_and_refresh_idle_timeout(
   p_idle_minutes_default int default 30
