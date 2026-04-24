@@ -67,10 +67,14 @@ async function buildAuthedCookieHeader(email: string, password: string): Promise
     .join('; ')
 }
 
-// Reset the test user's last_activity_at to now() at the start of this
-// file so earlier vitest runs (which may have mutated last_activity_at
-// via the idle-timeout tests) don't bleed over and cause the middleware
-// to redirect /admin on idle expiry.
+// Reset the test user's state at the start of this file so earlier
+// vitest runs (and earlier files in the same run) don't bleed state:
+//   - last_activity_at is reset so idle-timeout middleware doesn't kick
+//     the /admin test to the sign-in page
+//   - auth.mfa_factors rows are deleted so the MFA redirect is
+//     deterministically "no factor → /auth/mfa/enrol" (a leftover
+//     verified factor from a manual phone-scan session would redirect
+//     to /auth/mfa/challenge instead)
 let adminPg: pg.Client | null = null
 beforeAll(async () => {
   if (!RUN_E2E) return
@@ -90,6 +94,15 @@ beforeAll(async () => {
     `UPDATE public.user_profiles SET last_activity_at = now() WHERE email = $1`,
     [TEST_EMAIL],
   )
+  const { rows } = await adminPg.query<{ id: string }>(
+    `SELECT id FROM public.user_profiles WHERE email = $1`,
+    [TEST_EMAIL],
+  )
+  if (rows.length === 1) {
+    await adminPg.query(`DELETE FROM auth.mfa_factors WHERE user_id = $1`, [
+      rows[0].id,
+    ])
+  }
 })
 
 afterAll(async () => {
@@ -119,7 +132,7 @@ describe.skipIf(!RUN_E2E)('sign-in flow (slice 1)', () => {
   })
 
   it.skipIf(!TEST_USER_PASSWORD)(
-    'authenticated ld_admin: / redirects to /admin',
+    'authenticated ld_admin (no MFA factor): / redirects to /auth/mfa/enrol',
     async () => {
       const cookieHeader = await buildAuthedCookieHeader(TEST_EMAIL, TEST_USER_PASSWORD!)
       expect(cookieHeader.length).toBeGreaterThan(0)
@@ -129,24 +142,15 @@ describe.skipIf(!RUN_E2E)('sign-in flow (slice 1)', () => {
         redirect: 'manual',
       })
       expect(r.status).toBe(307)
-      expect(r.headers.get('location')).toContain('/admin')
+      expect(r.headers.get('location')).toContain('/auth/mfa/enrol')
     },
   )
 
-  it.skipIf(!TEST_USER_PASSWORD)(
-    'authenticated ld_admin: /admin returns 200 with placeholder text',
-    async () => {
-      const cookieHeader = await buildAuthedCookieHeader(TEST_EMAIL, TEST_USER_PASSWORD!)
-
-      const r = await fetch(`${BASE}/admin`, {
-        headers: { cookie: cookieHeader },
-      })
-      expect(r.status).toBe(200)
-      const html = await r.text()
-      expect(html).toContain('L&amp;D Admin home placeholder')
-      expect(html).toContain(TEST_EMAIL)
-    },
-  )
+  // The /admin page render test from slice 1 is not reachable now that
+  // MFA enforcement redirects ld_admin away before they can see /admin.
+  // Re-enabling requires either (a) a non-MFA-required test user, or (b)
+  // a verified TOTP factor already enrolled for the test user — both
+  // belong in slice 3 / Phase 1 test infrastructure work, not slice 2.
 
   it.skipIf(!TEST_USER_PASSWORD)(
     'authenticated ld_admin: /auth/sign-in redirects to /',
