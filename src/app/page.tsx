@@ -12,10 +12,9 @@ type UserRole = Database["public"]["Enums"]["user_role"]
  *   the check is duplicated here as a defence-in-depth guard).
  * - Session but no matching user_profiles row → /auth/sign-in?error=profile_missing.
  * - Session + known role → the role's landing page.
- * - Session + unknown role → /auth/sign-in?error=unknown_role, plus a
- *   security_events row (closest-fit enum: 'rls_denial' with metadata
- *   describing the actual reason). A dedicated 'unknown_role_fallback'
- *   enum value is tracked in docs/PROGRESS.md for slice 2.
+ * - Session + unknown role → /auth/sign-in?error=unknown_role, plus an
+ *   auth_unknown_role_fallback security_events row recording the
+ *   unrecognised role value in metadata.
  */
 export default async function Home() {
   const supabase = createClient()
@@ -55,8 +54,8 @@ export default async function Home() {
       const admin = createAdminClient()
       await admin.from("security_events").insert({
         user_id: user.id,
-        event_type: "rls_denial",
-        metadata: { reason: "unknown_role_fallback", role },
+        event_type: "auth_unknown_role_fallback",
+        metadata: { role },
       })
       redirect("/auth/sign-in?error=unknown_role")
     }
