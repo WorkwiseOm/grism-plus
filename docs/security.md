@@ -139,7 +139,7 @@ Zero-day retention is enabled on Anthropic API calls where available.
 
 - Supabase automated daily backups retained for 7 days (free tier) / 30 days (paid tier)
 - Point-in-time recovery available on paid tier — target for Phase 4
-- Quarterly restore drill planned from Phase 4 onward, documented in `docs/runbooks/restore-drill.md`
+- Quarterly restore drill planned from Phase 4 onward, to be documented in `docs/runbooks/restore-drill.md` (Phase 4 deliverable)
 - RTO target: 4 hours. RPO target: 24 hours. These targets tighten in Phase 4.
 
 ### Vulnerability management
@@ -151,7 +151,7 @@ Zero-day retention is enabled on Anthropic API calls where available.
 
 ## Incident response
 
-Incident response procedures are documented in `docs/runbooks/incident-response.md` (Phase 1 deliverable). Severity tiers:
+Incident response procedures will be documented in `docs/runbooks/incident-response.md` (Phase 4 deliverable). Severity tiers:
 
 - **SEV-0** — data breach confirmed, customer notification required
 - **SEV-1** — production outage affecting multiple tenants
