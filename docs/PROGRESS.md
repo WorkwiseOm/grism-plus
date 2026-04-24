@@ -1,5 +1,36 @@
 # Progress — Grism Plus
 
+## Phase 0 progress
+
+### 2026-04-24 — Step 4 vertical slice 1 complete
+
+Minimum slice verified end-to-end: sign-in page, auth middleware, role-based redirect, and three placeholder landing pages. The seeded `ld_admin` test user authenticates against cloud Supabase and lands on `/admin`; unauthenticated requests to protected routes redirect to `/auth/sign-in`. Six e2e tests pass under `RUN_E2E_TESTS=1`.
+
+Commits (most recent first):
+
+- `5e499ec` — test: e2e sign-in flow coverage (opt-in via RUN_E2E_TESTS)
+- `1e1b778` — feat: placeholder landing pages for employee, manager, admin roles
+- `2772a15` — feat: root page role-based redirect
+- `782868c` — feat: minimal middleware (static asset bypass + auth-required redirect)
+- `f71a630` — feat: sign-in page with email/password auth (Shadcn Card form)
+- `bb96fae` — chore: `scripts/seed_test_user.ts` for Step 4 login verification (one tenant + one ld_admin user)
+- `55e12a1` — chore: Shadcn components for auth UI (card, input, label, button, alert, form)
+
+Supporting infrastructure migrations (ready for slice 2 wiring):
+
+- `b9c496c` — `user_profiles.last_activity_at` column for idle-timeout middleware
+- `8c3aa56` — `check_mfa_rate_limit()` per-user MFA failure rate limit
+- `7fce4b9` — `user_mfa_required_but_missing()` helper + `mfa_factor_reset_by_admin` enum value
+- `4eb1b96` — `check_login_rate_limit(inet)` + partial index + `login_rate_limited` enum value
+
+Explicitly deferred to slice 2: rate-limit call wiring in middleware, MFA enforcement middleware, `/auth/mfa/enrol` and `/auth/mfa/challenge` pages, password policy validation route for signup/reset, idle-timeout enforcement (column is ready, logic is not), mocked middleware unit tests.
+
+### 2026-04-23 — Step 3C complete
+
+Subprocessor register seeded and reconciled with deployment reality. Five subprocessors persisted in cloud; `docs/subprocessors.md` updated to match (Sydney for Supabase dev project, Vercel marked not-yet-provisioned until Phase 0 Step 9).
+
+Commit: `9917f75`
+
 ## Phase 1 inputs
 
 ### Unberry integration scope for Phase 1
