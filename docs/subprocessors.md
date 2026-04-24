@@ -2,7 +2,7 @@
 
 This document lists every third-party service that processes customer data on behalf of Grism Plus. It is maintained for SOC 2 vendor management and for prospective customer security reviews.
 
-Last reviewed: 2026-04-23 by Tariq Al-Maskari.
+Last reviewed: 2026-04-24 by Tariq Al-Maskari.
 
 ## How to read this register
 
@@ -16,7 +16,7 @@ The corresponding `subprocessors` table in the production database holds the mac
 
 - **Purpose:** Hosted Postgres database, authentication, row-level security, storage, Edge Functions, vector search
 - **Data categories:** all customer data (employee records, assessments, IDPs, OJT evidence, coaching briefs, audit logs)
-- **Hosting region:** Frankfurt, Germany (EU) — confirmed per project configuration
+- **Hosting region:** Sydney, Australia (ap-southeast-2). MVP development project; region selected by operator default during provisioning, not by data residency policy. Production deployment region to be determined by data residency requirements of the first customer contract, most likely Frankfurt for GCC proximity.
 - **SOC 2 status:** Type II certified
 - **GDPR status:** compliant, DPA executed
 - **DPA:** https://supabase.com/legal/dpa
@@ -26,11 +26,12 @@ The corresponding `subprocessors` table in the production database holds the mac
 
 - **Purpose:** Next.js application hosting, serverless function execution, edge caching, custom domain TLS
 - **Data categories:** request payloads in transit, server-side rendering payloads (may include PII), environment variables (secrets)
-- **Hosting region:** Frankfurt — configured via Vercel project settings
+- **Hosting region:** Not yet provisioned. Intended hosting region: Frankfurt (production). Will be activated in the migration that provisions the Vercel project (Phase 0 Step 9). Until then, no Grism Plus customer data flows through Vercel.
 - **SOC 2 status:** Type II certified
 - **GDPR status:** compliant, DPA executed
 - **DPA:** https://vercel.com/legal/dpa
 - **Added:** 2026-04
+- **Status:** Inactive (documented in register as non-processing) until Step 9 provisioning.
 
 ### Anthropic (Anthropic PBC)
 
