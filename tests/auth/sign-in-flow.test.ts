@@ -19,8 +19,9 @@
  * slice 2 alongside the rate-limit / MFA / idle-timeout code.
  */
 import { readFileSync } from 'node:fs'
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createServerClient } from '@supabase/ssr'
+import pg from 'pg'
 
 const env = readFileSync('.env.local', 'utf8')
 const readEnv = (key: string): string => {
@@ -65,6 +66,35 @@ async function buildAuthedCookieHeader(email: string, password: string): Promise
     .map((c) => `${c.name}=${encodeURIComponent(c.value)}`)
     .join('; ')
 }
+
+// Reset the test user's last_activity_at to now() at the start of this
+// file so earlier vitest runs (which may have mutated last_activity_at
+// via the idle-timeout tests) don't bleed over and cause the middleware
+// to redirect /admin on idle expiry.
+let adminPg: pg.Client | null = null
+beforeAll(async () => {
+  if (!RUN_E2E) return
+  const projectRef = new URL(
+    readEnv('NEXT_PUBLIC_SUPABASE_URL'),
+  ).hostname.split('.')[0]
+  adminPg = new pg.Client({
+    host: 'aws-1-ap-southeast-2.pooler.supabase.com',
+    port: 5432,
+    user: `postgres.${projectRef}`,
+    password: readEnv('SUPABASE_DB_PASSWORD'),
+    database: 'postgres',
+    ssl: { rejectUnauthorized: false },
+  })
+  await adminPg.connect()
+  await adminPg.query(
+    `UPDATE public.user_profiles SET last_activity_at = now() WHERE email = $1`,
+    [TEST_EMAIL],
+  )
+})
+
+afterAll(async () => {
+  if (adminPg) await adminPg.end()
+})
 
 describe.skipIf(!RUN_E2E)('sign-in flow (slice 1)', () => {
   it('redirects unauthenticated / to /auth/sign-in', async () => {

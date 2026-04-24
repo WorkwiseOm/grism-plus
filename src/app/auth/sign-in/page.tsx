@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { createClient } from "@/lib/supabase/client"
 
 function SignInForm() {
   const router = useRouter()
@@ -28,14 +27,25 @@ function SignInForm() {
     event.preventDefault()
     setError(null)
     setLoading(true)
-    const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    let response: Response
+    try {
+      response = await fetch("/api/auth/sign-in", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+    } catch {
+      setError("Network error. Please try again.")
+      setLoading(false)
+      return
+    }
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string
+      ok?: boolean
+    }
     setLoading(false)
-    if (signInError) {
-      setError(signInError.message)
+    if (!response.ok) {
+      setError(data.error ?? "Sign-in failed.")
       return
     }
     router.push("/")
