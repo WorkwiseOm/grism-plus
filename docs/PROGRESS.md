@@ -2,6 +2,34 @@
 
 ## Phase 0 progress
 
+### 2026-04-24 — Step 4 complete (vertical slice 2 closes Step 4)
+
+Slice 2 adds the remaining middleware + UI layer on top of the infrastructure landed in the preceding migrations (00003–00007): cleanup (`getAll`/`setAll` cookie pattern, `@base-ui` removal, `auth_unknown_role_fallback` enum), password policy validator, idle timeout enforcement with throttled activity refresh (00008 + 00009), login rate limit wired into middleware against the `check_login_rate_limit` RPC, and the full MFA flow (enrolment page, challenge page, enforcement middleware branch).
+
+**Manual MFA end-to-end verification** completed by Tariq on 2026-04-24 against cloud Supabase with a real TOTP authenticator. Both flows confirmed:
+
+- First-time enrolment: sign-in → `/auth/mfa/enrol` → QR scan → 6-digit verify → `/admin` lands with session elevated to aal2.
+- Returning-user challenge: sign-out → sign-in → `/auth/mfa/challenge` → 6-digit verify → `/admin`.
+
+Slice 2 commits (most recent first):
+
+- `60a592b` — test: middleware MFA redirect coverage; update sign-in-flow for MFA-required users
+- `c7e96d1` — feat: middleware MFA enforcement (redirect aal1 users with required-MFA roles to enrol or challenge)
+- `88e73ba` — feat: MFA challenge page with per-user rate limit
+- `ac63c74` — feat: MFA enrolment page with QR code and TOTP verify
+- `a37ba99` — feat: login rate limit middleware (5 failed attempts per 15 min per IP, writes login_failure/login_rate_limited events)
+- `b24df97` — docs: log test parallelism trade-off as PROGRESS.md backlog item
+- `1dbeee0` — docs: annotate 00009 as corrective migration for 00008 search_path bug
+- `079a27b` — feat: idle timeout enforcement via RPC (per-tenant timeout, throttled activity updates)
+- `a5378b4` — feat: password policy validator (12 chars, complexity) for signup/reset flows
+- `8349ade` — chore: slice 2 cleanup (getAll/setAll cookie pattern, remove @base-ui, add auth_unknown_role_fallback enum, log coach role scope question)
+
+Still open from slice 2 for Phase 1+:
+
+- Coach-role landing page scope question — backlog entry above.
+- Multi-test-user seeding to partition E2E tests and restore vitest file parallelism — backlog entry above.
+- Pre-planted TOTP factor fixture so the `/admin` page-render test can be restored (currently skipped in `tests/auth/sign-in-flow.test.ts`).
+
 ### 2026-04-24 — Step 4 vertical slice 1 complete
 
 Minimum slice verified end-to-end: sign-in page, auth middleware, role-based redirect, and three placeholder landing pages. The seeded `ld_admin` test user authenticates against cloud Supabase and lands on `/admin`; unauthenticated requests to protected routes redirect to `/auth/sign-in`. Six e2e tests pass under `RUN_E2E_TESTS=1`.
