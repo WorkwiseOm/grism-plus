@@ -47,6 +47,8 @@ Global auth policies enforced at the Supabase Auth layer (same for every tenant)
 - **Rate limiting on sign-in/sign-up** — 5 failed sign-in attempts per 15-minute rolling window per IP, enforced in Next.js middleware against a pg-backed counter (Step 4 deliverable). Supabase Auth's native per-IP limit is kept at the default 30/5-min as a safety net.
 - **Session idle timeout** — 30-minute inactivity threshold enforced in Next.js middleware against `tenants.idle_timeout_minutes` (app-layer, not Supabase Auth — `inactivity_timeout` is a Pro-tier-only feature and per-tenant override needs app logic anyway).
 
+**Client-IP source for rate limiting and audit.** The middleware reads the client IP from `x-real-ip`, falling back to the first value of `x-forwarded-for`. Both headers are client-supplied at the network level, so this is only safe under a deployment where the production edge/platform overwrites or strips them before they reach the app. Vercel sets `x-real-ip` and `x-forwarded-for` on incoming requests, but `x-forwarded-for` may be appended to rather than replaced — the trusted entry depends on the request chain. Before public pilot/production: verify the Vercel→Supabase chain end-to-end, document the trusted client-IP source, and adjust middleware to read whatever signal the platform documents as authoritative (likely `x-real-ip` alone, or the runtime-provided `request.ip`). Until then, rate-limit bypass via spoofed forwarding headers is theoretically possible from a sufficiently-determined attacker; impact is contained to login attempts (the rate-limit RPC keys on `inet`, audit rows record `ip_address`, and Supabase Auth's native 30/5-min cap remains in force as a backstop). Tracked in `docs/PROGRESS.md` backlog as Phase 4 deployment hardening.
+
 Authentication events — successful logins, failures, password resets, MFA challenges, session revocations — are recorded in the `security_events` table. This stream is append-only at the database level (triggers block UPDATE and DELETE).
 
 ### Role-based access control
@@ -55,7 +57,7 @@ Five roles are defined: `employee`, `manager`, `ld_admin`, `coach`, `superadmin`
 
 - `employee` — sees only their own records
 - `manager` — sees their own records plus direct reports
-- `coach` — read-only access to assigned coachees
+- `coach` — **intended**: read-only access to assigned coachees. **Current implementation (Phase 0)**: `coach` is mapped to the `/manager` landing, and RLS does not yet enforce per-assignment scoping — under the existing tenant-isolation policies a coach can read tenant-wide employee/IDP data. Tracked in `docs/PROGRESS.md` backlog as a pre-production hardening gate.
 - `ld_admin` — tenant-wide administrative access
 - `superadmin` — cross-tenant support access, used only by Tilqai-Grism operational staff under documented access review
 
