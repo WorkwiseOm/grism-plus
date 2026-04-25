@@ -8,6 +8,25 @@
 
 - **Show, don't reference.** When proposing content for user review (file diffs, new file contents, SQL, proposed edits), paste the content verbatim in the assistant response body. Do not direct the reviewer to tool output with phrases like "shown above" or "see the diff in the cat output" — tool results are easy to skip or scroll past and are not a durable review surface. Tool output proves execution. The message body presents content for review. Never conflate the two. If content is too long to paste, split the review into smaller reviewable chunks rather than offloading to tool logs.
 
+## UI design protocol
+
+- **Phase 0 placeholder screens may be built directly in Shadcn without Stitch wireframes.** Auth screens, role-based landing pages, and similar infrastructure UIs are throwaway placeholders that will be replaced or significantly evolved in Phase 1. Designing them in Stitch would be wireframing for the bin.
+
+- **From Phase 1 onwards, every real product screen MUST have a Stitch design before code is written.** "Real product screen" means: a screen the user will actually use to do work (IDP approval, IDP view, manager coachee view, framework editor), or a screen that will be shown to a client or used in a demo. Workflow:
+  1. Write the brief in claude.ai (data shape, user goal, edge cases, error states)
+  2. Generate Stitch wireframe via MCP
+  3. Save .pen files to /design directory in this repo
+  4. Review wireframe with Tariq (and Grism where their eLearning UX expertise applies)
+  5. Claude Code reads .pen via MCP and generates production components
+
+- **Stitch is NOT required for:**
+  - Modal confirmations, toast notifications, standard form validation states
+  - Simple CRUD lists where Shadcn templates suffice
+  - Settings/profile pages with no novel interaction model
+  - Any frontend work where the implementation is <200 lines and follows established patterns
+
+- **Hard stop:** No real product screen ships to pilot clients without a Stitch design file in /design at the corresponding commit.
+
 ## Current phase
 
 **Phase 0 — Foundation** (~85% complete as of 2026-04-24).
