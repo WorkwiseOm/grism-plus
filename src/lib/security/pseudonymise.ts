@@ -41,6 +41,30 @@ export function pseudonymiseEmployee(
     .digest('hex')
 
   const pseudonym = `Employee_${hmac.slice(0, 4).toUpperCase()}` as const
-  const { full_name: _fn, email: _em, ...rest } = employee
-  return { ...rest, pseudonym } as PseudonymisedEmployee
+  // Explicit construction (no destructure) so lint cannot flag unused
+  // full_name / email bindings. Keeps both guarantees:
+  //   - Runtime: full_name and email are simply not copied, so they
+  //     cannot leak through this function regardless of what the
+  //     caller does with the returned object.
+  //   - Compile-time: PseudonymisedEmployee (Omit<Employee, 'full_name'
+  //     | 'email'> & …) has no full_name / email fields, so any code
+  //     that tries to read them does not type-check.
+  return {
+    id: employee.id,
+    tenant_id: employee.tenant_id,
+    user_profile_id: employee.user_profile_id,
+    employee_number: employee.employee_number,
+    role_title: employee.role_title,
+    target_role_title: employee.target_role_title,
+    department: employee.department,
+    org_unit: employee.org_unit,
+    manager_id: employee.manager_id,
+    hire_date: employee.hire_date,
+    data_classification: employee.data_classification,
+    is_active: employee.is_active,
+    created_at: employee.created_at,
+    updated_at: employee.updated_at,
+    deleted_at: employee.deleted_at,
+    pseudonym,
+  } as PseudonymisedEmployee
 }
