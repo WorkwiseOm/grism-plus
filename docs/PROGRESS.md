@@ -2,6 +2,19 @@
 
 ## Phase 0 progress
 
+### 2026-04-25 — Step 5 complete (Arwa Energy demo seed)
+
+Demo fixture seeded into cloud Supabase: 1 tenant, 21 user_profiles, 20 employees with manager hierarchy, the Arwa Energy Core Competency Framework (5 categories × 4 competencies = 20 leaves + 5 parent rows), 196 competency_scores, 12 IDPs distributed across 8 pending_approval / 2 active / 1 draft / 1 completed (with the 8 pending IDPs hand-designed across the variety dimensions agreed in spec — category coverage, gap magnitude, originator, milestone count, modality mix), 12 assessments, 35 idp_milestones, 55 idp_actions, 10 OJT activities, 10 eLearning courses, 7 elearning_enrolments + 7 ojt_assignments tied to the active and completed IDPs.
+
+Idempotent and deterministic: re-running the script produces identical row counts and IDP shape (deterministic via mulberry32 seeded on `DEMO_SEED_VARIANT`, default `'arwa-energy-demo-v1'`). The 5 persona passwords (Yusuf superadmin, Aisha ld_admin, Khalid/Fatima/Omar managers) are rotated each run and printed to stdout once; the other 16 users get random passwords that are generated and discarded immediately.
+
+**Audit trigger silent-failure mode for child tables without direct tenant_id discovered during seed; resolved via per-table FK lookup in 00010 migration.** The original `write_audit_log()` in 00001 read `NEW.tenant_id` directly and swallowed missing-column errors, producing INSERT failures on `idp_milestones`, `idp_actions`, and `ojt_evidence` with non-obvious symptoms. Treated as a real production-runtime fix, committed separately ahead of the seed.
+
+Commits:
+
+- `870980b` — feat: add Phase 1 demo seed (Arwa Energy fixture - 1 tenant, 21 users, 20 competencies, 12 IDPs, 10+10 catalogues, deterministic re-runs)
+- `f059435` — fix: resolve audit_log.tenant_id for child tables without direct tenant_id column (idp_milestones, idp_actions, ojt_evidence)
+
 ### 2026-04-24 — Step 4 complete (vertical slice 2 closes Step 4)
 
 Slice 2 adds the remaining middleware + UI layer on top of the infrastructure landed in the preceding migrations (00003–00007): cleanup (`getAll`/`setAll` cookie pattern, `@base-ui` removal, `auth_unknown_role_fallback` enum), password policy validator, idle timeout enforcement with throttled activity refresh (00008 + 00009), login rate limit wired into middleware against the `check_login_rate_limit` RPC, and the full MFA flow (enrolment page, challenge page, enforcement middleware branch).
@@ -92,3 +105,4 @@ Commit: `9917f75`
 - MFA multi-device friendlyName — if users commonly enrol multiple factors (new device, old device), consider per-device friendlyName like "Grism Plus - <device hint>" so users can distinguish entries in their authenticator app. Currently all factors show "Grism Plus". Phase 4 or when user feedback indicates confusion.
 - Coach role landing page and Phase 1 scope — currently mapped to `/manager` view since coaches supervise coachees and manager view approximates. Revisit before Phase 1 kickoff: does coach need a dedicated `/coach` landing with a coachee list view, or does manager view remain appropriate? Phase 1 scope question for the IDP coaching modality.
 - Test suite runs serially (vitest fileParallelism: false) because E2E tests share cloud DB state on the single seeded test user's user_profiles.last_activity_at row. Trade-off: suite gets slower as tests are added. Mitigation for Phase 1+: seed multiple test users and partition tests by user, restoring parallelism. Not urgent for MVP — expected Phase 0/Phase 1 test suite stays under 50 files.
+- Audit trigger pattern documentation — `write_audit_log()` now has per-table CASE branches for child tables (idp_milestones, idp_actions, ojt_evidence). As new tables are added to the schema, especially child tables without direct `tenant_id` columns, this function MUST be updated. Consider adding a CI check that fails if a new audited table is missing from the function's CASE statement. Phase 4 deliverable; not urgent for MVP but useful as the schema grows.

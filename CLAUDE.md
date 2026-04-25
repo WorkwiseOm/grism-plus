@@ -29,7 +29,7 @@
 
 ## Current phase
 
-**Phase 0 — Foundation** (~85% complete as of 2026-04-24).
+**Phase 0 — Foundation** (~90% complete as of 2026-04-25).
 
 Completed:
 
@@ -39,8 +39,9 @@ Completed:
 - Step 3B — CI scaffolding (Dependabot, CodeQL, CODEOWNERS, PR template), SOC 2 security posture docs, PII pseudonymisation utility, auth hardening docs reconciled with Free-tier constraints
 - Step 3C — SOC 2 subprocessor register seeded (5 vendors)
 - Step 4 — Auth + middleware + MFA + idle timeout + login rate limit + password policy validator. Slices 1 (sign-in + role-routing baseline) and 2 (MFA, idle, rate limit) both closed. Manual end-to-end MFA verification confirmed 2026-04-24.
+- Step 5 — Arwa Energy demo seed (`scripts/seed_phase1_demo.ts` + `scripts/demo/`): 1 tenant, 21 users, 20 competencies, 12 IDPs (8 pending_approval / 2 active / 1 draft / 1 completed), 10+10 catalogues, idempotent + deterministic. Audit trigger child-table tenant resolution fix landed in 00010 alongside.
 
-Next: Step 5 (demo seed data for Phase 1 preparation). See `docs/PROGRESS.md` for the detailed progress log and open backlog (including coach-role landing scope and multi-test-user seeding for parallel test restoration).
+Remaining for Phase 0: Step 6 (AI client wrapper), Steps 7–10 (docs, CI, deploy, Phase 1 plan).
 
 ## Design decisions log
 
