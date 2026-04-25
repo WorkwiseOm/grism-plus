@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
 import {
   Card,
   CardContent,
@@ -7,13 +5,10 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { SignOutButton } from "@/components/auth/sign-out-button"
+import { requireRole } from "@/lib/auth/require-role"
 
 export default async function AdminHome() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/sign-in")
+  const { user } = await requireRole(["ld_admin", "superadmin"])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-50 p-4">

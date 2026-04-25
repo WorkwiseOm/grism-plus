@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
 import {
   Card,
   CardContent,
@@ -7,13 +5,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { SignOutButton } from "@/components/auth/sign-out-button"
+import { requireRole } from "@/lib/auth/require-role"
 
 export default async function ManagerHome() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/sign-in")
+  // Coach uses the manager landing for slice 1; splitting into a
+  // dedicated /coach route is tracked as a Phase 1 scope decision.
+  const { user } = await requireRole(["manager", "coach"])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-50 p-4">
