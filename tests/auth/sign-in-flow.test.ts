@@ -23,9 +23,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createServerClient } from '@supabase/ssr'
 import pg from 'pg'
 
-const env = readFileSync('.env.local', 'utf8')
+// Lazy: .env.local is read on first readEnv() call, not at module load.
+// CI runs npm test without .env.local; eager-reading at the top level
+// would crash this file before describe.skipIf(!RUN_E2E) takes effect.
+let envCache: string | null = null
 const readEnv = (key: string): string => {
-  const m = env.match(new RegExp(`^${key}\\s*=\\s*"?([^"\\n]+?)"?\\s*$`, 'm'))
+  if (envCache === null) envCache = readFileSync('.env.local', 'utf8')
+  const m = envCache.match(new RegExp(`^${key}\\s*=\\s*"?([^"\\n]+?)"?\\s*$`, 'm'))
   if (!m) throw new Error(`Missing ${key} in .env.local`)
   return m[1]
 }
