@@ -1,6 +1,6 @@
 # Dev environment reference — Grism Plus
 
-Last reviewed: 2026-04-24 by Tariq Al-Maskari.
+Last reviewed: 2026-04-25 by Tariq Al-Maskari.
 
 This document describes how a developer stands up a local working environment for Grism Plus and how that environment differs from production in security posture.
 
@@ -8,9 +8,13 @@ This document describes how a developer stands up a local working environment fo
 
 See [.env.local.example](../.env.local.example). That file is the source of truth for required env vars; this doc does not duplicate it.
 
+`.env.local` is gitignored and must never be committed. Secret-handling rules (rotation cadence, who can access service-role keys, what is treated as a secret) live in [`security.md`](security.md) § "Encryption" and § "AI and third-party data handling".
+
 ## Local → cloud topology
 
-- The project targets a single cloud Supabase project (`grism-plus-dev`, Sydney region, Free tier). Local Supabase via `supabase start` is supported but optional. Grism Plus treats the cloud project as the canonical dev target; local Docker-based stacks are a developer preference, not a requirement. Rationale: consistent dev environment across team members who may or may not have Docker working on their OS.
+- **Default dev topology:** `npm run dev` runs Next.js locally and points at the shared cloud Supabase project (`grism-plus-dev`, Sydney, Free tier). This is the canonical dev target — no Docker required, identical schema/RLS/Auth posture across the team. Rationale: consistent dev environment regardless of whether a team member has Docker working on their OS.
+- **Optional local-Supabase topology:** `supabase start` brings up a Docker-based local stack. Supported for offline iteration but not required; the cloud project remains the source of truth for migrations, types generation, and seed data. Switching topologies means re-pointing `NEXT_PUBLIC_SUPABASE_URL` / keys in `.env.local`.
+- **Production topology:** not yet provisioned. Hosting region and Vercel project are activated in Phase 0 Step 9 — see [`PROGRESS.md`](PROGRESS.md) and [`subprocessors.md`](subprocessors.md) for the deployment-gate plan.
 - Database connection is via the Session pooler (`aws-1-ap-southeast-2.pooler.supabase.com:5432`) using the password in `SUPABASE_DB_PASSWORD`. Direct connection is IPv6-only and unusable on most home/office networks.
 - Migrations are applied with `npx supabase db push --db-url …`. Type generation uses `npm run types:generate` (requires a short-lived Supabase Personal Access Token).
 
