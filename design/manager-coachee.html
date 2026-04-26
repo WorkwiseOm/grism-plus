@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Grism+ · Manager Coachee View — Khalid (mockup)</title>
+<link rel="stylesheet" href="_shared.css" />
+<style>
+  .canvas { display: flex; flex-direction: column; gap: 16px; max-width: 1200px; }
+
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .stat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.12s ease;
+  }
+  .stat-card:hover { border-color: var(--border-strong); }
+  .stat-card .l {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--fg-muted); margin-bottom: 8px;
+  }
+  .stat-card .v { font-size: 26px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat-card .sub { margin-top: 6px; font-size: 12px; color: var(--fg-muted); display: flex; align-items: center; gap: 6px; }
+  .stat-card .avatars { display: flex; margin-top: 8px; }
+  .stat-card .avatars .avatar { width: 22px; height: 22px; font-size: 10px; margin-left: -6px; border: 2px solid var(--bg); }
+  .stat-card.alert .v { color: var(--destructive); }
+  .stat-card.ok   .v { color: var(--ok); }
+
+  .action-queue {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  .qa-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex; gap: 12px;
+    border-left: 3px solid var(--info);
+  }
+  .qa-card.warn { border-left-color: var(--warn); }
+  .qa-card.danger { border-left-color: var(--destructive); }
+  .qa-card .ico {
+    width: 32px; height: 32px; border-radius: var(--radius-sm);
+    display: grid; place-items: center;
+    font-size: 14px; flex-shrink: 0;
+    background: var(--info-bg); color: var(--info);
+  }
+  .qa-card.warn .ico { background: var(--warn-bg); color: hsl(35 100% 28%); }
+  .qa-card.danger .ico { background: var(--destructive-bg); color: var(--destructive); }
+  .qa-card .body { flex: 1; }
+  .qa-card .verb { font-size: 13px; font-weight: 600; }
+  .qa-card .subj { font-size: 12px; color: var(--fg-muted); margin: 2px 0 8px; }
+
+  .filter-bar {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .seg-control { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2px; }
+  .seg-control button { background: transparent; border: 0; padding: 5px 10px; border-radius: 5px; font: inherit; font-size: 12px; color: var(--fg-muted); }
+  .seg-control button.active { background: var(--bg); color: var(--fg); box-shadow: var(--shadow-sm); font-weight: 500; }
+  .filter-bar select {
+    border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+    border-radius: var(--radius-sm); padding: 5px 10px; font: inherit; font-size: 12px;
+  }
+  .filter-bar input {
+    border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+    border-radius: var(--radius-sm); padding: 5px 10px; font: inherit; font-size: 12px;
+    min-width: 200px;
+  }
+  .spacer { flex: 1; }
+
+  .table-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  .progress-cell { display: flex; align-items: center; gap: 8px; }
+  .progress-cell .bar { flex: 1; max-width: 110px; }
+  .progress-cell .pct { font-size: 12px; color: var(--fg-muted); font-variant-numeric: tabular-nums; min-width: 30px; }
+
+  .name-cell { display: flex; align-items: center; gap: 10px; }
+  .name-cell .avatar { width: 30px; height: 30px; font-size: 11px; }
+  .name-cell .nm { font-size: 13px; font-weight: 500; }
+  .name-cell .nb { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+  .role-cell .r { font-size: 13px; }
+  .role-cell .t { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+  .qa-link { color: var(--info); font-size: 12px; text-decoration: none; }
+
+  /* Drawer */
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgb(0 0 0 / 0.18);
+    display: none;
+  }
+  .drawer-overlay.open { display: block; }
+  .drawer {
+    position: fixed; right: 0; top: 0; bottom: 0;
+    width: 480px; max-width: 90vw;
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    box-shadow: -8px 0 24px rgb(0 0 0 / 0.08);
+    overflow-y: auto;
+    padding: 22px 24px;
+    transform: translateX(100%);
+    transition: transform 0.18s ease;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer .dh { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+  .drawer .dh .who { flex: 1; }
+  .drawer .dh h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .drawer .dh .roles { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+  .drawer .progress-block { margin-bottom: 18px; }
+  .drawer .progress-block .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); margin-bottom: 6px; }
+  .drawer .ms-mini {
+    display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .drawer .ms-mini:last-child { border-bottom: 0; }
+  .drawer .ms-mini .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--border-strong); }
+  .drawer .ms-mini.in-progress .dot { background: var(--info); }
+  .drawer .ms-mini.completed .dot { background: var(--ok); }
+  .drawer .ms-mini .t { font-size: 13px; }
+  .drawer .ms-mini .c { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+  .drawer .footer { display: flex; gap: 8px; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">Grism<span class="plus">+</span></div>
+    <div class="crumb">Arwa Energy · My team</div>
+    <div class="spacer"></div>
+    <div class="who">
+      <span>Khalid Al-Harthy · Operations Manager</span>
+      <span class="avatar a5">KH</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a><span class="dot"></span>Home</a>
+    <a class="active"><span class="dot"></span>My team</a>
+    <a><span class="dot"></span>My IDP</a>
+    <a><span class="dot"></span>Coaching</a>
+    <a><span class="dot"></span>Catalogues</a>
+    <div class="group">Manager</div>
+    <a class="active"><span class="dot"></span>Direct reports</a>
+    <a><span class="dot"></span>OJT evidence</a>
+    <div class="group">Account</div>
+    <a><span class="dot"></span>Settings</a>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>My team</h1>
+        <div class="sub">Operations · 6 direct reports · 4 with IDPs · 1 awaiting your action</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn ghost">Export team report</button>
+        <button class="btn primary">Initiate IDP</button>
+      </div>
+    </div>
+
+    <div class="canvas">
+
+      <!-- STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-card">
+          <div class="l">Direct reports</div>
+          <div class="v">6</div>
+          <div class="avatars">
+            <span class="avatar a2">SR</span>
+            <span class="avatar a3">HK</span>
+            <span class="avatar a1">NW</span>
+            <span class="avatar a6">SH</span>
+            <span class="avatar a4">LB</span>
+            <span class="avatar a5">HT</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="l">Active or pending IDPs</div>
+          <div class="v">5 <span style="font-size:14px;color:var(--fg-muted);">/ 6</span></div>
+          <div style="margin-top:10px;"><div class="bar"><span style="width:83%;"></span></div></div>
+          <div class="sub">Above team average (72%)</div>
+        </div>
+        <div class="stat-card alert">
+          <div class="l">Awaiting your action</div>
+          <div class="v">3</div>
+          <div class="sub">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:999px;background:var(--destructive);"></span>
+            1 evidence · 1 reassign · 1 coaching gap
+          </div>
+        </div>
+        <div class="stat-card ok">
+          <div class="l">On-track active</div>
+          <div class="v">2</div>
+          <div class="sub">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:999px;background:var(--ok);"></span>
+            Salma · Mohammed
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTION QUEUE -->
+      <div class="action-queue">
+        <div class="qa-card warn">
+          <div class="ico">📎</div>
+          <div class="body">
+            <div class="verb">Validate OJT evidence</div>
+            <div class="subj">Mohammed Al-Mawali submitted "Co-led the maintenance shutdown" 4 days ago</div>
+            <a class="qa-link">Review evidence →</a>
+          </div>
+        </div>
+        <div class="qa-card danger">
+          <div class="ico">⚠</div>
+          <div class="body">
+            <div class="verb">Coaching gap</div>
+            <div class="subj">Salma hasn't logged a coaching session in 21 days</div>
+            <a class="qa-link">Send reminder →</a>
+          </div>
+        </div>
+        <div class="qa-card">
+          <div class="ico">↻</div>
+          <div class="body">
+            <div class="verb">Approve milestone reassign</div>
+            <div class="subj">Layla wants to move stretch milestone target from 2026-12-10 → 2027-02-15</div>
+            <a class="qa-link">Decide →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="seg-control">
+          <button class="active">All · 6</button>
+          <button>Active · 1</button>
+          <button>Pending · 3</button>
+          <button>Draft · 1</button>
+          <button>Completed · 1</button>
+          <button>No IDP · 0</button>
+        </div>
+        <select>
+          <option>All gap categories</option>
+          <option>knowledge</option>
+          <option>behavioural</option>
+          <option>technical</option>
+        </select>
+        <input type="text" placeholder="Filter by competency…" />
+        <div class="spacer"></div>
+        <select>
+          <option>Sort: Last activity</option>
+          <option>Sort: % progress</option>
+          <option>Sort: Name</option>
+          <option>Sort: Role</option>
+        </select>
+      </div>
+
+      <!-- TEAM TABLE -->
+      <div class="table-card">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Role / target role</th>
+              <th>IDP status</th>
+              <th>Milestones</th>
+              <th>% complete</th>
+              <th>Last activity</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td class="name-cell">
+                <span class="avatar a2">SR</span>
+                <div><div class="nm">Salma Al-Riyami</div><div class="nb">ARW-006</div></div>
+              </td>
+              <td class="role-cell">
+                <div class="r">Sr Ops Analyst</div>
+                <div class="t">→ Operations Manager</div>
+              </td>
+              <td><span class="pill ok"><span class="dot"></span>active</span></td>
+              <td>3</td>
+              <td><div class="progress-cell"><div class="bar"><span style="width:45%;"></span></div><div class="pct">45%</div></div></td>
+              <td><span style="font-size:12px;color:var(--fg-muted);">2 days ago</span></td>
+              <td><button class="btn sm">View</button></td>
+            </tr>
+            <tr>
+              <td class="name-cell">
+                <span class="avatar a3">HK</span>
+                <div><div class="nm">Hamed Al-Kindi</div><div class="nb">ARW-007</div></div>
+              </td>
+              <td class="role-cell">
+                <div class="r">Ops Coordinator</div>
+                <div class="t">→ Sr Ops Analyst</div>
+              </td>
+              <td><span class="pill warn"><span class="dot"></span>pending_approval</span></td>
+              <td>4</td>
+              <td><div class="progress-cell"><div class="bar"><span style="width:0%;"></span></div><div class="pct">0%</div></div></td>
+              <td><span style="font-size:12px;color:var(--fg-muted);">6 days ago</span></td>
+              <td><a class="qa-link">Nudge L&amp;D</a></td>
+            </tr>
+            <tr>
+              <td class="name-cell">
+                <span class="avatar a1">NW</span>
+                <div><div class="nm">Noura Al-Wahaibi</div><div class="nb">ARW-008</div></div>
+              </td>
+              <td class="role-cell">
+                <div class="r">Field Ops Specialist</div>
+                <div class="t">no target role set</div>
+              </td>
+              <td><span class="pill muted"><span class="dot"></span>draft</span></td>
+              <td>2</td>
+              <td><div class="progress-cell"><div class="bar"><span style="width:0%;"></span></div><div class="pct">—</div></div></td>
+              <td><span style="font-size:12px;color:var(--fg-muted);">3 days ago (still drafting)</span></td>
+              <td><a class="qa-link">Send reminder</a></td>
+            </tr>
+            <tr>
+              <td class="name-cell">
+                <span class="avatar a6">SH</span>
+                <div><div class="nm">Saif Al-Habsi</div><div class="nb">ARW-009</div></div>
+              </td>
+              <td class="role-cell">
+                <div class="r">Junior Ops Analyst</div>
+                <div class="t">→ Ops Analyst</div>
+              </td>
+              <td><span class="pill warn"><span class="dot"></span>pending_approval</span></td>
+              <td>2</td>
+              <td><div class="progress-cell"><div class="bar"><span style="width:0%;"></span></div><div class="pct">0%</div></div></td>
+              <td><span style="font-size:12px;color:var(--fg-muted);">9 days ago</span></td>
+              <td><a class="qa-link">Nudge L&amp;D</a></td>
+            </tr>
+            <tr>
+              <td class="name-cell">
+                <span class="avatar a4">LB</span>
+                <div><div class="nm">Layla Al-Busaidi</div><div class="nb">ARW-010</div></div>
+              </td>
+              <td class="role-cell">
+                <div class="r">Operations Trainee</div>
+                <div class="t">→ Junior Ops Analyst</div>
+              </td>
+              <td><span class="pill warn"><span class="dot"></span>pending_approval</span></td>
+              <td>4</td>
+              <td><div class="progress-cell"><div class="bar"><span style="width:0%;"></span></div><div class="pct">0%</div></div></td>
+              <td><span style="font-size:12px;color:var(--fg-muted);">7 days ago</span></td>
+              <td><a class="qa-link">Nudge L&amp;D</a></td>
+            </tr>
+            <tr>
+              <td class="name-cell">
+                <span class="avatar a5">HT</span>
+                <div><div class="nm">Hessa Al-Toubi</div><div class="nb">ARW-011</div></div>
+              </td>
+              <td class="role-cell">
+                <div class="r">Logistics Coordinator</div>
+                <div class="t">no target role set</div>
+              </td>
+              <td><span class="pill"><span class="dot"></span>completed</span></td>
+              <td>3</td>
+              <td><div class="progress-cell"><div class="bar"><span style="width:100%;"></span></div><div class="pct">100%</div></div></td>
+              <td><span style="font-size:12px;color:var(--fg-muted);">90 days ago</span></td>
+              <td><a class="qa-link">Start next IDP</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay open"></div>
+<div class="drawer open">
+  <div class="dh">
+    <span class="avatar lg a2">SR</span>
+    <div class="who">
+      <h3>Salma Al-Riyami</h3>
+      <div class="roles">Senior Ops Analyst → Operations Manager · ARW-006</div>
+      <div style="margin-top:6px;">
+        <span class="pill ok"><span class="dot"></span>active IDP</span>
+        <span class="pill muted">Step-up to Ops Manager</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-block">
+    <div class="lbl">Progress · 5 of 11 actions complete</div>
+    <div class="bar"><span style="width:45%;"></span></div>
+    <div style="font-size:11px;color:var(--fg-muted);margin-top:6px;">218 days to target · 2026-11-30</div>
+  </div>
+
+  <div class="lbl" style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--fg-muted);margin-bottom:6px;">
+    Milestones
+  </div>
+  <div class="ms-mini in-progress">
+    <span class="dot"></span>
+    <div>
+      <div class="t">Run a 3-year ops capacity strategy review</div>
+      <div class="c">BIZ-STRAT · L3 → L4 · target 2026-08-30</div>
+    </div>
+    <span class="pill info" style="font-size:10px;">in progress</span>
+  </div>
+  <div class="ms-mini in-progress">
+    <span class="dot"></span>
+    <div>
+      <div class="t">Run a development conversation with each junior analyst</div>
+      <div class="c">LEAD-COACH · L2 → L4 · target 2026-07-15</div>
+    </div>
+    <span class="pill info" style="font-size:10px;">in progress</span>
+  </div>
+  <div class="ms-mini">
+    <span class="dot"></span>
+    <div>
+      <div class="t">Lead a multi-discipline project from kick-off to handover</div>
+      <div class="c">BIZ-PM · L2 → L4 · target 2026-11-30</div>
+    </div>
+    <span class="pill muted" style="font-size:10px;">not started</span>
+  </div>
+
+  <div class="note warn" style="margin-top:16px;">
+    ⚠ <b>2 actions are assigned to you:</b> sponsor the FY27 budget exercise · review
+    development-conversation summaries.
+  </div>
+
+  <div class="footer">
+    <button class="btn ghost" style="flex:1;">Close</button>
+    <button class="btn primary" style="flex:1;">Open full IDP</button>
+  </div>
+</div>
+</body>
+</html>

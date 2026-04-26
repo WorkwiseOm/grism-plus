@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Grism+ · Framework Editor (mockup)</title>
+<link rel="stylesheet" href="_shared.css" />
+<style>
+  .canvas {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr) 300px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* Panels share the card base; override scrolling */
+  .panel { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); }
+  .panel-head {
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .panel-head h3 { margin: 0; font-size: 13px; font-weight: 600; }
+  .panel-body { padding: 12px 14px; }
+
+  /* Tree */
+  .tree { padding: 6px 0; max-height: calc(100vh - 220px); overflow-y: auto; }
+  .tree-row {
+    display: grid;
+    grid-template-columns: 14px 14px 1fr auto;
+    gap: 6px;
+    padding: 6px 14px;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .tree-row:hover { background: var(--surface); }
+  .tree-row.selected { background: var(--primary); color: var(--primary-fg); }
+  .tree-row.selected .leaf-code,
+  .tree-row.selected .cat-code,
+  .tree-row.selected .leaf-count { color: var(--primary-fg); opacity: 0.85; }
+  .tree-row .handle { color: var(--fg-muted); font-size: 11px; opacity: 0.6; }
+  .tree-row .chevron { color: var(--fg-muted); font-size: 10px; }
+  .tree-row .cat-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--fg-muted); }
+  .tree-row.cat .cat-name { font-weight: 600; }
+  .tree-row.leaf { padding-left: 36px; font-size: 12.5px; }
+  .tree-row.leaf .leaf-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--fg-muted); margin-right: 8px; }
+  .tree-row .leaf-count {
+    background: var(--surface-2); color: var(--fg-muted);
+    font-size: 10px; padding: 1px 6px; border-radius: 999px;
+  }
+  .gap-dot { width: 6px; height: 6px; border-radius: 999px; }
+  .gap-dot.knowledge { background: hsl(217 91% 55%); }
+  .gap-dot.behavioural { background: hsl(280 73% 55%); }
+  .gap-dot.technical { background: hsl(35 92% 50%); }
+
+  .tree-add {
+    margin: 8px 14px;
+    width: calc(100% - 28px);
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--fg-muted);
+    padding: 7px 10px; border-radius: var(--radius-sm);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* Form */
+  .form-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-row label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); }
+  .form-row input,
+  .form-row textarea,
+  .form-row select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 13px;
+  }
+  .form-row textarea { min-height: 80px; resize: vertical; }
+  .form-row input:focus, .form-row textarea:focus, .form-row select:focus {
+    outline: 2px solid var(--info); outline-offset: -1px; border-color: var(--info);
+  }
+  .code-input {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+    background: var(--surface) !important;
+    color: var(--fg-muted) !important;
+  }
+
+  .seg-control { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 2px; }
+  .seg-control button { background: transparent; border: 0; padding: 6px 12px; border-radius: 5px; font: inherit; font-size: 12px; color: var(--fg-muted); }
+  .seg-control button.active { background: var(--bg); color: var(--fg); box-shadow: var(--shadow-sm); font-weight: 500; }
+
+  .level-row {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .level-row .lev {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--surface); border-radius: var(--radius-sm);
+    padding: 8px; text-align: center;
+  }
+  .level-row .lev .n {
+    font-size: 18px; font-weight: 600; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .level-row .lev .nm { font-size: 11px; color: var(--fg-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .level-row textarea {
+    width: 100%; min-height: 50px;
+    border: 1px solid var(--border); background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px; font: inherit; font-size: 13px;
+    resize: vertical;
+  }
+  .level-row .reset { font-size: 11px; color: var(--info); margin-top: 4px; cursor: pointer; }
+
+  .anchors {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .anchor-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+  }
+  .anchor-row input { flex: 1; }
+  .anchor-add {
+    background: transparent; border: 1px dashed var(--border);
+    color: var(--fg-muted); padding: 7px; border-radius: var(--radius-sm);
+    font-size: 12px;
+  }
+
+  .form-footer {
+    display: flex; justify-content: space-between;
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+  }
+
+  /* Coverage */
+  .cov-stat { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .cov-stat:last-child { border-bottom: 0; }
+  .cov-stat .v { font-weight: 600; }
+  .ver-list { display: flex; flex-direction: column; gap: 8px; }
+  .ver { display: grid; grid-template-columns: 8px 1fr; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .ver:last-child { border-bottom: 0; }
+  .ver .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--ok); margin-top: 6px; }
+  .ver.draft .dot { background: var(--warn); }
+  .ver .vt { font-size: 13px; font-weight: 500; }
+  .ver .vd { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+  .audit-row { display: flex; gap: 8px; padding: 6px 0; font-size: 12px; color: var(--fg-muted); border-bottom: 1px dashed var(--border); }
+  .audit-row:last-child { border-bottom: 0; }
+  .audit-row .when { flex-shrink: 0; min-width: 64px; }
+
+  .legend { display: flex; gap: 12px; padding: 6px 14px 10px; font-size: 11px; color: var(--fg-muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">Grism<span class="plus">+</span></div>
+    <div class="crumb">Arwa Energy · Framework · Editor</div>
+    <div class="spacer"></div>
+    <div class="who">
+      <span>Aisha Al-Balushi · L&amp;D Manager</span>
+      <span class="avatar a4">AB</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a><span class="dot"></span>Home</a>
+    <a><span class="dot"></span>IDPs</a>
+    <a><span class="dot"></span>People</a>
+    <a><span class="dot"></span>Catalogues</a>
+    <a class="active"><span class="dot"></span>Framework</a>
+    <a><span class="dot"></span>Reports</a>
+    <div class="group">L&amp;D admin</div>
+    <a><span class="dot"></span>Approval queue</a>
+    <a><span class="dot"></span>Templates</a>
+    <a><span class="dot"></span>Audit log</a>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Arwa Energy Core Competency Framework</h1>
+        <div class="sub">
+          <span class="pill ok"><span class="dot"></span>v1 published 2026-01-30</span>
+          <span class="pill warn" style="margin-left:6px;"><span class="dot"></span>v2 draft · 12 unsaved changes</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn ghost">Discard draft</button>
+        <button class="btn">Save changes</button>
+        <button class="btn primary">Publish v2…</button>
+      </div>
+    </div>
+
+    <div class="canvas">
+
+      <!-- TREE -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Framework structure</h3>
+          <button class="btn ghost sm">+ Category</button>
+        </div>
+        <div class="legend">
+          <span><span class="gap-dot knowledge"></span>knowledge</span>
+          <span><span class="gap-dot behavioural"></span>behavioural</span>
+          <span><span class="gap-dot technical"></span>technical</span>
+        </div>
+        <div class="tree">
+          <!-- TECH -->
+          <div class="tree-row cat">
+            <span class="handle">⋮⋮</span>
+            <span class="chevron">▾</span>
+            <span><span class="cat-code">TECH</span> <span class="cat-name">Technical</span></span>
+            <span class="leaf-count">4</span>
+          </div>
+          <div class="tree-row leaf">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">TECH-IND</span>Industrial Safety Fundamentals</span>
+            <span class="gap-dot technical"></span>
+          </div>
+          <div class="tree-row leaf">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">TECH-DATA</span>Data Tooling Foundations</span>
+            <span class="gap-dot knowledge"></span>
+          </div>
+          <div class="tree-row leaf">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">TECH-WRIT</span>Technical Writing</span>
+            <span class="gap-dot knowledge"></span>
+          </div>
+          <div class="tree-row leaf">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">TECH-TOOL</span>Engineering Tooling</span>
+            <span class="gap-dot technical"></span>
+          </div>
+
+          <!-- LEAD -->
+          <div class="tree-row cat">
+            <span class="handle">⋮⋮</span>
+            <span class="chevron">▾</span>
+            <span><span class="cat-code">LEAD</span> <span class="cat-name">Leadership</span></span>
+            <span class="leaf-count">4</span>
+          </div>
+          <div class="tree-row leaf selected">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">LEAD-COACH</span>Coaching &amp; Developing Others</span>
+            <span class="gap-dot behavioural"></span>
+          </div>
+          <div class="tree-row leaf">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">LEAD-PERF</span>Performance Conversations</span>
+            <span class="gap-dot behavioural"></span>
+          </div>
+          <div class="tree-row leaf">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">LEAD-MOTV</span>Motivating Teams</span>
+            <span class="gap-dot behavioural"></span>
+          </div>
+          <div class="tree-row leaf">
+            <span class="handle">⋮⋮</span>
+            <span></span>
+            <span><span class="leaf-code">LEAD-CONF</span>Confident Decision-Making</span>
+            <span class="gap-dot behavioural"></span>
+          </div>
+
+          <!-- COMM -->
+          <div class="tree-row cat">
+            <span class="handle">⋮⋮</span>
+            <span class="chevron">▸</span>
+            <span><span class="cat-code">COMM</span> <span class="cat-name">Communication</span></span>
+            <span class="leaf-count">4</span>
+          </div>
+
+          <!-- ANAL -->
+          <div class="tree-row cat">
+            <span class="handle">⋮⋮</span>
+            <span class="chevron">▸</span>
+            <span><span class="cat-code">ANAL</span> <span class="cat-name">Analytical</span></span>
+            <span class="leaf-count">4</span>
+          </div>
+
+          <!-- BIZ -->
+          <div class="tree-row cat">
+            <span class="handle">⋮⋮</span>
+            <span class="chevron">▸</span>
+            <span><span class="cat-code">BIZ</span> <span class="cat-name">Business</span></span>
+            <span class="leaf-count">4</span>
+          </div>
+
+          <button class="tree-add">+ Add category</button>
+        </div>
+      </div>
+
+      <!-- EDIT FORM -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Edit competency</h3>
+          <span class="pill warn"><span class="dot"></span>unsaved changes</span>
+        </div>
+        <div class="panel-body">
+
+          <div class="form-row">
+            <label>Code</label>
+            <input class="code-input" type="text" value="LEAD-COACH" readonly />
+          </div>
+
+          <div class="form-row">
+            <label>Name</label>
+            <input type="text" value="Coaching &amp; Developing Others" />
+          </div>
+
+          <div class="form-row">
+            <label>Description</label>
+            <textarea>Holds structured coaching conversations that help team members reach their development goals. Asks open questions, listens actively, and co-creates next steps with the coachee rather than prescribing them.</textarea>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-row">
+              <label>Parent category</label>
+              <select>
+                <option>LEAD · Leadership</option>
+                <option>TECH · Technical</option>
+                <option>COMM · Communication</option>
+                <option>ANAL · Analytical</option>
+                <option>BIZ · Business</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Status</label>
+              <select>
+                <option>active</option>
+                <option>draft</option>
+                <option>deprecated</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Gap category</label>
+            <div class="seg-control">
+              <button>knowledge</button>
+              <button class="active">behavioural</button>
+              <button>technical</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Proficiency scale (5 levels)</label>
+
+            <div class="level-row">
+              <div class="lev"><div class="n">1</div><div class="nm">Awareness</div></div>
+              <div>
+                <textarea>Knows that coaching is distinct from telling, but rarely initiates a coaching conversation.</textarea>
+              </div>
+            </div>
+            <div class="level-row">
+              <div class="lev"><div class="n">2</div><div class="nm">Working</div></div>
+              <div>
+                <textarea>Holds informal coaching chats when prompted; tends to revert to giving answers when stuck.</textarea>
+                <div class="reset">↺ Reset to template default</div>
+              </div>
+            </div>
+            <div class="level-row">
+              <div class="lev"><div class="n">3</div><div class="nm">Practising</div></div>
+              <div>
+                <textarea>Runs scheduled 1:1 development conversations using a clear structure (GROW or similar). Uses open questions consistently.</textarea>
+              </div>
+            </div>
+            <div class="level-row">
+              <div class="lev"><div class="n">4</div><div class="nm">Advanced</div></div>
+              <div>
+                <textarea>Coaches across team boundaries — including peers and skip-level — and leaves coachees with clear self-authored next steps.</textarea>
+                <div class="reset">↺ Reset to template default</div>
+              </div>
+            </div>
+            <div class="level-row">
+              <div class="lev"><div class="n">5</div><div class="nm">Expert</div></div>
+              <div>
+                <textarea>Trains other managers in coaching technique. Coaching is a recognisable habit in their team's culture.</textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Behavioural anchors</label>
+            <div class="anchors">
+              <div class="anchor-row"><input value="Asks at least 3 open questions before offering an opinion." /><button class="btn ghost sm">×</button></div>
+              <div class="anchor-row"><input value="Closes every coaching conversation with coachee-owned next steps." /><button class="btn ghost sm">×</button></div>
+              <div class="anchor-row"><input value="Tracks development conversations in a private journal or system." /><button class="btn ghost sm">×</button></div>
+              <button class="anchor-add">+ Add behavioural anchor</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Tags (used by AI recommender)</label>
+            <input type="text" value="coaching, GROW, development conversation, listening" />
+          </div>
+
+          <div class="form-footer">
+            <button class="btn ghost">Discard changes</button>
+            <button class="btn primary">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COVERAGE -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Coverage &amp; impact</h3>
+        </div>
+        <div class="panel-body">
+
+          <div class="note warn">
+            ⚠ You changed the L4 descriptor. <b>3 active or pending IDPs</b> reference this
+            competency at L4 target — they will see the new descriptor on next refresh.
+          </div>
+
+          <div style="margin-top:14px;">
+            <div class="cov-stat">
+              <span>Employees scored</span>
+              <span class="v">12</span>
+            </div>
+            <div class="cov-stat">
+              <span>IDPs referencing</span>
+              <span class="v">5</span>
+            </div>
+            <div class="cov-stat">
+              <span>Catalogue tags</span>
+              <span class="v">3 <span style="font-weight:400;color:var(--fg-muted);font-size:11px;">(2 eLearning · 1 OJT)</span></span>
+            </div>
+            <div class="cov-stat">
+              <span>Avg current proficiency</span>
+              <span class="v">L2.4</span>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--fg-muted);margin-bottom:8px;">
+              Active IDPs touching this
+            </div>
+            <div class="cov-stat">
+              <span>Salma Al-Riyami</span>
+              <span class="v" style="font-weight:400;color:var(--fg-muted);font-size:12px;">L2 → L4</span>
+            </div>
+            <div class="cov-stat">
+              <span>Mohammed Al-Mawali</span>
+              <span class="v" style="font-weight:400;color:var(--fg-muted);font-size:12px;">L2 → L4</span>
+            </div>
+            <div class="cov-stat">
+              <span>Khadija Al-Zadjali</span>
+              <span class="v" style="font-weight:400;color:var(--fg-muted);font-size:12px;">L1 → L3 · pending</span>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--fg-muted);margin-bottom:8px;">
+              Version history
+            </div>
+            <div class="ver-list">
+              <div class="ver draft">
+                <span class="dot"></span>
+                <div>
+                  <div class="vt">v2 · draft</div>
+                  <div class="vd">12 unsaved changes since v1 · started by you 2026-04-19</div>
+                </div>
+              </div>
+              <div class="ver">
+                <span class="dot"></span>
+                <div>
+                  <div class="vt">v1 · published</div>
+                  <div class="vd">2026-01-30 by Aisha Al-Balushi · initial release</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--fg-muted);margin-bottom:8px;">
+              Audit (this competency)
+            </div>
+            <div class="audit-row">
+              <span class="when">2 hr ago</span>
+              <span>You · edited L4 descriptor</span>
+            </div>
+            <div class="audit-row">
+              <span class="when">2 hr ago</span>
+              <span>You · added behavioural anchor "Closes every coaching conversation…"</span>
+            </div>
+            <div class="audit-row">
+              <span class="when">3 days ago</span>
+              <span>Yusuf Al-Saadi · added tag "GROW"</span>
+            </div>
+            <div class="audit-row">
+              <span class="when">2026-01-30</span>
+              <span>Aisha · created (v1 release)</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

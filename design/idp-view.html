@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Grism+ · IDP View — Salma Al-Riyami (mockup)</title>
+<link rel="stylesheet" href="_shared.css" />
+<style>
+  .canvas { display: flex; flex-direction: column; gap: 16px; max-width: 1100px; }
+
+  .hero {
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 22px;
+    align-items: center;
+  }
+  .hero .who h2 {
+    margin: 0; font-size: 19px; font-weight: 600;
+  }
+  .hero .who .roles {
+    margin-top: 4px; color: var(--fg-muted); font-size: 13px;
+  }
+  .hero .who .meta { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .hero .stats {
+    display: grid; grid-template-columns: repeat(3, max-content); gap: 28px;
+  }
+  .hero .stat .v {
+    font-size: 22px; font-weight: 600; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero .stat .l {
+    margin-top: 4px; color: var(--fg-muted); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .hero .actions { display: flex; gap: 8px; flex-direction: column; align-items: flex-end; }
+
+  .seg-bar {
+    grid-column: 1 / -1;
+    display: flex; gap: 4px; margin-top: 16px;
+    height: 8px;
+  }
+  .seg-bar .seg {
+    flex: 1; background: var(--surface-2); border-radius: 4px; position: relative; overflow: hidden;
+  }
+  .seg-bar .seg > span { position: absolute; inset: 0; background: var(--ok); border-radius: 4px; }
+  .seg-bar .seg.in-progress > span { background: var(--info); width: 60%; }
+  .seg-bar .seg.not-started > span { background: var(--border-strong); width: 0; }
+
+  .next-strip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .next-strip .lbl {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--fg-muted); margin-bottom: 10px;
+  }
+  .next-strip .row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 2px; }
+  .next-chip {
+    flex: 0 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    min-width: 280px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .next-chip .body { flex: 1; }
+  .next-chip .body .t { font-size: 13px; font-weight: 500; }
+  .next-chip .body .s { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 2px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .tabs .tab {
+    padding: 10px 16px;
+    font-size: 13px; color: var(--fg-muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+  .tabs .tab.active { color: var(--fg); border-bottom-color: var(--primary); font-weight: 500; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px;
+    width: 2px; background: var(--border);
+  }
+  .ms-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    padding: 16px 18px;
+    position: relative;
+  }
+  .ms-card::before {
+    content: ""; position: absolute; left: -23px; top: 22px;
+    width: 16px; height: 16px; border-radius: 999px;
+    background: var(--surface-2); border: 3px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--border);
+  }
+  .ms-card.in-progress::before { background: var(--info); box-shadow: 0 0 0 1px var(--info); }
+  .ms-card.completed::before { background: var(--ok); box-shadow: 0 0 0 1px var(--ok); }
+
+  .ms-card .ms-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px;
+  }
+  .ms-card .code { font-size: 11px; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .ms-card .name { font-size: 15px; font-weight: 600; margin-top: 2px; }
+  .ms-card .desc { font-size: 13px; color: var(--fg); margin: 8px 0 12px; line-height: 1.55; }
+
+  .checklist { display: flex; flex-direction: column; gap: 10px; }
+  .check-row {
+    display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px; align-items: center;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .check-row .t { font-size: 13px; font-weight: 500; }
+  .check-row .s { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+  .ms-foot {
+    display: flex; justify-content: space-between; gap: 12px;
+    margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border);
+    font-size: 12px; color: var(--fg-muted);
+  }
+  .ms-foot a { color: var(--info); text-decoration: none; }
+
+  .gap-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-2); border-radius: 999px; padding: 3px 10px;
+    font-size: 12px;
+  }
+  .gap-chip .arr { color: var(--fg-muted); }
+  .gap-chip .level-bar { display: inline-flex; gap: 2px; margin-left: 4px; }
+  .gap-chip .level-bar i {
+    width: 4px; height: 12px; border-radius: 1px; background: var(--border-strong);
+  }
+  .gap-chip .level-bar i.curr { background: var(--info); }
+  .gap-chip .level-bar i.gap  { background: hsl(35 92% 60%); }
+  .gap-chip .level-bar i.ok   { background: var(--ok); }
+
+  .mgr-banner {
+    background: var(--info-bg);
+    border: 1px solid hsl(217 85% 85%);
+    color: hsl(217 91% 25%);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mgr-banner b { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">Grism<span class="plus">+</span></div>
+    <div class="crumb">Arwa Energy · My team · Salma Al-Riyami</div>
+    <div class="spacer"></div>
+    <div class="who">
+      <span>Khalid Al-Harthy · Operations Manager</span>
+      <span class="avatar a5">KH</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a><span class="dot"></span>Home</a>
+    <a class="active"><span class="dot"></span>My team</a>
+    <a><span class="dot"></span>My IDP</a>
+    <a><span class="dot"></span>Coaching</a>
+    <a><span class="dot"></span>Catalogues</a>
+    <div class="group">Manager</div>
+    <a><span class="dot"></span>Direct reports</a>
+    <a><span class="dot"></span>OJT evidence</a>
+    <div class="group">Account</div>
+    <a><span class="dot"></span>Settings</a>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Salma Al-Riyami's IDP</h1>
+        <div class="sub">Step-up to Operations Manager · approved 2026-03-12 by Aisha Al-Balushi</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn ghost">Download PDF</button>
+        <button class="btn">Add note</button>
+      </div>
+    </div>
+
+    <div class="canvas">
+
+      <div class="mgr-banner">
+        <span>👤</span>
+        <span>You're viewing this as Salma's manager. <b>She can see your notes.</b></span>
+      </div>
+
+      <!-- HERO -->
+      <div class="hero">
+        <span class="avatar xl a2">SR</span>
+        <div class="who">
+          <h2>Salma Al-Riyami <span style="font-size:13px;color:var(--fg-muted);font-weight:400;">· ARW-006</span></h2>
+          <div class="roles"><strong>Senior Ops Analyst</strong> → Operations Manager</div>
+          <div class="meta">
+            <span class="pill ok"><span class="dot"></span>active</span>
+            <span class="pill">manual</span>
+            <span class="pill muted">3 milestones · 11 actions</span>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <div class="v">45%</div>
+            <div class="l">Actions complete</div>
+          </div>
+          <div class="stat">
+            <div class="v">218</div>
+            <div class="l">Days to target</div>
+          </div>
+          <div class="stat">
+            <div class="v" style="color: var(--ok);">On&nbsp;track</div>
+            <div class="l">Status</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn primary">Add note</button>
+          <button class="btn ghost">Reassign milestone</button>
+        </div>
+        <div class="seg-bar">
+          <div class="seg"><span style="width:80%;"></span></div>
+          <div class="seg in-progress"><span></span></div>
+          <div class="seg not-started"><span></span></div>
+        </div>
+      </div>
+
+      <!-- WHAT'S NEXT -->
+      <div class="next-strip">
+        <div class="lbl">What's next this week</div>
+        <div class="row">
+          <div class="next-chip">
+            <span class="mod ojt"><span class="glyph">O</span></span>
+            <div class="body">
+              <div class="t">Lead Q2 ops planning workshop end-to-end</div>
+              <div class="s">OJT-004 · evidence due 2026-05-08</div>
+            </div>
+            <button class="btn sm">View evidence</button>
+          </div>
+          <div class="next-chip">
+            <span class="mod coaching"><span class="glyph">C</span></span>
+            <div class="body">
+              <div class="t">Coaching session 4 of 8 — "Holding a development conversation"</div>
+              <div class="s">Coaching · scheduled with Maryam · 2026-05-02</div>
+            </div>
+            <button class="btn sm">Log session</button>
+          </div>
+          <div class="next-chip">
+            <span class="mod elearning"><span class="glyph">L</span></span>
+            <div class="body">
+              <div class="t">Operations PM Fundamentals — module 4 of 6</div>
+              <div class="s">ELRN-009 · 2 hrs remaining</div>
+            </div>
+            <button class="btn sm">Resume</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS + BODY -->
+      <div>
+        <div class="tabs">
+          <div class="tab active">Milestones</div>
+          <div class="tab">Narrative</div>
+          <div class="tab">Activity</div>
+          <div class="tab">People</div>
+        </div>
+
+        <div class="timeline">
+          <!-- Milestone 1 -->
+          <div class="ms-card in-progress">
+            <div class="ms-head">
+              <div>
+                <div class="code">BIZ-STRAT · Strategic Thinking</div>
+                <div class="name">Run a 3-year ops capacity strategy review with the leadership team</div>
+              </div>
+              <div class="gap-chip">
+                L3 <span class="arr">→</span> L4
+                <span class="level-bar"><i class="curr"></i><i class="curr"></i><i class="curr"></i><i class="gap"></i><i></i></span>
+              </div>
+            </div>
+            <p class="desc">
+              Salma will own the FY27–FY29 ops capacity model, present it at the August Exec
+              offsite, and have her recommendation approved or rejected before Q4 planning starts.
+            </p>
+            <div class="checklist">
+              <div class="check-row">
+                <span class="mod elearning"><span class="glyph">L</span></span>
+                <div>
+                  <div class="t">Coursera — Strategy for Operating Leaders</div>
+                  <div class="s">eLearning catalogue · ELRN-006 · 12 hrs</div>
+                </div>
+                <span class="pill ok"><span class="dot"></span>completed</span>
+                <button class="btn ghost sm">View certificate</button>
+              </div>
+              <div class="check-row">
+                <span class="mod ojt"><span class="glyph">O</span></span>
+                <div>
+                  <div class="t">Lead Q2 ops planning workshop end-to-end</div>
+                  <div class="s">OJT catalogue · OJT-004 · evidence required</div>
+                </div>
+                <span class="pill warn"><span class="dot"></span>assigned</span>
+                <button class="btn sm">Attach evidence</button>
+              </div>
+              <div class="check-row">
+                <span class="mod coaching"><span class="glyph">C</span></span>
+                <div>
+                  <div class="t">Strategic framing coaching with Maryam — 4 sessions</div>
+                  <div class="s">Coaching · 2 of 4 logged</div>
+                </div>
+                <span class="pill info"><span class="dot"></span>in_progress</span>
+                <button class="btn sm">Log session</button>
+              </div>
+            </div>
+            <div class="ms-foot">
+              <span>Target · 2026-08-30</span>
+              <span><a>Reassign milestone</a> · <a>Add note</a></span>
+            </div>
+          </div>
+
+          <!-- Milestone 2 -->
+          <div class="ms-card in-progress">
+            <div class="ms-head">
+              <div>
+                <div class="code">LEAD-COACH · Coaching &amp; Developing Others</div>
+                <div class="name">Run a development conversation with each junior analyst</div>
+              </div>
+              <div class="gap-chip">
+                L2 <span class="arr">→</span> L4
+                <span class="level-bar"><i class="curr"></i><i class="curr"></i><i class="gap"></i><i class="gap"></i><i></i></span>
+              </div>
+            </div>
+            <p class="desc">
+              Hold a structured development conversation with Saif, Hamed and Layla by end of Q2 —
+              outcomes captured as 1-page summaries reviewed by Khalid.
+            </p>
+            <div class="checklist">
+              <div class="check-row">
+                <span class="mod elearning"><span class="glyph">L</span></span>
+                <div>
+                  <div class="t">Holding the Development Conversation</div>
+                  <div class="s">eLearning catalogue · ELRN-002 · 4 hrs</div>
+                </div>
+                <span class="pill ok"><span class="dot"></span>completed</span>
+                <button class="btn ghost sm">View certificate</button>
+              </div>
+              <div class="check-row">
+                <span class="mod coaching"><span class="glyph">C</span></span>
+                <div>
+                  <div class="t">Coaching session — "Holding a development conversation"</div>
+                  <div class="s">Coaching · 1 of 4 sessions</div>
+                </div>
+                <span class="pill info"><span class="dot"></span>in_progress</span>
+                <button class="btn sm">Log session</button>
+              </div>
+              <div class="check-row">
+                <span class="mod ojt"><span class="glyph">O</span></span>
+                <div>
+                  <div class="t">Hold 3 development conversations with junior analysts</div>
+                  <div class="s">OJT catalogue · OJT-001 · 0 of 3 logged</div>
+                </div>
+                <span class="pill muted"><span class="dot"></span>not_started</span>
+                <button class="btn sm">Attach evidence</button>
+              </div>
+            </div>
+            <div class="ms-foot">
+              <span>Target · 2026-07-15</span>
+              <span><a>Reassign milestone</a> · <a>Add note</a></span>
+            </div>
+          </div>
+
+          <!-- Milestone 3 -->
+          <div class="ms-card">
+            <div class="ms-head">
+              <div>
+                <div class="code">BIZ-PM · Project Management</div>
+                <div class="name">Lead a multi-discipline project from kick-off to handover</div>
+              </div>
+              <div class="gap-chip">
+                L2 <span class="arr">→</span> L4
+                <span class="level-bar"><i class="curr"></i><i class="curr"></i><i class="gap"></i><i class="gap"></i><i></i></span>
+              </div>
+            </div>
+            <p class="desc">
+              Take ownership of the FY27 budget exercise across Operations + Finance + HR. Khalid
+              will sponsor; Salma will be the day-to-day project lead.
+            </p>
+            <div class="checklist">
+              <div class="check-row">
+                <span class="mod elearning"><span class="glyph">L</span></span>
+                <div>
+                  <div class="t">Operations PM Fundamentals</div>
+                  <div class="s">eLearning catalogue · ELRN-009 · 6 hrs</div>
+                </div>
+                <span class="pill info"><span class="dot"></span>enrolled · 33%</span>
+                <button class="btn sm">Resume</button>
+              </div>
+              <div class="check-row">
+                <span class="mod ojt"><span class="glyph">O</span></span>
+                <div>
+                  <div class="t">Lead the FY27 budget exercise</div>
+                  <div class="s">OJT catalogue · OJT-005 · sponsor: Khalid Al-Harthy</div>
+                </div>
+                <span class="pill muted"><span class="dot"></span>not_started</span>
+                <button class="btn sm">Attach evidence</button>
+              </div>
+            </div>
+            <div class="ms-foot">
+              <span>Target · 2026-11-30</span>
+              <span><a>Reassign milestone</a> · <a>Add note</a></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

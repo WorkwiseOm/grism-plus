@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Grism+ — Phase 1 Wireframe Mockups</title>
+<link rel="stylesheet" href="_shared.css" />
+<style>
+  body { padding: 40px 48px; max-width: 1200px; margin: 0 auto; }
+  header { margin-bottom: 32px; }
+  header .eyebrow {
+    text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px;
+    color: var(--fg-muted); margin-bottom: 8px;
+  }
+  header h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  header p { color: var(--fg-muted); margin: 8px 0 0; max-width: 640px; }
+  section { margin-top: 28px; }
+  section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin: 0 0 12px; font-weight: 500; }
+  .footnote { margin-top: 40px; color: var(--fg-muted); font-size: 12px; }
+  .footnote code { background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Grism+ · Phase 1 design package</div>
+  <h1>Real product screen wireframes</h1>
+  <p>
+    Static HTML mockups for the four Phase 1 screens called out in <code>CLAUDE.md</code>.
+    Each one ships with a Stitch brief (paste into Stitch to regenerate) and an illustrative
+    mockup populated with the live demo seed (Arwa Energy — 21 users, 12 IDPs, 20 competencies).
+    Mockups are illustration-only — production styling will be Shadcn primitives in
+    <code>src/app/</code>.
+  </p>
+</header>
+
+<section>
+  <h2>Mockups</h2>
+  <div class="index-grid">
+    <a class="card" href="idp-approval.html">
+      <h3>IDP Approval</h3>
+      <p>L&amp;D admin (Aisha) reviews the 8 pending IDPs in a queue + detail review pane.</p>
+      <div class="meta">
+        <span class="pill warn"><span class="dot"></span>8 pending</span>
+        <span class="pill muted">role: ld_admin</span>
+      </div>
+    </a>
+    <a class="card" href="idp-view.html">
+      <h3>IDP View</h3>
+      <p>Salma's active IDP: progress hero, narrative, milestone timeline, action checklist. Toggle for manager mode.</p>
+      <div class="meta">
+        <span class="pill ok"><span class="dot"></span>active</span>
+        <span class="pill muted">role: employee · manager</span>
+      </div>
+    </a>
+    <a class="card" href="manager-coachee.html">
+      <h3>Manager Coachee View</h3>
+      <p>Khalid's team rollup — 6 directs, IDP status, % complete, last activity, drill-in side panel.</p>
+      <div class="meta">
+        <span class="pill info"><span class="dot"></span>6 directs</span>
+        <span class="pill muted">role: manager</span>
+      </div>
+    </a>
+    <a class="card" href="framework-editor.html">
+      <h3>Framework Editor</h3>
+      <p>Aisha edits the Arwa Core Framework — 5 categories / 20 competencies, proficiency scale, version + coverage.</p>
+      <div class="meta">
+        <span class="pill"><span class="dot"></span>v1 · published</span>
+        <span class="pill muted">role: ld_admin</span>
+      </div>
+    </a>
+    <a class="card" href="future-platform.html">
+      <h3>Future Platform Overview</h3>
+      <p>Production-ready target map across L&amp;D admin, manager, employee, and coach workspaces.</p>
+      <div class="meta">
+        <span class="pill warn"><span class="dot"></span>future target</span>
+        <span class="pill muted">role: all</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section>
+  <h2>Stitch briefs</h2>
+  <div class="index-grid">
+    <a class="card" href="idp-approval.brief.md">
+      <h3>idp-approval.brief.md</h3>
+      <p>Wireframe brief — paste into Stitch to generate the design file.</p>
+    </a>
+    <a class="card" href="idp-view.brief.md">
+      <h3>idp-view.brief.md</h3>
+      <p>Wireframe brief — paste into Stitch to generate the design file.</p>
+    </a>
+    <a class="card" href="manager-coachee.brief.md">
+      <h3>manager-coachee.brief.md</h3>
+      <p>Wireframe brief — paste into Stitch to generate the design file.</p>
+    </a>
+    <a class="card" href="framework-editor.brief.md">
+      <h3>framework-editor.brief.md</h3>
+      <p>Wireframe brief — paste into Stitch to generate the design file.</p>
+    </a>
+    <a class="card" href="future-platform.brief.md">
+      <h3>future-platform.brief.md</h3>
+      <p>Wireframe brief — paste into Stitch to generate the design file.</p>
+    </a>
+  </div>
+</section>
+
+<p class="footnote">
+  Tokens mirror the Shadcn defaults already wired in <code>tailwind.config.ts</code>. None of these
+  files are imported by the app — they're a design surface only. Per CLAUDE.md, before any of these
+  screens become real components, the corresponding <code>.pen</code> file must land in
+  <code>/design</code> via Stitch MCP.
+</p>
+</body>
+</html>

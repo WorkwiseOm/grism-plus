@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Grism+ · IDP Approval (mockup)</title>
+<link rel="stylesheet" href="_shared.css" />
+<style>
+  .canvas {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .queue {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    max-height: calc(100vh - 200px);
+    display: flex; flex-direction: column;
+  }
+  .queue-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .queue-head input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font: inherit; font-size: 13px;
+  }
+  .filter-chips { display: flex; gap: 6px; padding: 8px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .filter-chips .pill { cursor: pointer; }
+  .filter-chips .pill.active { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+  .queue-list { overflow-y: auto; }
+  .queue-row {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 10px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+  .queue-row:hover { background: var(--surface); }
+  .queue-row.selected { background: var(--info-bg); border-left-color: var(--info); }
+  .queue-row .name { font-weight: 600; font-size: 13px; }
+  .queue-row .roles { color: var(--fg-muted); font-size: 12px; margin-top: 2px; }
+  .queue-row .meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; font-size: 11px; }
+  .queue-row .meta .when { color: var(--fg-muted); }
+
+  .review { display: flex; flex-direction: column; gap: 16px; }
+
+  .emp-card { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .emp-card .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+  .narr p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.6; }
+  .narr p:last-child { margin: 0; }
+
+  .milestone {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 4px 1fr;
+  }
+  .milestone .stripe { background: hsl(217 91% 55%); }
+  .milestone[data-cat="LEAD"] .stripe { background: hsl(280 73% 55%); }
+  .milestone[data-cat="ANAL"] .stripe { background: hsl(35 92% 50%); }
+  .milestone[data-cat="BIZ"]  .stripe { background: hsl(142 71% 38%); }
+  .milestone[data-cat="COMM"] .stripe { background: hsl(195 85% 50%); }
+  .milestone .ms-body { padding: 14px 16px; }
+  .milestone .ms-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px;
+  }
+  .milestone .ms-head .title-row { display: flex; flex-direction: column; gap: 4px; }
+  .milestone .ms-head .code { font-size: 11px; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .milestone .ms-head .name { font-size: 14px; font-weight: 600; }
+  .gap-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-2); border-radius: 999px; padding: 3px 10px;
+    font-size: 12px; color: var(--fg);
+  }
+  .gap-chip .arr { color: var(--fg-muted); }
+  .gap-chip .level-bar {
+    display: inline-flex; gap: 2px; margin-left: 4px;
+  }
+  .gap-chip .level-bar i {
+    width: 4px; height: 12px; border-radius: 1px; background: var(--border-strong);
+  }
+  .gap-chip .level-bar i.curr { background: var(--info); }
+  .gap-chip .level-bar i.gap  { background: hsl(35 92% 60%); }
+
+  .ms-desc { font-size: 13px; color: var(--fg); margin: 0 0 8px; line-height: 1.55; }
+  .ms-target { font-size: 12px; color: var(--fg-muted); margin-bottom: 10px; }
+  .actions-list { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px dashed var(--border); }
+  .action-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+  .action-row .title { font-size: 13px; }
+  .action-row .src { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+  .footer-bar {
+    position: sticky; bottom: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 -8px 16px -8px rgb(0 0 0 / 0.06);
+  }
+  .footer-bar .actions { display: flex; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">Grism<span class="plus">+</span></div>
+    <div class="crumb">Arwa Energy · IDPs · Approval queue</div>
+    <div class="spacer"></div>
+    <div class="who">
+      <span>Aisha Al-Balushi · L&amp;D Manager</span>
+      <span class="avatar a4">AB</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a><span class="dot"></span>Home</a>
+    <a class="active"><span class="dot"></span>IDPs</a>
+    <a><span class="dot"></span>People</a>
+    <a><span class="dot"></span>Catalogues</a>
+    <a><span class="dot"></span>Framework</a>
+    <a><span class="dot"></span>Reports</a>
+    <div class="group">L&amp;D admin</div>
+    <a><span class="dot"></span>Approval queue</a>
+    <a><span class="dot"></span>Templates</a>
+    <a><span class="dot"></span>Audit log</a>
+    <div class="group">Account</div>
+    <a><span class="dot"></span>Settings</a>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Approval queue</h1>
+        <div class="sub">8 pending · 2 active · 1 draft · 1 completed · oldest submitted 9 days ago</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn ghost">Export</button>
+        <button class="btn">View active IDPs</button>
+      </div>
+    </div>
+
+    <div class="canvas">
+      <!-- QUEUE -->
+      <div class="queue">
+        <div class="queue-head">
+          <input type="text" placeholder="Search by employee, dept, competency…" />
+        </div>
+        <div class="filter-chips">
+          <span class="pill active"><span class="dot"></span>Pending · 8</span>
+          <span class="pill">Active · 2</span>
+          <span class="pill">Draft · 1</span>
+          <span class="pill">Completed · 1</span>
+        </div>
+
+        <div class="queue-list">
+          <div class="queue-row">
+            <span class="avatar a3">SA</span>
+            <div>
+              <div class="name">Saif Al-Habsi</div>
+              <div class="roles">Junior Ops Analyst → Ops Analyst</div>
+              <div class="meta">
+                <span class="pill muted">Operations</span>
+                <span class="pill">manual</span>
+                <span class="pill">2 milestones</span>
+                <span class="when">9d ago</span>
+                <span class="pill warn"><span class="dot"></span>L2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="queue-row selected">
+            <span class="avatar a4">LB</span>
+            <div>
+              <div class="name">Layla Al-Busaidi</div>
+              <div class="roles">Operations Trainee → Junior Ops Analyst</div>
+              <div class="meta">
+                <span class="pill muted">Operations</span>
+                <span class="pill info">template</span>
+                <span class="pill">4 milestones</span>
+                <span class="when">7d ago</span>
+                <span class="pill danger"><span class="dot"></span>L3 gap</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="queue-row">
+            <span class="avatar a2">HK</span>
+            <div>
+              <div class="name">Hamed Al-Kindi</div>
+              <div class="roles">Ops Coordinator → Sr Ops Analyst</div>
+              <div class="meta">
+                <span class="pill muted">Operations</span>
+                <span class="pill">manual</span>
+                <span class="pill">4 milestones</span>
+                <span class="when">6d ago</span>
+                <span class="pill warn"><span class="dot"></span>L2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="queue-row">
+            <span class="avatar a5">SB</span>
+            <div>
+              <div class="name">Sultan Al-Battashi</div>
+              <div class="roles">Process Engineer → Sr Process Engineer</div>
+              <div class="meta">
+                <span class="pill muted">Engineering</span>
+                <span class="pill">manual</span>
+                <span class="pill">4 milestones</span>
+                <span class="when">5d ago</span>
+                <span class="pill warn"><span class="dot"></span>L2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="queue-row">
+            <span class="avatar a1">NF</span>
+            <div>
+              <div class="name">Najla Al-Farsi</div>
+              <div class="roles">Mech Engineer → Project Lead</div>
+              <div class="meta">
+                <span class="pill muted">Engineering</span>
+                <span class="pill info">template</span>
+                <span class="pill">2 milestones</span>
+                <span class="when">4d ago</span>
+                <span class="pill warn"><span class="dot"></span>L2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="queue-row">
+            <span class="avatar a6">MH</span>
+            <div>
+              <div class="name">Maha Al-Hashmi</div>
+              <div class="roles">Engineering Trainee → Junior Engineer</div>
+              <div class="meta">
+                <span class="pill muted">Engineering</span>
+                <span class="pill info">template</span>
+                <span class="pill">2 milestones</span>
+                <span class="when">3d ago</span>
+                <span class="pill"><span class="dot"></span>L1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="queue-row">
+            <span class="avatar a3">KZ</span>
+            <div>
+              <div class="name">Khadija Al-Zadjali</div>
+              <div class="roles">Commercial Analyst → Team Lead</div>
+              <div class="meta">
+                <span class="pill muted">Commercial</span>
+                <span class="pill">manual</span>
+                <span class="pill">4 milestones</span>
+                <span class="when">2d ago</span>
+                <span class="pill danger"><span class="dot"></span>L3 gap</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="queue-row">
+            <span class="avatar a2">BR</span>
+            <div>
+              <div class="name">Bader Al-Rawahi</div>
+              <div class="roles">Commercial Trainee → Junior Analyst</div>
+              <div class="meta">
+                <span class="pill muted">Commercial</span>
+                <span class="pill info">template</span>
+                <span class="pill">2 milestones</span>
+                <span class="when">today</span>
+                <span class="pill"><span class="dot"></span>L1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REVIEW PANE -->
+      <div class="review">
+        <div class="card">
+          <div class="card-body emp-card">
+            <span class="avatar xl a4">LB</span>
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <strong style="font-size:17px;">Layla Al-Busaidi</strong>
+                <span class="pill muted">ARW-010</span>
+                <span class="pill warn"><span class="dot"></span>pending_approval</span>
+                <span class="pill info">template · T-OPS-1</span>
+              </div>
+              <div style="font-size:13px;margin-top:4px;">
+                <strong>Operations Trainee</strong>
+                <span style="color:var(--fg-muted);"> → Junior Ops Analyst</span>
+              </div>
+              <div class="meta" style="margin-top:6px;font-size:12px;color:var(--fg-muted);">
+                Operations · Manager: Khalid Al-Harthy · Hire date 2025-08-01 (8 mo) · Submitted 7 days ago
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span class="pill"><span class="dot"></span>AI-assisted</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Narrative</h3>
+            <span class="pill muted">narrative_source = template</span>
+          </div>
+          <div class="card-body narr">
+            <p>
+              Layla joined Arwa Energy on the Operations rotation programme in August 2025 and has
+              completed her foundational onboarding modules. This IDP is the standard 12-month
+              pathway from Trainee to Junior Ops Analyst, generated from the
+              <strong>T-OPS-1</strong> template and adjusted to Layla's intake assessment scores.
+            </p>
+            <p>
+              Focus areas are industrial safety fundamentals (TECH-IND), introductory data tooling
+              (TECH-DATA), and presentation skills (COMM-PRES) so she can start running shift
+              handover briefings independently by Q3 2026.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Underlying assessment</h3>
+            <button class="btn ghost sm">View raw data</button>
+          </div>
+          <div class="card-body">
+            <dl class="kv">
+              <dt>Source platform</dt><dd>Manual demo seed</dd>
+              <dt>Conducted</dt><dd>2026-01-12 · by Aisha Al-Balushi</dd>
+              <dt>Coverage</dt><dd>20 competencies scored · 4 identified as gap (≥ 2 levels)</dd>
+              <dt>Top gap</dt><dd>TECH-IND · Industrial Safety Fundamentals (L1 → L4)</dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Milestones · 4</h3>
+            <span class="pill muted">target completion · 2026-12-15</span>
+          </div>
+          <div class="card-body">
+            <div class="milestone" data-cat="ANAL">
+              <div class="stripe"></div>
+              <div class="ms-body">
+                <div class="ms-head">
+                  <div class="title-row">
+                    <div class="code">TECH-IND · Industrial Safety Fundamentals</div>
+                    <div class="name">Achieve site-safety competence to run unsupervised plant walks</div>
+                  </div>
+                  <div class="gap-chip">
+                    L1 <span class="arr">→</span> L4
+                    <span class="level-bar"><i class="curr"></i><i class="gap"></i><i class="gap"></i><i class="gap"></i><i></i></span>
+                  </div>
+                </div>
+                <p class="ms-desc">
+                  Build foundational HSE knowledge through accredited training plus shadowed plant
+                  walks. Ready by end of Q2 to run safety walks independently with checklist sign-off.
+                </p>
+                <div class="ms-target">Target · 2026-06-30</div>
+                <div class="actions-list">
+                  <div class="action-row">
+                    <span class="mod elearning"><span class="glyph">L</span></span>
+                    <div>
+                      <div class="title">NEBOSH IGC1 — Management of HSE</div>
+                      <div class="src">eLearning catalogue · ELRN-014 · 18 hrs</div>
+                    </div>
+                    <button class="btn ghost sm">View</button>
+                  </div>
+                  <div class="action-row">
+                    <span class="mod ojt"><span class="glyph">O</span></span>
+                    <div>
+                      <div class="title">Shadow 6 supervised plant walks with HSE lead</div>
+                      <div class="src">OJT catalogue · OJT-007 · evidence required</div>
+                    </div>
+                    <button class="btn ghost sm">View</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="milestone" data-cat="BIZ">
+              <div class="stripe"></div>
+              <div class="ms-body">
+                <div class="ms-head">
+                  <div class="title-row">
+                    <div class="code">TECH-DATA · Data Tooling Foundations</div>
+                    <div class="name">Confident with shift dashboards + ad-hoc Excel analysis</div>
+                  </div>
+                  <div class="gap-chip">
+                    L1 <span class="arr">→</span> L3
+                    <span class="level-bar"><i class="curr"></i><i class="gap"></i><i class="gap"></i><i></i><i></i></span>
+                  </div>
+                </div>
+                <p class="ms-desc">
+                  Comfortable querying the daily ops data mart in Power BI; able to build and
+                  present a basic shift performance pack each Monday.
+                </p>
+                <div class="ms-target">Target · 2026-09-30</div>
+                <div class="actions-list">
+                  <div class="action-row">
+                    <span class="mod elearning"><span class="glyph">L</span></span>
+                    <div>
+                      <div class="title">Power BI Essentials for Ops</div>
+                      <div class="src">eLearning catalogue · ELRN-003 · 6 hrs</div>
+                    </div>
+                    <button class="btn ghost sm">View</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="milestone" data-cat="COMM">
+              <div class="stripe"></div>
+              <div class="ms-body">
+                <div class="ms-head">
+                  <div class="title-row">
+                    <div class="code">COMM-PRES · Operational Presentation Skills</div>
+                    <div class="name">Lead the Monday shift handover briefing solo</div>
+                  </div>
+                  <div class="gap-chip">
+                    L1 <span class="arr">→</span> L3
+                    <span class="level-bar"><i class="curr"></i><i class="gap"></i><i class="gap"></i><i></i><i></i></span>
+                  </div>
+                </div>
+                <p class="ms-desc">
+                  Run the shift handover with confidence — 12 min slot, 3 KPIs, 1 incident review,
+                  Q&amp;A. Mentored by Salma Al-Riyami (Sr Ops Analyst).
+                </p>
+                <div class="ms-target">Target · 2026-10-31</div>
+                <div class="actions-list">
+                  <div class="action-row">
+                    <span class="mod coaching"><span class="glyph">C</span></span>
+                    <div>
+                      <div class="title">Bi-weekly 30-min coaching with Salma Al-Riyami</div>
+                      <div class="src">Coaching · 8 sessions planned</div>
+                    </div>
+                    <button class="btn ghost sm">View</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="milestone" data-cat="ANAL">
+              <div class="stripe"></div>
+              <div class="ms-body">
+                <div class="ms-head">
+                  <div class="title-row">
+                    <div class="code">TECH-IND · Industrial Safety — Stretch</div>
+                    <div class="name">Co-run a tabletop emergency drill</div>
+                  </div>
+                  <div class="gap-chip">
+                    L2 <span class="arr">→</span> L3
+                    <span class="level-bar"><i class="curr"></i><i class="curr"></i><i class="gap"></i><i></i><i></i></span>
+                  </div>
+                </div>
+                <p class="ms-desc">
+                  Stretch milestone for Q4 — co-design and co-facilitate one tabletop drill with
+                  the HSE team. Owns the post-drill action register.
+                </p>
+                <div class="ms-target">Target · 2026-12-10</div>
+                <div class="note warn" style="margin-top:8px;">
+                  ⚠ No actions specified on this milestone — author may have forgotten to attach activities.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bar">
+          <div style="font-size:12px;color:var(--fg-muted);">
+            Last reviewed by you on 2026-04-22 · Author was asked to clarify milestone 4
+          </div>
+          <div class="actions">
+            <button class="btn danger">Reject</button>
+            <button class="btn warn">Request changes</button>
+            <button class="btn primary">Approve IDP</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

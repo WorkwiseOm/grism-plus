@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Grism+ - Future Platform Overview (wireframe)</title>
+<link rel="stylesheet" href="_shared.css" />
+<style>
+  .overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 18px;
+    align-items: start;
+  }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 16px;
+  }
+  .product-loop {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .loop-step {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    min-height: 92px;
+  }
+  .loop-step .num {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--primary);
+    color: var(--primary-fg);
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .loop-step .label { font-weight: 600; font-size: 12px; line-height: 1.25; }
+  .loop-step .hint { color: var(--fg-muted); font-size: 11px; margin-top: 5px; line-height: 1.35; }
+  .screen-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .screen {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .screen-title {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .screen-title h3 { margin: 0; font-size: 13px; font-weight: 700; }
+  .screen-body { padding: 12px; }
+  .mini-layout {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 10px;
+    min-height: 210px;
+  }
+  .mini-nav {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .mini-nav span {
+    height: 18px;
+    border-radius: 5px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .mini-nav span.active { background: var(--primary); border-color: var(--primary); }
+  .mini-main {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 10px;
+  }
+  .mini-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .mini-kpi {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    background: var(--bg);
+  }
+  .mini-kpi b { display: block; font-size: 16px; line-height: 1; }
+  .mini-kpi span { color: var(--fg-muted); font-size: 10px; }
+  .mini-list {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .mini-row {
+    min-height: 34px;
+    display: grid;
+    grid-template-columns: 1fr 60px;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 9px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-row:last-child { border-bottom: 0; }
+  .bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .bar i {
+    display: block;
+    height: 100%;
+    background: var(--info);
+    border-radius: inherit;
+  }
+  .short-line, .long-line {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+  }
+  .short-line { width: 64%; }
+  .long-line { width: 88%; }
+  .lane-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .lane {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    background: var(--surface);
+  }
+  .lane h4 { margin: 0 0 8px; font-size: 13px; }
+  .lane ul { margin: 0; padding-left: 16px; color: var(--fg-muted); font-size: 12px; }
+  .lane li { margin: 5px 0; }
+  .side-note {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 14px;
+  }
+  .side-note h3 { margin: 0 0 8px; font-size: 14px; }
+  .side-note p { margin: 0 0 10px; color: var(--fg-muted); font-size: 12px; }
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--fg);
+  }
+  .box {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+  }
+  .box.done { background: var(--ok); border-color: var(--ok); }
+  .rail { display: flex; flex-direction: column; gap: 14px; }
+  .persona {
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .persona:last-child { border-bottom: 0; }
+  .persona b { display: block; font-size: 12px; }
+  .persona span { display: block; color: var(--fg-muted); font-size: 11px; }
+  .map {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 12px;
+    background: var(--surface);
+  }
+  .map-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .map-row:last-child { border-bottom: 0; }
+  .map-row b { font-size: 12px; }
+  .map-row span { color: var(--fg-muted); font-size: 12px; }
+  @media (max-width: 1100px) {
+    .overview, .hero-grid, .screen-grid, .lane-grid { grid-template-columns: 1fr; }
+    .product-loop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">Grism<span class="plus">+</span></div>
+    <div class="crumb">Future platform wireframe - production-ready target</div>
+    <div class="spacer"></div>
+    <div class="who">
+      <span>Arwa Energy workspace</span>
+      <span class="avatar a1">GP</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a class="active"><span class="dot"></span>Command center</a>
+    <a><span class="dot"></span>IDPs</a>
+    <a><span class="dot"></span>People</a>
+    <a><span class="dot"></span>Competencies</a>
+    <a><span class="dot"></span>Learning</a>
+    <a><span class="dot"></span>OJT evidence</a>
+    <a><span class="dot"></span>Coaching</a>
+    <a><span class="dot"></span>Reports</a>
+    <div class="group">Admin</div>
+    <a><span class="dot"></span>Framework builder</a>
+    <a><span class="dot"></span>AI review queue</a>
+    <a><span class="dot"></span>Security audit</a>
+    <div class="group">Account</div>
+    <a><span class="dot"></span>Settings</a>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Production platform overview</h1>
+        <div class="sub">One operating layer for competency gaps, IDPs, learning actions, OJT evidence, coaching, and L&D governance.</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="pill ok"><span class="dot"></span>Phase 0 foundation</span>
+        <span class="pill warn"><span class="dot"></span>Phase 1 build target</span>
+        <span class="pill muted">Wireframe only</span>
+      </div>
+    </div>
+
+    <div class="overview">
+      <div class="stack">
+        <section class="card">
+          <div class="card-head">
+            <h3>Core product loop</h3>
+            <span class="pill muted">from assessment to proof of growth</span>
+          </div>
+          <div class="card-body">
+            <div class="hero-grid">
+              <div>
+                <p style="margin:0;color:var(--fg-muted);max-width:720px;">
+                  The finished platform should make the talent-development cycle visible and accountable.
+                  L&D owns the framework and approvals, managers guide execution, employees complete the work,
+                  and coaches support assigned coachees only.
+                </p>
+                <div class="product-loop">
+                  <div class="loop-step">
+                    <div class="num">1</div>
+                    <div class="label">Framework</div>
+                    <div class="hint">Role families, competencies, proficiency scale</div>
+                  </div>
+                  <div class="loop-step">
+                    <div class="num">2</div>
+                    <div class="label">Assessment</div>
+                    <div class="hint">Unberry intake and gap normalization</div>
+                  </div>
+                  <div class="loop-step">
+                    <div class="num">3</div>
+                    <div class="label">AI draft IDP</div>
+                    <div class="hint">Pseudonymised prompts, admin review</div>
+                  </div>
+                  <div class="loop-step">
+                    <div class="num">4</div>
+                    <div class="label">Approval</div>
+                    <div class="hint">L&D and manager decisions with comments</div>
+                  </div>
+                  <div class="loop-step">
+                    <div class="num">5</div>
+                    <div class="label">Execution</div>
+                    <div class="hint">eLearning, OJT, coaching actions</div>
+                  </div>
+                  <div class="loop-step">
+                    <div class="num">6</div>
+                    <div class="label">Evidence</div>
+                    <div class="hint">Progress, proof, follow-up nudges</div>
+                  </div>
+                </div>
+              </div>
+              <div class="map">
+                <div class="map-row">
+                  <b>L&D admin</b>
+                  <span>Owns framework, approval queue, catalogues, audit posture.</span>
+                </div>
+                <div class="map-row">
+                  <b>Manager</b>
+                  <span>Owns team execution, evidence review, unblock decisions.</span>
+                </div>
+                <div class="map-row">
+                  <b>Employee</b>
+                  <span>Owns IDP progress, learning actions, OJT uploads.</span>
+                </div>
+                <div class="map-row">
+                  <b>Coach</b>
+                  <span>Supports assigned coachees after assignment-scoped RLS lands.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen-grid">
+          <article class="screen">
+            <div class="screen-title">
+              <h3>L&D command center</h3>
+              <span class="pill info">ld_admin</span>
+            </div>
+            <div class="screen-body">
+              <div class="mini-layout">
+                <div class="mini-nav">
+                  <span class="active"></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <div class="mini-main">
+                  <div class="mini-kpis">
+                    <div class="mini-kpi"><b>8</b><span>pending IDPs</span></div>
+                    <div class="mini-kpi"><b>20</b><span>competencies</span></div>
+                    <div class="mini-kpi"><b>92%</b><span>coverage</span></div>
+                  </div>
+                  <div class="mini-list">
+                    <div class="mini-row"><div><div class="long-line"></div></div><span class="pill warn">review</span></div>
+                    <div class="mini-row"><div><div class="short-line"></div></div><span class="pill info">AI</span></div>
+                    <div class="mini-row"><div><div class="long-line"></div></div><span class="pill ok">ready</span></div>
+                    <div class="mini-row"><div><div class="short-line"></div></div><span class="pill muted">audit</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="screen">
+            <div class="screen-title">
+              <h3>Manager team cockpit</h3>
+              <span class="pill info">manager</span>
+            </div>
+            <div class="screen-body">
+              <div class="mini-layout">
+                <div class="mini-nav">
+                  <span></span><span class="active"></span><span></span><span></span><span></span>
+                </div>
+                <div class="mini-main">
+                  <div class="mini-kpis">
+                    <div class="mini-kpi"><b>6</b><span>directs</span></div>
+                    <div class="mini-kpi"><b>3</b><span>blocked</span></div>
+                    <div class="mini-kpi"><b>74%</b><span>avg progress</span></div>
+                  </div>
+                  <div class="mini-list">
+                    <div class="mini-row"><div><div class="bar"><i style="width:78%"></i></div></div><span class="pill ok">on track</span></div>
+                    <div class="mini-row"><div><div class="bar"><i style="width:35%"></i></div></div><span class="pill warn">needs help</span></div>
+                    <div class="mini-row"><div><div class="bar"><i style="width:58%"></i></div></div><span class="pill info">evidence</span></div>
+                    <div class="mini-row"><div><div class="bar"><i style="width:18%"></i></div></div><span class="pill danger">late</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="screen">
+            <div class="screen-title">
+              <h3>Employee IDP workspace</h3>
+              <span class="pill ok">employee</span>
+            </div>
+            <div class="screen-body">
+              <div class="mini-layout">
+                <div class="mini-nav">
+                  <span></span><span></span><span class="active"></span><span></span><span></span>
+                </div>
+                <div class="mini-main">
+                  <div class="mini-kpis">
+                    <div class="mini-kpi"><b>4</b><span>milestones</span></div>
+                    <div class="mini-kpi"><b>7</b><span>actions</span></div>
+                    <div class="mini-kpi"><b>1</b><span>coach brief</span></div>
+                  </div>
+                  <div class="mini-list">
+                    <div class="mini-row"><div><div class="long-line"></div></div><span class="pill ok">done</span></div>
+                    <div class="mini-row"><div><div class="long-line"></div></div><span class="pill info">OJT</span></div>
+                    <div class="mini-row"><div><div class="short-line"></div></div><span class="pill warn">upload</span></div>
+                    <div class="mini-row"><div><div class="short-line"></div></div><span class="pill muted">next</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="screen">
+            <div class="screen-title">
+              <h3>Coach assigned-coachee view</h3>
+              <span class="pill warn">gated</span>
+            </div>
+            <div class="screen-body">
+              <div class="mini-layout">
+                <div class="mini-nav">
+                  <span></span><span></span><span></span><span class="active"></span><span></span>
+                </div>
+                <div class="mini-main">
+                  <div class="mini-kpis">
+                    <div class="mini-kpi"><b>5</b><span>assigned</span></div>
+                    <div class="mini-kpi"><b>2</b><span>briefs due</span></div>
+                    <div class="mini-kpi"><b>0</b><span>tenant-wide</span></div>
+                  </div>
+                  <div class="mini-list">
+                    <div class="mini-row"><div><div class="long-line"></div></div><span class="pill info">brief</span></div>
+                    <div class="mini-row"><div><div class="short-line"></div></div><span class="pill ok">session</span></div>
+                    <div class="mini-row"><div><div class="long-line"></div></div><span class="pill warn">risk</span></div>
+                    <div class="mini-row"><div><div class="short-line"></div></div><span class="pill muted">notes</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>Build lanes from current state to production-ready platform</h3>
+            <span class="pill muted">implementation map</span>
+          </div>
+          <div class="card-body">
+            <div class="lane-grid">
+              <div class="lane">
+                <h4>Phase 1: usable demo/pilot loop</h4>
+                <ul>
+                  <li>IDP engine and approval queue</li>
+                  <li>Employee IDP workspace</li>
+                  <li>Manager team cockpit</li>
+                  <li>Framework and catalogue management</li>
+                </ul>
+              </div>
+              <div class="lane">
+                <h4>Pre-pilot hardening</h4>
+                <ul>
+                  <li>Vercel deploy path and branch protection</li>
+                  <li>Client-IP trust verification</li>
+                  <li>Coach assignment-scoped RLS or coach disabled</li>
+                  <li>Smoke tests against deployed app</li>
+                </ul>
+              </div>
+              <div class="lane">
+                <h4>Production expansion</h4>
+                <ul>
+                  <li>Notifications and recovery workflows</li>
+                  <li>Customer-ready audit exports</li>
+                  <li>External catalogue integrations</li>
+                  <li>SOC 2 runbooks and vendor reviews</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="rail">
+        <section class="side-note">
+          <h3>Pending gates</h3>
+          <p>Items that still block real pilot or production use.</p>
+          <div class="checklist">
+            <div class="check"><span class="box"></span><span>First Vercel deployment and smoke checks</span></div>
+            <div class="check"><span class="box"></span><span>GitHub branch protection required check</span></div>
+            <div class="check"><span class="box"></span><span>Vercel client-IP trust verification</span></div>
+            <div class="check"><span class="box"></span><span>Apply Vercel subprocessor migration only after go-live</span></div>
+            <div class="check"><span class="box"></span><span>Coach RLS assignment scope if coach is in pilot</span></div>
+            <div class="check"><span class="box"></span><span>Stitch .pen files before real screens ship</span></div>
+          </div>
+        </section>
+
+        <section class="side-note">
+          <h3>Primary users</h3>
+          <div class="persona">
+            <span class="avatar a4">AB</span>
+            <div><b>Aisha</b><span>L&D admin, owns governance</span></div>
+            <span class="pill info">MFA</span>
+          </div>
+          <div class="persona">
+            <span class="avatar a3">KM</span>
+            <div><b>Khalid</b><span>Manager, owns team execution</span></div>
+            <span class="pill muted">team</span>
+          </div>
+          <div class="persona">
+            <span class="avatar a2">SA</span>
+            <div><b>Salma</b><span>Employee, owns IDP progress</span></div>
+            <span class="pill ok">IDP</span>
+          </div>
+          <div class="persona">
+            <span class="avatar a5">CH</span>
+            <div><b>Coach</b><span>Assigned coachees only</span></div>
+            <span class="pill warn">RLS</span>
+          </div>
+        </section>
+
+        <section class="side-note">
+          <h3>Design rule</h3>
+          <p>
+            Keep the final product quiet and operational: dense lists, clear status,
+            predictable navigation, and fast drill-ins. Avoid marketing-style heroes
+            inside the logged-in app.
+          </p>
+          <span class="pill muted">dashboard first</span>
+          <span class="pill muted">no nested cards</span>
+          <span class="pill muted">evidence visible</span>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>
