@@ -4,7 +4,7 @@ Multi-tenant talent development execution platform — joint Tilqai × Grism pro
 
 ## Status
 
-**Phase 0 — Foundation.** Auth, security posture, RLS, demo seed, and middleware are landed; CI, deploy, and AI client wrapper are still in progress. **Not production ready.** No pilot tenants are connected.
+**Phase 0 — Foundation.** Auth, security posture, RLS, demo seed, middleware, CI, and the AI client boundary are landed; first Vercel deploy is still gated. **Not production ready.** No pilot tenants are connected.
 
 The current `/admin`, `/manager`, and `/employee` landing pages are placeholders. Real Phase 1 product screens require a Stitch wireframe in `/design` before code is written — see [`CLAUDE.md`](CLAUDE.md) → "UI design protocol".
 
