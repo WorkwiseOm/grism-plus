@@ -10,7 +10,7 @@ The current `/admin`, `/manager`, and `/employee` landing pages are placeholders
 
 ## Stack
 
-- **App:** Next.js 14 (App Router) + TypeScript
+- **App:** Next.js 15 (App Router) + TypeScript
 - **DB / Auth / Storage:** Supabase (Postgres 17, Auth, RLS, Edge Functions)
 - **UI:** Shadcn/UI + Tailwind CSS
 - **Tests:** Vitest

@@ -17,6 +17,7 @@ This document separates safe local preparation from actions that require explici
 - `npm run build` succeeds locally.
 - `.env.local.example` includes Supabase, Resend, Anthropic, and model configuration placeholders.
 - `docs/security.md` and `docs/subprocessors.md` document the intended hosting and subprocessor posture.
+- `supabase/migrations/00012_activate_vercel_subprocessor.sql` is prepared locally but remains unapplied.
 
 ## Operator Actions Required
 
@@ -25,7 +26,7 @@ These actions affect external systems and should not be performed unattended:
 - Create or connect the Vercel project.
 - Add Vercel environment variables.
 - Trigger the first real Vercel deployment.
-- Configure GitHub branch protection to require `CI / lint · typecheck · test · build`.
+- Configure GitHub branch protection to require `CI / lint / typecheck / test / build`.
 - Verify Vercel's trusted client-IP header behavior in the deployed runtime.
 - Apply the Vercel subprocessor activation migration to cloud Supabase.
 - Create or rotate provider API keys.
@@ -64,16 +65,18 @@ Do not store database passwords, test passwords, or demo credentials in Vercel u
 
 Do not mark Vercel active in the database before the Vercel project exists and is serving Grism Plus.
 
-Expected migration shape after deployment is confirmed:
+Prepared migration file: `supabase/migrations/00012_activate_vercel_subprocessor.sql`.
+
+Expected migration shape:
 
 ```sql
 update public.subprocessors
    set is_active = true,
-       updated_at = now()
+       reviewed_at = now()
  where name = 'Vercel';
 ```
 
-Use a new migration file. Do not edit `00002_seed_subprocessors.sql`.
+The prepared file also updates the registered location to Frankfurt and fails unless exactly one inactive Vercel row is activated. Do not apply this migration until Vercel is serving Grism Plus and the deployment region has been verified. Do not edit `00002_seed_subprocessors.sql`.
 
 ## Deployment Smoke Checks
 

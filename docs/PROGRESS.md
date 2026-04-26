@@ -2,6 +2,10 @@
 
 ## Phase 0 progress
 
+### 2026-04-26 - Step 9 local readiness refresh
+
+Local Step 9 readiness was rechecked after the Next 15 upgrade: lint, typecheck, tests, build, and `npm audit` all pass. `docs/STEP_9_DEPLOYMENT_GATES.md` now references the actual `subprocessors.reviewed_at` column, the README stack version matches Next 15, and `supabase/migrations/00012_activate_vercel_subprocessor.sql` is prepared but must not be applied until Vercel is live.
+
 ### 2026-04-26 — Next.js security upgrade spike complete
 
 Local security-upgrade spike moved Next.js and `eslint-config-next` from 14.2.35 to 15.5.15, updated server-side cookie/header usage for Next 15's async request APIs, and added an npm override so Next's nested PostCSS resolves to `8.5.10`. Verification passed: lint, typecheck, tests, build, and `npm audit` (0 vulnerabilities). Follow-up: `next lint` is deprecated in Next 15 and should be migrated to the ESLint CLI before any future Next 16 upgrade.
