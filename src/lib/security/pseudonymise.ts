@@ -16,12 +16,14 @@ type Employee = Database['public']['Tables']['employees']['Row']
 
 declare const pseudonymisedBrand: unique symbol
 
-export type PseudonymisedEmployee =
-  & Omit<Employee, 'full_name' | 'email'>
-  & {
-    pseudonym: `Employee_${string}`
-    readonly [pseudonymisedBrand]: true
-  }
+export type PseudonymisedEmployee = {
+  pseudonym: `Employee_${string}`
+  role_title: string
+  target_role_title: string | null
+  department: string | null
+  org_unit: string | null
+  readonly [pseudonymisedBrand]: true
+}
 
 export function pseudonymiseEmployee(
   employee: Employee,
@@ -40,31 +42,16 @@ export function pseudonymiseEmployee(
     .update(`grism-plus:pseudonym:v1:${employee.id}:${sessionId}`)
     .digest('hex')
 
-  const pseudonym = `Employee_${hmac.slice(0, 4).toUpperCase()}` as const
-  // Explicit construction (no destructure) so lint cannot flag unused
-  // full_name / email bindings. Keeps both guarantees:
-  //   - Runtime: full_name and email are simply not copied, so they
-  //     cannot leak through this function regardless of what the
-  //     caller does with the returned object.
-  //   - Compile-time: PseudonymisedEmployee (Omit<Employee, 'full_name'
-  //     | 'email'> & …) has no full_name / email fields, so any code
-  //     that tries to read them does not type-check.
+  const pseudonym = `Employee_${hmac.slice(0, 8).toUpperCase()}` as const
+
+  // Explicit allow-list construction keeps direct identifiers out of
+  // AI prompt inputs. Do not add fields here unless they are safe to
+  // send to Anthropic under docs/security.md.
   return {
-    id: employee.id,
-    tenant_id: employee.tenant_id,
-    user_profile_id: employee.user_profile_id,
-    employee_number: employee.employee_number,
     role_title: employee.role_title,
     target_role_title: employee.target_role_title,
     department: employee.department,
     org_unit: employee.org_unit,
-    manager_id: employee.manager_id,
-    hire_date: employee.hire_date,
-    data_classification: employee.data_classification,
-    is_active: employee.is_active,
-    created_at: employee.created_at,
-    updated_at: employee.updated_at,
-    deleted_at: employee.deleted_at,
     pseudonym,
   } as PseudonymisedEmployee
 }

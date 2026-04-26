@@ -115,7 +115,7 @@ Four AI nodes in Grism Plus send data to Anthropic's Claude API:
 - OJT recommender — sends competency gap, employee role, and OJT catalogue candidates
 - Coaching brief — sends IDP status and recent OJT activity
 
-**PII pseudonymisation for AI prompts is a Phase 1 commitment.** Before sending employee data to Claude, the application replaces real names with stable session-scoped pseudonyms (e.g., `Employee_A1B2`). Employee IDs, email addresses, and tenant names are never sent. Anthropic is documented in our subprocessor register (`docs/subprocessors.md`). Anthropic is SOC 2 Type II certified and offers a Data Processing Agreement.
+**PII pseudonymisation for AI prompts is enforced in application code.** Before sending employee data to Claude, the application replaces direct identifiers with stable session-scoped pseudonyms (e.g., `Employee_A1B2C3D4`). The `src/lib/ai` wrapper rejects prompt payload keys such as `email`, `employee_id`, `employee_number`, `tenant_id`, and `user_profile_id` before any Anthropic call is made. Real employee names, emails, employee IDs, employee numbers, and tenant identifiers are never sent. Anthropic is documented in our subprocessor register (`docs/subprocessors.md`). Anthropic is SOC 2 Type II certified and offers a Data Processing Agreement.
 
 Zero-day retention is enabled on Anthropic API calls where available.
 

@@ -2,6 +2,12 @@
 
 ## Phase 0 progress
 
+### 2026-04-26 — Step 6 complete (Anthropic AI client wrapper)
+
+Step 6 adds the first application-level AI boundary: the official Anthropic TypeScript SDK, a small `src/lib/ai` wrapper for non-streaming Messages API calls, per-node prompt contracts for the four planned AI nodes (`idp_generation`, `modality_recommender`, `ojt_recommender`, `coaching_brief`), and mocked tests that prove no live Anthropic call is required during CI.
+
+The prompt-safety contract was tightened at the same time: `PseudonymisedEmployee` now exposes only role/context fields plus an 8-hex-char pseudonym, and the AI wrapper rejects direct identifier keys (`email`, `employee_id`, `employee_number`, `tenant_id`, `user_profile_id`, etc.) before any SDK call. This turns the security-doc pseudonymisation promise into a compile-time and runtime boundary for future AI nodes.
+
 ### 2026-04-25 — Step 5 complete (Arwa Energy demo seed)
 
 Demo fixture seeded into cloud Supabase: 1 tenant, 21 user_profiles, 20 employees with manager hierarchy, the Arwa Energy Core Competency Framework (5 categories × 4 competencies = 20 leaves + 5 parent rows), 196 competency_scores, 12 IDPs distributed across 8 pending_approval / 2 active / 1 draft / 1 completed (with the 8 pending IDPs hand-designed across the variety dimensions agreed in spec — category coverage, gap magnitude, originator, milestone count, modality mix), 12 assessments, 35 idp_milestones, 55 idp_actions, 10 OJT activities, 10 eLearning courses, 7 elearning_enrolments + 7 ojt_assignments tied to the active and completed IDPs.
@@ -94,7 +100,7 @@ Commit: `9917f75`
 - Data classification modelled as Postgres enum (public/internal/confidential/restricted) — adequate for MVP and SOC 2 readiness. Consider promoting to a reference table if per-classification metadata (handling rules, retention defaults, UI colours) becomes needed. Tracked as post-MVP item.
 - Session idle timeout enforcement — Step 4 deliverable. Supabase Auth's `inactivity_timeout` is Pro-tier only; enforce in Next.js middleware that checks time-since-`last_activity_at` against `tenants.idle_timeout_minutes` on every authenticated request and forces re-auth past threshold.
 - Rate limiting (5 failed sign-ins per 15-minute rolling window per IP) — Step 4 deliverable. Next.js middleware with pg-backed counter keyed on IP and outcome=failure. Supabase Auth native `sign_in_sign_ups` left at default 30/5-min as safety net (Option B).
-- Pseudonym collision space — current 4-hex-char pseudonyms provide 65,536 unique values. Birthday-paradox collision probability reaches ~50% at ~300 employees per tenant. Risk: AI conflates two employees with same pseudonym in a single coaching brief. Step 4 deliverable: expand to 8 hex chars (4.3B values, collision-negligible at enterprise scale) OR use sequential pseudonym IDs stored per-session (no collision possible, traceable, reversible for debugging).
+- Pseudonym collision space — resolved in Step 6 by expanding employee pseudonyms from 4 to 8 hex chars (4.3B values, collision-negligible at enterprise scale for expected tenant sizes) and tightening `PseudonymisedEmployee` to expose only role/context fields plus the pseudonym. Sequential per-session pseudonym maps remain a possible future improvement if debugging traceability becomes necessary.
 - Supabase Pro tier upgrade — unlocks Time-box user sessions, Inactivity timeout, and other session controls. Revisit in Phase 4 when scoping production deployment or when a client security review specifically demands it.
 - Incident response runbook — Phase 4 deliverable. Scope with Grism JSC and first pilot client security review input. Skeleton now would be speculative and would likely need full rewrite later.
 - MFA enforcement UI and enrolment flow — Step 4 deliverable. Will check tenants.mfa_required_roles array at login and gate ld_admin/superadmin roles on MFA completion.

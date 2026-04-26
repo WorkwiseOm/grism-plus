@@ -42,7 +42,7 @@ describe('pseudonymiseEmployee — runtime behaviour', () => {
     const b = pseudonymiseEmployee(emp, 'session-abc')
 
     expect(a.pseudonym).toBe(b.pseudonym)
-    expect(a.pseudonym).toMatch(/^Employee_[0-9A-F]{4}$/)
+    expect(a.pseudonym).toMatch(/^Employee_[0-9A-F]{8}$/)
   })
 
   it('produces different pseudonyms when employee.id differs (same sessionId)', () => {
@@ -67,12 +67,17 @@ describe('pseudonymiseEmployee — runtime behaviour', () => {
     expect(a.pseudonym).not.toBe(b.pseudonym)
   })
 
-  it('strips full_name and email at runtime', () => {
+  it('strips direct identifiers at runtime', () => {
     const emp = makeEmployee()
     const pe = pseudonymiseEmployee(emp, 'session-xyz')
 
     expect(pe).not.toHaveProperty('full_name')
     expect(pe).not.toHaveProperty('email')
+    expect(pe).not.toHaveProperty('id')
+    expect(pe).not.toHaveProperty('tenant_id')
+    expect(pe).not.toHaveProperty('employee_number')
+    expect(pe).not.toHaveProperty('user_profile_id')
+    expect(pe).not.toHaveProperty('manager_id')
   })
 
   it('throws with a loud, specific message when HMAC_SESSION_KEY is missing', () => {
@@ -91,28 +96,34 @@ describe('pseudonymiseEmployee — runtime behaviour', () => {
 })
 
 describe('PseudonymisedEmployee — compile-time assertions', () => {
-  it('type has no `full_name` or `email` fields', () => {
+  it('type has no direct identifier fields', () => {
     const pe = pseudonymiseEmployee(makeEmployee(), 'session-abc')
 
     // @ts-expect-error — full_name must not exist on PseudonymisedEmployee
     void pe.full_name
     // @ts-expect-error — email must not exist on PseudonymisedEmployee
     void pe.email
+    // @ts-expect-error — id must not exist on PseudonymisedEmployee
+    void pe.id
+    // @ts-expect-error — tenant_id must not exist on PseudonymisedEmployee
+    void pe.tenant_id
+    // @ts-expect-error — employee_number must not exist on PseudonymisedEmployee
+    void pe.employee_number
 
-    expect(pe.pseudonym).toMatch(/^Employee_[0-9A-F]{4}$/)
+    expect(pe.pseudonym).toMatch(/^Employee_[0-9A-F]{8}$/)
   })
 
   it('cannot be fabricated by a caller via a plain object literal (brand enforced)', () => {
-    const emp = makeEmployee()
-    const { full_name: _fn, email: _em, ...rest } = emp
-
     // @ts-expect-error — brand is private; plain object literals cannot satisfy PseudonymisedEmployee
     const fake: PseudonymisedEmployee = {
-      ...rest,
-      pseudonym: 'Employee_FAKE',
+      pseudonym: 'Employee_FAKE0000',
+      role_title: 'Software Engineer',
+      target_role_title: 'Senior Software Engineer',
+      department: 'Engineering',
+      org_unit: 'Platform',
     }
 
     // runtime assertion so the test is not dead code
-    expect(fake.pseudonym).toBe('Employee_FAKE')
+    expect(fake.pseudonym).toBe('Employee_FAKE0000')
   })
 })

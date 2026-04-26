@@ -10,6 +10,8 @@ See [.env.local.example](../.env.local.example). That file is the source of trut
 
 `.env.local` is gitignored and must never be committed. Secret-handling rules (rotation cadence, who can access service-role keys, what is treated as a secret) live in [`security.md`](security.md) § "Encryption" and § "AI and third-party data handling".
 
+AI-node local development uses `ANTHROPIC_API_KEY` plus optional `ANTHROPIC_MODEL`. Tests mock the Anthropic SDK and must not require either variable unless an explicit live-call test is added later.
+
 ## Local → cloud topology
 
 - **Default dev topology:** `npm run dev` runs Next.js locally and points at the shared cloud Supabase project (`grism-plus-dev`, Sydney, Free tier). This is the canonical dev target — no Docker required, identical schema/RLS/Auth posture across the team. Rationale: consistent dev environment regardless of whether a team member has Docker working on their OS.
