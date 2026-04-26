@@ -43,7 +43,7 @@ npm run build
 npm audit --omit=dev
 ```
 
-Current known issue: `npm audit` reports Next.js vulnerabilities that require a major-version path to resolve cleanly. Decide whether to upgrade before first external exposure or record a risk acceptance for a private smoke deploy only.
+Current status: the local Next.js security-upgrade spike moved the app to Next `15.5.15` and `npm audit` reports zero known vulnerabilities. `next lint` still works on Next 15 but emits a deprecation warning; migrate to the ESLint CLI before any future Next 16 upgrade.
 
 ## Environment Variables
 

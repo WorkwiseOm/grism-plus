@@ -57,7 +57,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthenticated." }, { status: 401 })
   }
 
-  const headerStore = headers()
+  const headerStore = await headers()
   const admin = createAdminClient()
   await admin.from("security_events").insert({
     user_id: user.id,

@@ -41,7 +41,7 @@ export type RequireRoleResult = {
 export async function requireRole(
   allowed: ReadonlyArray<UserRole>,
 ): Promise<RequireRoleResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

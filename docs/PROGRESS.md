@@ -2,6 +2,10 @@
 
 ## Phase 0 progress
 
+### 2026-04-26 — Next.js security upgrade spike complete
+
+Local security-upgrade spike moved Next.js and `eslint-config-next` from 14.2.35 to 15.5.15, updated server-side cookie/header usage for Next 15's async request APIs, and added an npm override so Next's nested PostCSS resolves to `8.5.10`. Verification passed: lint, typecheck, tests, build, and `npm audit` (0 vulnerabilities). Follow-up: `next lint` is deprecated in Next 15 and should be migrated to the ESLint CLI before any future Next 16 upgrade.
+
 ### 2026-04-26 — Step 10 complete (Phase 1 execution plan)
 
 `docs/PHASE_1_PLAN.md` now describes the Phase 1 scope, entry criteria, non-goals, product slices, cross-cutting work, pilot gates, build order, and known risks. It intentionally treats Phase 1 as a demo/pilot execution plan rather than a production readiness claim.

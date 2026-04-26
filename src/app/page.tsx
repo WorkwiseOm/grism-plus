@@ -17,7 +17,7 @@ type UserRole = Database["public"]["Enums"]["user_role"]
  *   unrecognised role value in metadata.
  */
 export default async function Home() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
     error: userError,
