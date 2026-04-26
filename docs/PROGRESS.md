@@ -2,6 +2,10 @@
 
 ## Phase 0 progress
 
+### 2026-04-26 — Step 10 complete (Phase 1 execution plan)
+
+`docs/PHASE_1_PLAN.md` now describes the Phase 1 scope, entry criteria, non-goals, product slices, cross-cutting work, pilot gates, build order, and known risks. It intentionally treats Phase 1 as a demo/pilot execution plan rather than a production readiness claim.
+
 ### 2026-04-26 — Step 6 complete (Anthropic AI client wrapper)
 
 Step 6 adds the first application-level AI boundary: the official Anthropic TypeScript SDK, a small `src/lib/ai` wrapper for non-streaming Messages API calls, per-node prompt contracts for the four planned AI nodes (`idp_generation`, `modality_recommender`, `ojt_recommender`, `coaching_brief`), and mocked tests that prove no live Anthropic call is required during CI.

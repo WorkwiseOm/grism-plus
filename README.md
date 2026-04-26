@@ -72,4 +72,4 @@ design/             — Stitch wireframes (.pen) for Phase 1+ product screens
 
 ## Phase milestones
 
-Phase progress is tracked in [`docs/PROGRESS.md`](docs/PROGRESS.md). Phase 1 (IDP engine, OJT recommender, coaching briefs) starts after Phase 0 closes — open Phase 0 work is in the Backlog section of that file.
+Phase progress is tracked in [`docs/PROGRESS.md`](docs/PROGRESS.md). Phase 1 execution scope is drafted in [`docs/PHASE_1_PLAN.md`](docs/PHASE_1_PLAN.md). Phase 1 (IDP engine, OJT recommender, coaching briefs) starts after Phase 0 closes — open Phase 0 work is in the Backlog section of the progress log.
