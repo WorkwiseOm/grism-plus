@@ -17,6 +17,8 @@ A reviewed IDP must surface enough context that Aisha doesn't have to bounce out
 - Which competencies are in play, current vs target proficiency, gap score.
 - What milestones and actions the author proposed, mapped to the eLearning / OJT / coaching
   catalogues where applicable.
+- Whether the proposed plan respects the 70/20/10 development blend: 70% experience, 20%
+  relationships, 10% formal learning, unless skill-type configuration justifies a different mix.
 
 ## Layout — two-pane
 
@@ -78,6 +80,18 @@ Two stacked cards:
 If `narrative_source = "template"`, show a small inline tag: "Generated from Arwa starter
 template (T-OPS-1)".
 
+## Review pane - 70/20/10 blend check
+
+Add a compact review card before the milestones list:
+
+- Experience: 70% - OJT, stretch work, field rotation, shadowing, manager-validated practice.
+- Relationships: 20% - coaching, mentoring, buddy/peer learning.
+- Formal: 10% - eLearning, classroom, workshop.
+
+Show a green "within guardrail" state when the plan is experience-led. If the plan is
+formal-learning-heavy, show an amber warning requiring the L&D admin to revise or record the
+skill-type rationale before approval.
+
 ## Review pane — milestones
 
 A vertical stack of milestone cards, one per `idp_milestones` row. Each card:
@@ -97,6 +111,8 @@ A vertical stack of milestone cards, one per `idp_milestones` row. Each card:
     Analysis Bootcamp" pulled from `elearning_catalogue` via `external_ref_id`); for coaching
     it's free text (e.g. "Pair with Senior Eng on next plant trip RCA")
   - Catalogue link icon (only on elearning/ojt actions) — opens catalogue entry in side drawer
+  - OJT rows should show expected workplace outcome, evidence required, and manager validation
+    status so OJT does not read as elapsed time only.
 
 If the IDP has 0 actions on a milestone, show a soft warn callout: "No actions specified on
 this milestone — author may have forgotten to attach activities."

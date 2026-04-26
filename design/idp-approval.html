@@ -100,6 +100,39 @@
   .action-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
   .action-row .title { font-size: 13px; }
   .action-row .src { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+  .blend-grid { display: grid; gap: 10px; }
+  .blend-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 48px;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .blend-row .label { font-weight: 600; }
+  .blend-row .track {
+    height: 9px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .blend-row .track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--info);
+  }
+  .blend-row.experience .track span { background: var(--ok); }
+  .blend-row.relationship .track span { background: var(--warn); }
+  .blend-row.formal .track span { background: var(--info); }
+  .blend-note {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--ok-bg);
+    border: 1px solid hsl(142 50% 75%);
+    color: hsl(142 71% 24%);
+    font-size: 12px;
+  }
 
   .footer-bar {
     position: sticky; bottom: 0;
@@ -346,6 +379,36 @@
               <dt>Coverage</dt><dd>20 competencies scored · 4 identified as gap (≥ 2 levels)</dd>
               <dt>Top gap</dt><dd>TECH-IND · Industrial Safety Fundamentals (L1 → L4)</dd>
             </dl>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>70/20/10 blend check</h3>
+            <span class="pill ok"><span class="dot"></span>within guardrail</span>
+          </div>
+          <div class="card-body">
+            <div class="blend-grid">
+              <div class="blend-row experience">
+                <div class="label">Experience</div>
+                <div class="track"><span style="width:70%;"></span></div>
+                <strong>70%</strong>
+              </div>
+              <div class="blend-row relationship">
+                <div class="label">Relationships</div>
+                <div class="track"><span style="width:20%;"></span></div>
+                <strong>20%</strong>
+              </div>
+              <div class="blend-row formal">
+                <div class="label">Formal</div>
+                <div class="track"><span style="width:10%;"></span></div>
+                <strong>10%</strong>
+              </div>
+            </div>
+            <div class="blend-note">
+              Formal learning is capped to the 10% layer; the majority of the plan is OJT,
+              field rotation, shadowing, and manager-validated stretch work.
+            </div>
           </div>
         </div>
 

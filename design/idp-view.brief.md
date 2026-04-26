@@ -18,6 +18,7 @@ complete, three are in progress, two haven't started. She needs to see at a glan
 3. Why this plan exists (narrative, gaps it addresses).
 4. How to update the system as she makes progress (mark action done, attach OJT evidence, log a
    coaching session).
+5. Whether the plan is staying inside the 70/20/10 development blend.
 
 A manager opening the same screen needs Salma's progress + the ability to leave a note, view OJT
 evidence, and reassign a milestone if the original action turns out to be unrealistic.
@@ -59,6 +60,17 @@ Worked example for Salma:
 
 A horizontal progress bar runs along the bottom of the hero, segmented by milestone so you can
 see which milestone is dragging.
+
+## 70/20/10 blend panel
+
+Place a compact card directly below the hero:
+
+- Experience 68% - OJT, stretch assignments, field rotation, workplace practice.
+- Relationships 22% - coaching, mentoring, peer/buddy learning.
+- Formal 10% - eLearning, classroom, workshop.
+
+State should read "blend healthy" when formal learning stays near the 10% layer. The purpose is
+to avoid presenting an eLearning-heavy plan as if it were operationalizing 70/20/10.
 
 ## "What's next" strip
 
@@ -123,6 +135,8 @@ When viewer role is `manager` and they manage this employee:
 - Milestone cards gain a "Reassign" link in the footer.
 - Action rows gain a "View OJT evidence" button when modality = ojt and status ∈
   {`evidence_submitted`, `validated`}.
+- OJT evidence rows show expected outcome, evidence requirement, manager validation status, and
+  whether the validation has contributed a skill-progression signal.
 - A small banner above the hero: "You're viewing this as Salma's manager. She can see your
   notes." — keeps it transparent.
 

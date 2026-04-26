@@ -12,6 +12,7 @@ Phase 1 turns the Phase 0 foundation into a usable talent-development workflow f
 2. L&D reviews and approves an IDP.
 3. Employees, managers, and coaches execute the plan through eLearning, OJT, and coaching actions.
 4. Progress, evidence, and activity stay auditable.
+5. IDP generation operationalizes the recognizable 70/20/10 development blend instead of defaulting to eLearning-heavy plans.
 
 Phase 1 is not the production hardening phase. It must still avoid architectural shortcuts that would make pilot hardening expensive later.
 
@@ -36,6 +37,34 @@ Do not include these in Phase 1 unless a pilot requires them:
 - SCORM/xAPI implementation.
 - Multi-assessment-provider support beyond the chosen Unberry path.
 - Production-scale observability, on-call, or incident runbooks.
+- Pre/post-work automation for ILT.
+- 30/60/90-day workshop reinforcement engine.
+- Peer learning circles and social-learning surfaces.
+- Succession pipeline visualization.
+- Coach-side session log linked to IDP milestones. Keep the manager-side AI coaching brief in Phase 1.
+
+## Grism Scope Alignment - 2026-04-26
+
+Source: `C:/Users/tariq/Downloads/TDEP_Phase1_Scope_Alignment.html`, provided by Grism for Tilqai review. Treat this as product feedback, not as permission to run deployment or cloud operations.
+
+Must land in Phase 1:
+
+- **70/20/10 blend logic in IDP generation.** The generator must enforce a canonical default of roughly 70% experience, 20% relationship-based development, and 10% formal learning, adjustable by skill type. Experience includes OJT, stretch assignments, field rotations, and similar work-based activity. Relationships include coaching, mentoring, and peer learning. Formal includes eLearning, classroom, and workshops.
+- **Multi-signal skill progression model.** The data model must capture skill-level evidence from assessment, OJT manager feedback, coaching feedback, and eLearning completion. Progression should use weights and a convergence rule so no single signal can advance a competency level alone.
+- **OJT task and evidence capture.** Phase 1 must represent OJT as outcome-bearing tasks tied to competencies, with manager validation and feedback records. OJT cannot be only elapsed time or a calendar tag.
+
+Phase 2 backlog from Grism feedback:
+
+- ILT pre/post-work automation.
+- 30/60/90-day workshop reinforcement.
+- Peer learning circles.
+- Succession pipeline view.
+- Social learning.
+- Coach-side session log linked to IDP milestones.
+
+Demo-data watch:
+
+- Before showing the wireframes to a prospective tenant, revise any side-panel or plan-summary metric that implies an inverse blend such as 70% eLearning / 20% OJT / 10% coaching. The demo should read closer to 70% experience / 20% relationships / 10% formal learning unless a skill-specific rationale says otherwise.
 
 ## Product Slices
 
@@ -77,6 +106,7 @@ Core screen:
 - Queue grouped by status: pending approval, draft, active, completed.
 - Filters for department, manager, gap category, modality mix, and risk/overdue state.
 - IDP review panel with employee role context, competency gaps, milestones, recommended actions, and narrative.
+- 70/20/10 blend summary showing experience, relationship, and formal-learning proportions before approval.
 - Approve, return for revision, or edit actions with confirmation where appropriate.
 
 Acceptance checks:
@@ -85,6 +115,7 @@ Acceptance checks:
 - Employee and manager cannot access the approval queue.
 - Approval writes audit_log rows through existing triggers.
 - Returned IDPs preserve prior version context.
+- L&D admin can see and challenge any plan that is formal-learning-heavy without skill-type rationale.
 
 ### Slice 3 - Employee IDP View
 
@@ -101,6 +132,7 @@ Core screen:
 
 - IDP hero summary: current role, target role, status, progress, target date.
 - "What's next" action strip.
+- 70/20/10 blend panel with experience, relationship, and formal-learning progress.
 - Milestone timeline with eLearning, OJT, and coaching actions.
 - Narrative tab.
 - Activity tab.
@@ -111,6 +143,7 @@ Acceptance checks:
 - Employee can see only their own IDPs.
 - Employee can update allowed progress fields only.
 - OJT evidence upload/submission flow is explicit and auditable.
+- OJT task rows show outcome, evidence requirement, manager validation status, and feedback status.
 - Empty state handles employees with no active IDP.
 
 ### Slice 4 - Manager Team and Coachee View
@@ -131,12 +164,14 @@ Core screen:
 - Action queue for pending approvals, overdue evidence validation, and coaching gaps.
 - Dense team table with IDP status, progress, last activity, and next action.
 - Right-side drawer or detail route for a selected direct report.
+- Evidence validation flow records manager feedback, not only approve/reject.
 
 Acceptance checks:
 
 - Manager sees only direct reports plus their own employee record.
 - Manager cannot access tenant-wide admin data.
 - Evidence validation and manager notes are visible to the employee where required.
+- Validated OJT evidence contributes a manager-feedback signal to skill progression.
 - Direct navigation to employee/admin pages still redirects correctly.
 
 ### Slice 5 - Framework Editor
@@ -190,10 +225,12 @@ Implementation rules:
 - Payloads must not contain direct identifiers rejected by `assertNoForbiddenPromptKeys()`.
 - Prompt inputs and model outputs must be logged at the right abstraction level without storing raw PII.
 - Live-call tests remain opt-in; CI uses mocks.
+- IDP generation prompts and validators must enforce the 70/20/10 default blend unless skill-type configuration overrides it.
 
 Acceptance checks:
 
 - IDP generation can produce a draft from a fixed, pseudonymised fixture.
+- Generated drafts include a machine-readable blend summary and do not default to formal-learning-heavy plans.
 - OJT recommender only sees filtered candidate summaries, not full catalogue tables.
 - Coaching brief does not include employee names, email addresses, tenant IDs, or employee IDs.
 - Failed AI calls write structured `error_log` rows with `ai_node`.
@@ -223,6 +260,7 @@ Acceptance checks:
 
 - Assessment import creates or updates competency scores deterministically.
 - Re-import is idempotent.
+- Assessment import writes one skill-progression signal and does not directly advance a competency level without convergence from other sources.
 - Cross-tenant assessment data cannot be read or written.
 - Provider failures do not block existing IDP screens.
 
@@ -268,6 +306,8 @@ Phase 1 must decide:
 - whether `coach_assignments` is required before pilot
 - whether framework versioning is normalized or JSONB-backed for MVP
 - whether activity feeds come from `audit_log`, explicit event tables, or both
+- whether to implement multi-signal progression as a new `skill_progression_events` table, explicit signal columns, or derived events from existing source tables
+- how to store skill-type-specific 70/20/10 blend overrides without weakening the default commercial promise
 
 ### Testing Strategy
 
@@ -300,22 +340,26 @@ Before any pilot user gets access:
 - Production client-IP source for rate limiting is verified.
 - Next.js dependency audit is addressed or risk-accepted with a written rationale.
 - Coach RLS is assignment-scoped, or coach login is disabled and documented.
+- 70/20/10 blend logic is enforced in IDP generation and visible in review screens.
+- OJT task/evidence validation creates skill-progression signals.
 - Anthropic account data-retention settings are verified.
 - Subprocessor register matches actual active services.
 - No demo credentials are stored in git, docs, issue trackers, or screenshots.
+- Demo IDP summaries do not show an inverted eLearning-heavy 70/20/10 split.
 
 ## Suggested Build Order
 
 1. Deploy and environment gates.
 2. Data loaders and app shell.
-3. L&D admin IDP approval queue.
-4. Employee IDP detail.
-5. Manager team rollup.
-6. AI-assisted draft generation behind an admin-only path.
-7. Framework editor.
-8. Unberry adapter/import path.
-9. Notifications and nudges.
-10. Pilot hardening pass.
+3. 70/20/10 blend model and multi-signal progression migration.
+4. L&D admin IDP approval queue.
+5. Employee IDP detail.
+6. Manager team rollup and OJT validation.
+7. AI-assisted draft generation behind an admin-only path.
+8. Framework editor.
+9. Unberry adapter/import path.
+10. Notifications and nudges.
+11. Pilot hardening pass.
 
 ## Known Risks
 
@@ -323,5 +367,5 @@ Before any pilot user gets access:
 - Current coach RLS is tenant-wide and must be fixed before coach exposure.
 - Framework editor may force schema changes if real versioning is required.
 - AI prompt quality cannot be evaluated from mocks alone; live-call evaluation needs a safe fixture set.
-- Next.js audit currently reports vulnerabilities that require a major-version path to resolve cleanly.
+- Current schema captures OJT evidence, assessment scores, and eLearning status, but not yet a weighted convergence rule across all four Grism-requested progression signals.
 - Current E2E tests share cloud state and will slow down as workflows grow.

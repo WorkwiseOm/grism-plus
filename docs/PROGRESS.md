@@ -2,6 +2,10 @@
 
 ## Phase 0 progress
 
+### 2026-04-26 - Grism Phase 1 scope feedback captured
+
+Reviewed Grism's `TDEP_Phase1_Scope_Alignment.html` feedback and updated Phase 1 planning/design artifacts. Phase 1 now explicitly includes 70/20/10 IDP blend logic, a multi-signal skill progression data model, and outcome-bearing OJT task/evidence/manager-validation flows. ILT pre/post-work, workshop reinforcement, peer learning circles, succession visualization, social learning, and coach-side session logs are tracked as Phase 2 unless pulled forward by pilot scope. See `docs/GRISM_PHASE1_SCOPE_ALIGNMENT.md`.
+
 ### 2026-04-26 - Step 9 local readiness refresh
 
 Local Step 9 readiness was rechecked after the Next 15 upgrade: lint, typecheck, tests, build, and `npm audit` all pass. `docs/STEP_9_DEPLOYMENT_GATES.md` now references the actual `subprocessors.reviewed_at` column, the README stack version matches Next 15, and `supabase/migrations/00012_activate_vercel_subprocessor.sql` is prepared but must not be applied until Vercel is live.

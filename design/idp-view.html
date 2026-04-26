@@ -49,6 +49,33 @@
   .seg-bar .seg.in-progress > span { background: var(--info); width: 60%; }
   .seg-bar .seg.not-started > span { background: var(--border-strong); width: 0; }
 
+  .blend-card {
+    display: grid;
+    grid-template-columns: 190px 1fr auto;
+    gap: 14px;
+    align-items: center;
+  }
+  .blend-card .headline { font-size: 13px; font-weight: 700; }
+  .blend-card .sub { color: var(--fg-muted); font-size: 12px; margin-top: 2px; }
+  .blend-bars { display: grid; gap: 7px; }
+  .blend-row {
+    display: grid;
+    grid-template-columns: 95px 1fr 42px;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .blend-row .track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .blend-row .track span { display: block; height: 100%; border-radius: inherit; }
+  .blend-row.experience .track span { background: var(--ok); }
+  .blend-row.relationship .track span { background: var(--warn); }
+  .blend-row.formal .track span { background: var(--info); }
+
   .next-strip {
     background: var(--bg);
     border: 1px solid var(--border);
@@ -239,6 +266,33 @@
           <div class="seg"><span style="width:80%;"></span></div>
           <div class="seg in-progress"><span></span></div>
           <div class="seg not-started"><span></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body blend-card">
+          <div>
+            <div class="headline">70/20/10 development blend</div>
+            <div class="sub">Experience-led IDP, adjustable by skill type.</div>
+          </div>
+          <div class="blend-bars">
+            <div class="blend-row experience">
+              <span>Experience</span>
+              <div class="track"><span style="width:68%;"></span></div>
+              <strong>68%</strong>
+            </div>
+            <div class="blend-row relationship">
+              <span>Relationships</span>
+              <div class="track"><span style="width:22%;"></span></div>
+              <strong>22%</strong>
+            </div>
+            <div class="blend-row formal">
+              <span>Formal</span>
+              <div class="track"><span style="width:10%;"></span></div>
+              <strong>10%</strong>
+            </div>
+          </div>
+          <span class="pill ok"><span class="dot"></span>blend healthy</span>
         </div>
       </div>
 

@@ -10,6 +10,8 @@ The design should help the team imagine the full product once Phase 1 and later 
 - Managers track team IDPs, overdue actions, evidence, and approval decisions.
 - Employees execute their IDP through eLearning, OJT, and coaching actions.
 - Coaches support only assigned coachees after assignment-scoped RLS is implemented.
+- IDP generation must visibly enforce a 70/20/10 blend: 70% experience, 20% relationships, 10% formal learning, adjustable per skill type.
+- Skill progression must be represented as multi-signal: assessment, OJT manager feedback, coaching feedback, and eLearning completion.
 
 ## Product Shape
 
@@ -40,7 +42,7 @@ Show six connected stages:
 
 1. Framework
 2. Assessment
-3. AI draft IDP
+3. 70/20/10 draft IDP
 4. Approval
 5. Execution
 6. Evidence
@@ -61,8 +63,8 @@ Show four role responsibilities:
 Include four wireframe mini-screens:
 
 1. L&D command center
-   - KPIs: pending IDPs, competencies, coverage
-   - list rows: review, AI, ready, audit
+   - KPIs: pending IDPs, 70/20/10 blend guard, four skill signals
+   - list rows: review, blend, ready, audit
 
 2. Manager team cockpit
    - KPIs: directs, blocked, average progress
@@ -82,9 +84,10 @@ Include four wireframe mini-screens:
 Include three implementation lanes:
 
 1. Phase 1: usable demo/pilot loop
-   - IDP engine and approval queue
+   - 70/20/10 IDP engine and approval queue
+   - Multi-signal skill progression model
    - Employee IDP workspace
-   - Manager team cockpit
+   - Manager team cockpit and OJT validation
    - Framework and catalogue management
 
 2. Pre-pilot hardening
@@ -106,6 +109,8 @@ Add a right rail with:
 - pending gates checklist
 - primary users list: Aisha, Khalid, Salma, Coach
 - design rule note: keep the final product quiet, operational, dense, and predictable
+
+Pending gates should include 70/20/10 blend logic, demo data correction, and multi-signal progression model in addition to deployment/security gates.
 
 ## Visual Direction
 
