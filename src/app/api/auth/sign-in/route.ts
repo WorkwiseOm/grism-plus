@@ -110,5 +110,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     metadata: null,
   })
 
+  await admin
+    .from("user_profiles")
+    .update({ last_activity_at: new Date().toISOString() })
+    .eq("id", data.user.id)
+    .is("deleted_at", null)
+
   return NextResponse.json({ ok: true }, { status: 200 })
 }
