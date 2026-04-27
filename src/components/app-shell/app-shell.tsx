@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { getCurrentEmployeeContext } from "@/lib/data/current-employee"
-import { AppSidebar } from "./app-sidebar"
+import { AppMobileNav, AppSidebar } from "./app-sidebar"
 import { AppTopBar } from "./app-top-bar"
 import { getNavItemsForRole } from "./nav-config"
 
@@ -42,9 +42,10 @@ export async function AppShell({ children }: AppShellProps): Promise<JSX.Element
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <AppTopBar displayName={displayName} subtitle={subtitle} />
+      <AppMobileNav sections={sections} />
       <div className="flex flex-1">
         <AppSidebar sections={sections} />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>
   )

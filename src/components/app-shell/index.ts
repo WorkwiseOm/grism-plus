@@ -1,5 +1,5 @@
 export { AppShell } from "./app-shell"
-export { AppSidebar } from "./app-sidebar"
+export { AppMobileNav, AppSidebar } from "./app-sidebar"
 export { AppTopBar } from "./app-top-bar"
 export {
   getNavItemsForRole,
