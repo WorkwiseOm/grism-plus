@@ -1,25 +1,32 @@
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { SignOutButton } from "@/components/auth/sign-out-button"
 import { requireRole } from "@/lib/auth/require-role"
 
 export default async function EmployeeHome() {
-  const { user } = await requireRole(["employee"])
+  await requireRole(["employee"])
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-50 p-4">
-      <h1 className="text-3xl font-bold">Employee home placeholder</h1>
-      <Card className="w-full max-w-md">
+    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+      <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        Employee
+      </h1>
+      <Card>
         <CardHeader>
-          <CardTitle>Signed in</CardTitle>
+          <CardTitle>Welcome</CardTitle>
+          <CardDescription>
+            Use the sidebar to open your IDP workspace.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-between">
-          <span className="text-sm text-slate-700">{user.email}</span>
-          <SignOutButton />
+        <CardContent className="text-sm text-slate-700">
+          <p>
+            Real product surfaces land in Phase 1 against the Stitch design
+            contracts in <code>design/stitch-phase1/</code>.
+          </p>
         </CardContent>
       </Card>
     </div>
