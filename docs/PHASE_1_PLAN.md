@@ -286,6 +286,10 @@ Implementation rules:
 
 ## Cross-Cutting Work
 
+### Phase 1 Development Model Schema
+
+The 70/20/10 and multi-signal progression schema direction is captured in [`PHASE_1_SCHEMA_PLAN.md`](PHASE_1_SCHEMA_PLAN.md). Treat that file as the starting point for the first Phase 1 migration rather than adding fields ad hoc while building screens.
+
 ### App Shell and Navigation
 
 Build a restrained enterprise app shell:

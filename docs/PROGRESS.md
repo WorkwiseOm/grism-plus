@@ -2,6 +2,10 @@
 
 ## Phase 0 progress
 
+### 2026-04-27 - Phase 1 schema planning started
+
+Added `docs/PHASE_1_SCHEMA_PLAN.md` to translate Grism's 70/20/10 and multi-signal progression feedback into a concrete migration direction. No SQL migration or cloud change was applied. The plan keeps existing Phase 0 tables intact and proposes a new Phase 1 development model layer: blend policies, IDP blend snapshots, action blend allocations, progression rules, progression events, and rollups.
+
 ### 2026-04-27 — Step 9 partial: Vercel smoke deploy under personal scope
 
 First Vercel deploy completed under personal scope `tas770-9352s-projects/grism-plus`. `vercel deploy` (no `--prod`) auto-promoted to production on a fresh project, claiming the `grism-plus.vercel.app` alias — documented as expected Vercel CLI behaviour in `docs/STEP_9_DEPLOYMENT_GATES.md` § "Vercel deploy command behaviour".
