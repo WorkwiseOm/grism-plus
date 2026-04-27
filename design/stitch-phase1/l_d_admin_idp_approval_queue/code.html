@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Grism Plus - IDP Approval Queue</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#5247e6",
+          "background-light": "#F8FAFC",
+          "background-dark": "#121121",
+          "surface": "#FFFFFF",
+          "text-main": "#0F172A",
+          "muted": "#64748B",
+          "border-color": "#E2E8F0",
+          "exp-70": "#10B981",
+          "rel-20": "#F59E0B",
+          "form-10": "#3B82F6",
+          "row-hover": "#F8FAFC",
+          "row-active": "#F1F5F9",
+          "pill-pending-bg": "#FEF3C7",
+          "pill-pending-text": "#D97706"
+        },
+        fontFamily: {
+          "display": ["Space Grotesk", "sans-serif"],
+          "body": ["IBM Plex Sans", "sans-serif"],
+          "mono": ["IBM Plex Mono", "monospace"]
+        },
+        borderRadius: {
+          "none": "0px",
+          "sm": "4px",
+          "md": "6px",
+          "lg": "8px"
+        },
+      },
+    },
+  }
+</script>
+<style>
+  /* Custom scrollbar for dense data grids */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F8FAFC;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+  }
+
+  /* Side panel animation */
+  .slide-in {
+    animation: slideInRight 300ms ease-out forwards;
+  }
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+</style>
+</head>
+<body class="bg-background-light font-body text-text-main h-screen flex flex-col overflow-hidden antialiased">
+<!-- Shared TopNavBar -->
+<div class="relative flex w-full flex-col bg-surface group/design-root border-b border-border-color shrink-0">
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-8 flex flex-1 justify-center">
+<div class="layout-content-container flex flex-col w-full flex-1">
+<header class="flex items-center justify-between whitespace-nowrap px-4 py-3">
+<div class="flex items-center gap-4 text-text-main">
+<div class="size-5 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_330)">
+<path clip-rule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill="currentColor" fill-rule="evenodd"></path>
+</g>
+<defs>
+<clippath id="clip0_6_330"><rect fill="white" height="48" width="48"></rect></clippath>
+</defs>
+</svg>
+</div>
+<h2 class="text-text-main text-lg font-display font-bold leading-tight tracking-[-0.015em]">Grism Plus</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="flex items-center gap-9">
+<a class="text-muted hover:text-text-main text-sm font-medium leading-normal transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold leading-normal border-b-2 border-primary pb-0.5" href="#">Approval Queue</a>
+<a class="text-muted hover:text-text-main text-sm font-medium leading-normal transition-colors" href="#">Framework Editor</a>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-border-color" data-alt="minimalist user avatar geometric pattern blue tone" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBrHsB-e-9Xlk0isy24utlO4BxxpRz_qX3OiuGi2Jy5uVFgBBIQbz4g-262whxabUjsYX5wTn4QzI7KnyqKjAVVWjds827ZmtVvtrktlEJAmGqv7wLKd2gtTGAiPFqc8nJAepSeJatcNmW57SKvwuSVfzVQuj2W0IdNFB4_k4oF4w0Q7wB746Qm9HhWFcsdmdqJK-NdhypVTXwGbUOgBuAKG6Nb_5qqp6DGfv71acxOVOvZA2lQTGcotbVB_Wnrh4cfrhYO9dLKYSIC");'></div>
+</div>
+</header>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Split-Pane Content -->
+<main class="flex flex-1 overflow-hidden">
+<!-- Left Pane: Data Grid (60%) -->
+<section class="flex flex-col w-[60%] border-r border-border-color bg-surface z-10 relative">
+<!-- Queue Header -->
+<div class="px-6 py-4 border-b border-border-color flex justify-between items-center bg-surface shrink-0">
+<div class="flex flex-col gap-1">
+<h1 class="text-text-main font-display text-[20px] font-semibold leading-tight">IDP Approval Queue</h1>
+<p class="text-muted text-[14px] font-normal leading-tight">Review and approve pending Individual Development Plans.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-muted font-mono text-[12px]">3 PENDING</span>
+</div>
+</div>
+<!-- Table Container -->
+<div class="flex-1 overflow-auto bg-surface">
+<table class="w-full text-left border-collapse whitespace-nowrap">
+<thead class="sticky top-0 bg-surface z-20 border-b border-border-color shadow-[0_1px_0_0_#E2E8F0]">
+<tr>
+<th class="px-6 py-2 text-muted font-body text-[12px] font-medium leading-tight">Employee</th>
+<th class="px-4 py-2 text-muted font-body text-[12px] font-medium leading-tight">Role Target</th>
+<th class="px-4 py-2 text-muted font-body text-[12px] font-medium leading-tight">70/20/10 Ratio</th>
+<th class="px-4 py-2 text-muted font-body text-[12px] font-medium leading-tight">Submitted Date</th>
+<th class="px-6 py-2 text-muted font-body text-[12px] font-medium leading-tight text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-body text-[14px]">
+<!-- Row 1 (Active) -->
+<tr class="h-[32px] border-b border-border-color cursor-pointer bg-row-active hover:bg-row-active transition-colors group">
+<td class="px-6 py-1">
+<div class="flex items-center gap-2">
+<span class="font-medium text-text-main">Jane Doe</span>
+<span class="font-mono text-[12px] text-muted">EMP-4092</span>
+</div>
+</td>
+<td class="px-4 py-1 text-text-main">Senior Engineer</td>
+<td class="px-4 py-1">
+<div class="flex items-center gap-2">
+<div class="w-[40px] h-[8px] rounded-sm flex overflow-hidden border border-border-color">
+<div class="bg-exp-70" style="width: 70%;"></div>
+<div class="bg-rel-20" style="width: 20%;"></div>
+<div class="bg-form-10" style="width: 10%;"></div>
+</div>
+</div>
+</td>
+<td class="px-4 py-1 font-mono text-[12px] text-muted">2023-10-25 14:32</td>
+<td class="px-6 py-1 text-right">
+<span class="inline-flex items-center justify-center h-[20px] px-2 rounded-sm bg-pill-pending-bg text-pill-pending-text text-[12px] font-medium tracking-wide">Pending</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-[32px] border-b border-border-color cursor-pointer bg-surface hover:bg-row-hover transition-colors group">
+<td class="px-6 py-1">
+<div class="flex items-center gap-2">
+<span class="font-medium text-text-main">John Smith</span>
+<span class="font-mono text-[12px] text-muted">EMP-8211</span>
+</div>
+</td>
+<td class="px-4 py-1 text-text-main">Product Manager</td>
+<td class="px-4 py-1">
+<div class="flex items-center gap-2">
+<div class="w-[40px] h-[8px] rounded-sm flex overflow-hidden border border-border-color opacity-70 group-hover:opacity-100 transition-opacity">
+<div class="bg-exp-70" style="width: 60%;"></div>
+<div class="bg-rel-20" style="width: 30%;"></div>
+<div class="bg-form-10" style="width: 10%;"></div>
+</div>
+</div>
+</td>
+<td class="px-4 py-1 font-mono text-[12px] text-muted">2023-10-26 09:15</td>
+<td class="px-6 py-1 text-right">
+<span class="inline-flex items-center justify-center h-[20px] px-2 rounded-sm bg-pill-pending-bg text-pill-pending-text text-[12px] font-medium tracking-wide">Pending</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-[32px] border-b border-border-color cursor-pointer bg-surface hover:bg-row-hover transition-colors group">
+<td class="px-6 py-1">
+<div class="flex items-center gap-2">
+<span class="font-medium text-text-main">Alice Jones</span>
+<span class="font-mono text-[12px] text-muted">EMP-1055</span>
+</div>
+</td>
+<td class="px-4 py-1 text-text-main">UX Lead</td>
+<td class="px-4 py-1">
+<div class="flex items-center gap-2">
+<div class="w-[40px] h-[8px] rounded-sm flex overflow-hidden border border-border-color opacity-70 group-hover:opacity-100 transition-opacity">
+<div class="bg-exp-70" style="width: 80%;"></div>
+<div class="bg-rel-20" style="width: 10%;"></div>
+<div class="bg-form-10" style="width: 10%;"></div>
+</div>
+</div>
+</td>
+<td class="px-4 py-1 font-mono text-[12px] text-muted">2023-10-27 16:45</td>
+<td class="px-6 py-1 text-right">
+<span class="inline-flex items-center justify-center h-[20px] px-2 rounded-sm bg-pill-pending-bg text-pill-pending-text text-[12px] font-medium tracking-wide">Pending</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Right Pane: Contextual Review Panel (40%) -->
+<section class="flex flex-col w-[40%] bg-background-light slide-in z-20 shadow-[-1px_0_0_0_#E2E8F0]">
+<!-- Panel Header -->
+<div class="px-6 py-5 border-b border-border-color bg-surface shrink-0">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="font-display text-[24px] font-bold text-text-main leading-tight mb-1">Jane Doe</h2>
+<p class="font-body text-[14px] text-muted flex items-center gap-2">
+            Targeting: <span class="font-medium text-text-main">Senior Engineer</span>
+<span class="text-border-color">•</span>
+<span class="font-mono text-[12px]">IDP-2023-Q4-089</span>
+</p>
+</div>
+<span class="inline-flex items-center justify-center h-[20px] px-2 rounded-sm bg-pill-pending-bg text-pill-pending-text text-[12px] font-medium tracking-wide mt-1">Pending Review</span>
+</div>
+<div class="grid grid-cols-3 gap-4 border border-border-color p-3 rounded-none bg-background-light">
+<div>
+<p class="text-[12px] text-muted mb-1">70% Experience</p>
+<p class="font-mono text-[14px] font-medium text-exp-70">140 hrs</p>
+</div>
+<div>
+<p class="text-[12px] text-muted mb-1">20% Relationship</p>
+<p class="font-mono text-[14px] font-medium text-rel-20">40 hrs</p>
+</div>
+<div>
+<p class="text-[12px] text-muted mb-1">10% Formal</p>
+<p class="font-mono text-[14px] font-medium text-form-10">20 hrs</p>
+</div>
+</div>
+</div>
+<!-- Panel Content (Scrollable) -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- OJT Artifacts -->
+<div>
+<h3 class="font-display text-[16px] font-semibold text-text-main mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-muted" data-icon="inventory_2">inventory_2</span>
+          Proposed OJT Artifacts
+        </h3>
+<div class="space-y-3">
+<div class="border border-border-color bg-surface p-3 hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<p class="font-medium text-[14px] text-text-main group-hover:text-primary transition-colors">Data Pipeline Refactoring</p>
+<span class="font-mono text-[12px] text-muted">EXP-70</span>
+</div>
+<p class="text-[12px] text-muted mb-2">Lead the migration of legacy ETL jobs to standard framework.</p>
+<div class="flex items-center gap-2 text-[12px] text-primary">
+<span class="material-symbols-outlined text-[14px]" data-icon="link">link</span>
+<span>View Jira Epic</span>
+</div>
+</div>
+<div class="border border-border-color bg-surface p-3 hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<p class="font-medium text-[14px] text-text-main group-hover:text-primary transition-colors">Mentorship: Junior Devs</p>
+<span class="font-mono text-[12px] text-muted">REL-20</span>
+</div>
+<p class="text-[12px] text-muted mb-2">Conduct weekly code pairing sessions for Q4.</p>
+<div class="flex items-center gap-2 text-[12px] text-primary">
+<span class="material-symbols-outlined text-[14px]" data-icon="description">description</span>
+<span>View Curriculum Draft</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Competency Alignment -->
+<div>
+<h3 class="font-display text-[16px] font-semibold text-text-main mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-muted" data-icon="radar">radar</span>
+          Competency Alignment
+        </h3>
+<div class="border border-border-color bg-surface divide-y divide-border-color">
+<div class="p-3 flex justify-between items-center">
+<span class="text-[14px] text-text-main">System Architecture</span>
+<span class="font-mono text-[12px] px-2 py-1 bg-background-light text-muted border border-border-color">L3 -&gt; L4</span>
+</div>
+<div class="p-3 flex justify-between items-center">
+<span class="text-[14px] text-text-main">Technical Leadership</span>
+<span class="font-mono text-[12px] px-2 py-1 bg-background-light text-muted border border-border-color">L2 -&gt; L3</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Block (Sticky Bottom) -->
+<div class="px-6 py-4 border-t border-border-color bg-surface shrink-0">
+<div class="flex flex-col gap-3">
+<button class="w-full h-[40px] flex items-center justify-center gap-2 bg-primary hover:bg-[#4338ca] text-surface font-display font-semibold text-[14px] rounded-sm transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle">check_circle</span>
+          Approve IDP
+        </button>
+<button class="w-full h-[40px] flex items-center justify-center gap-2 bg-surface hover:bg-background-light text-text-main border border-border-color font-display font-medium text-[14px] rounded-sm transition-colors">
+<span class="material-symbols-outlined text-[18px] text-muted" data-icon="edit_note">edit_note</span>
+          Request Changes
+        </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Mobile/Tablet Fallback -->
+<div class="hidden max-lg:flex fixed inset-0 bg-surface z-50 flex-col items-center justify-center text-center p-6">
+<span class="material-symbols-outlined text-[48px] text-primary mb-4" data-icon="desktop_windows">desktop_windows</span>
+<h2 class="font-display text-[24px] font-bold text-text-main mb-2">Desktop Required</h2>
+<p class="font-body text-[14px] text-muted max-w-sm">The IDP Approval Queue requires a high-density display. Please view this application on a desktop monitor.</p>
+</div>
+</body></html>

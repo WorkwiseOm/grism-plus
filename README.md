@@ -4,9 +4,9 @@ Multi-tenant talent development execution platform — joint Tilqai × Grism pro
 
 ## Status
 
-**Phase 0 — Foundation.** Auth, security posture, RLS, demo seed, middleware, CI, and the AI client boundary are landed; first Vercel deploy is still gated. **Not production ready.** No pilot tenants are connected.
+**Phase 0 — Foundation.** Auth, security posture, RLS, demo seed, middleware, CI, and the AI client boundary are landed; a first Vercel smoke deploy was completed under a personal scope, while the intended team-scope deploy and subprocessor activation remain gated. **Not production ready.** No pilot tenants are connected.
 
-The current `/admin`, `/manager`, and `/employee` landing pages are placeholders. Real Phase 1 product screens require a Stitch wireframe in `/design` before code is written — see [`CLAUDE.md`](CLAUDE.md) → "UI design protocol".
+The current `/admin`, `/manager`, and `/employee` landing pages are placeholders. Real Phase 1 product screens require a reviewed Stitch design artifact in [`design/`](design/) before code is written. The current Phase 1 Stitch snapshot is in [`design/stitch-phase1/`](design/stitch-phase1/) — see [`CLAUDE.md`](CLAUDE.md) -> "UI design protocol".
 
 ## Stack
 
@@ -67,7 +67,8 @@ scripts/            — seed scripts (test user, demo fixture, schema verifier)
 tests/              — Vitest suites (unit + opt-in E2E)
 docs/               — security, env reference, progress log, subprocessors,
                        OJT reference, module library
-design/             — Stitch wireframes (.pen) for Phase 1+ product screens
+design/             — Stitch briefs, reviewed design snapshots, and static
+                       wireframes for Phase 1+ product screens
 ```
 
 ## Phase milestones

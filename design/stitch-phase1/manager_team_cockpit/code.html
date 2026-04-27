@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Manager Team Cockpit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#4F46E5",
+          "background-light": "#F8FAFC",
+          "background-dark": "#121121",
+          "surface": "#FFFFFF",
+          "text-main": "#0F172A",
+          "muted": "#64748B",
+          "border-color": "#E2E8F0",
+          "exp-70": "#10B981",
+          "rel-20": "#F59E0B",
+          "form-10": "#3B82F6",
+          "error": "#EF4444"
+        },
+        fontFamily: {
+          "display": ["Space Grotesk", "sans-serif"],
+          "body": ["IBM Plex Sans", "sans-serif"],
+          "mono": ["IBM Plex Mono", "monospace"]
+        },
+        borderRadius: {
+          "none": "0px",
+          "DEFAULT": "4px",
+          "sm": "2px",
+          "md": "4px",
+          "lg": "6px",
+          "xl": "8px",
+          "full": "9999px"
+        },
+        boxShadow: {
+          "none": "none",
+        }
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+  }
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .font-mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Custom scrollbar for panels */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+  }
+</style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-background-light">
+<!-- TopNavBar Shared Component -->
+<div class="relative flex h-auto w-full flex-col bg-surface group/design-root overflow-x-hidden shrink-0 border-b border-border-color font-body">
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-8 flex flex-1 justify-center py-0">
+<div class="layout-content-container flex flex-col w-full flex-1 max-w-[1440px]">
+<header class="flex items-center justify-between whitespace-nowrap px-0 py-3">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-text-main">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-text-main text-xl font-bold leading-tight tracking-[-0.015em] font-display">Grism Plus</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-muted hover:text-text-main cursor-pointer px-2 py-1">
+<span class="material-symbols-outlined text-[20px]" data-icon="house">house</span>
+<span class="text-sm font-medium">Dashboard</span>
+</div>
+<div class="flex items-center gap-2 text-primary bg-primary/10 rounded px-3 py-1.5 border border-primary/20">
+<span class="material-symbols-outlined text-[20px]" data-icon="users" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-sm font-medium font-display">Team Cockpit</span>
+</div>
+<div class="flex items-center gap-2 text-muted hover:text-text-main cursor-pointer px-2 py-1">
+<span class="material-symbols-outlined text-[20px]" data-icon="folder">folder</span>
+<span class="text-sm font-medium">IDP Workspace</span>
+</div>
+<div class="flex items-center gap-2 text-muted hover:text-text-main cursor-pointer px-2 py-1">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_tree">account_tree</span>
+<span class="text-sm font-medium">Framework Editor</span>
+</div>
+</div>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<div class="relative w-64 h-8">
+<span class="material-symbols-outlined absolute left-2.5 top-1.5 text-muted text-[18px]" data-icon="search">search</span>
+<input class="w-full h-full bg-background-light border border-border-color text-sm pl-9 pr-3 text-text-main placeholder:text-muted focus:outline-none focus:border-primary rounded-none" placeholder="Search IDPs, Skills..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative cursor-pointer text-muted hover:text-text-main">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<div class="absolute top-0 right-0 size-2 rounded-full bg-error border border-surface"></div>
+</div>
+<div class="h-8 w-8 bg-border-color flex items-center justify-center text-sm font-medium text-text-main rounded-none border border-border-color cursor-pointer">
+      JD
+    </div>
+</div>
+</div>
+</header>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Application Area -->
+<div class="flex-1 flex overflow-hidden relative max-w-[1440px] mx-auto w-full">
+<!-- Left Column: Urgent Action Queue -->
+<div class="w-[320px] shrink-0 border-r border-border-color bg-surface flex flex-col h-full">
+<div class="h-12 border-b border-border-color flex items-center justify-between px-4 bg-background-light/50">
+<h3 class="font-display font-semibold text-sm uppercase tracking-wider text-text-main">Urgent Queue</h3>
+<span class="bg-error/10 text-error text-[10px] font-mono px-2 py-0.5 rounded border border-error/20">3 PENDING</span>
+</div>
+<div class="flex-1 overflow-y-auto p-2 space-y-1">
+<!-- Queue Item Active -->
+<div class="h-12 w-full flex items-center px-3 border border-primary bg-primary/5 cursor-pointer relative group">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary"></div>
+<div class="size-2 rounded-full bg-error shrink-0 mr-3"></div>
+<div class="flex-1 min-w-0">
+<div class="text-sm font-medium text-text-main truncate">Data Pipeline Optimization</div>
+<div class="text-[11px] text-muted truncate font-mono">OJT Sign-off • S. Chen</div>
+</div>
+<span class="material-symbols-outlined text-muted text-[16px] opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Queue Item -->
+<div class="h-12 w-full flex items-center px-3 border border-transparent hover:border-border-color hover:bg-background-light cursor-pointer group">
+<div class="size-2 rounded-full bg-error shrink-0 mr-3"></div>
+<div class="flex-1 min-w-0">
+<div class="text-sm font-medium text-text-main truncate">Client Discovery Call</div>
+<div class="text-[11px] text-muted truncate font-mono">Feedback Req • M. Davis</div>
+</div>
+</div>
+<!-- Queue Item -->
+<div class="h-12 w-full flex items-center px-3 border border-transparent hover:border-border-color hover:bg-background-light cursor-pointer group">
+<div class="size-2 rounded-full bg-error shrink-0 mr-3"></div>
+<div class="flex-1 min-w-0">
+<div class="text-sm font-medium text-text-main truncate">Q3 OKR Planning Prep</div>
+<div class="text-[11px] text-muted truncate font-mono">Goal Adjust • A. Patel</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle Column: Team Rollup -->
+<div class="flex-1 flex flex-col bg-surface h-full min-w-[500px]">
+<div class="h-12 border-b border-border-color flex items-center justify-between px-6 bg-background-light/50">
+<h3 class="font-display font-semibold text-sm uppercase tracking-wider text-text-main">Team Rollup</h3>
+<div class="flex gap-2">
+<button class="h-7 px-3 text-[11px] font-medium border border-border-color bg-surface hover:bg-background-light text-text-main rounded-none flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="filter_list">filter_list</span> Filter
+        </button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-border-color bg-background-light/30">
+<th class="py-2.5 px-6 text-[11px] font-mono text-muted font-normal w-[25%]">EMPLOYEE</th>
+<th class="py-2.5 px-6 text-[11px] font-mono text-muted font-normal w-[40%]">70/20/10 PROGRESSION</th>
+<th class="py-2.5 px-6 text-[11px] font-mono text-muted font-normal w-[20%]">STATUS</th>
+<th class="py-2.5 px-6 text-[11px] font-mono text-muted font-normal text-right w-[15%]">ACTION</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-color">
+<!-- Row 1 -->
+<tr class="hover:bg-background-light/50 transition-colors group h-14">
+<td class="py-3 px-6 align-middle">
+<div class="flex items-center gap-3">
+<div class="size-6 bg-border-color rounded-none flex items-center justify-center text-[10px] font-medium text-text-main">SC</div>
+<span class="text-sm font-medium text-text-main">Sarah Chen</span>
+</div>
+</td>
+<td class="py-3 px-6 align-middle">
+<div class="w-full flex gap-1 h-2">
+<div class="bg-exp-70 h-full w-[65%]" title="Experience: 65%"></div>
+<div class="bg-rel-20 h-full w-[20%]" title="Relationships: 20%"></div>
+<div class="bg-form-10 h-full w-[15%]" title="Formal: 15%"></div>
+</div>
+<div class="flex justify-between mt-1 text-[10px] font-mono text-muted">
+<span>OJT: 42/60h</span>
+<span>82% Overall</span>
+</div>
+</td>
+<td class="py-3 px-6 align-middle">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-warning/10 border border-warning/20 text-rel-20 text-[11px] font-medium">
+<span class="size-1.5 rounded-full bg-rel-20"></span> Blocked: Review
+              </span>
+</td>
+<td class="py-3 px-6 align-middle text-right">
+<button class="text-[11px] font-medium text-primary hover:text-primary/80 opacity-0 group-hover:opacity-100 transition-opacity">Drill In →</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-background-light/50 transition-colors group h-14">
+<td class="py-3 px-6 align-middle">
+<div class="flex items-center gap-3">
+<div class="size-6 bg-border-color rounded-none flex items-center justify-center text-[10px] font-medium text-text-main">MD</div>
+<span class="text-sm font-medium text-text-main">Marcus Davis</span>
+</div>
+</td>
+<td class="py-3 px-6 align-middle">
+<div class="w-full flex gap-1 h-2">
+<div class="bg-exp-70 h-full w-[40%]" title="Experience: 40%"></div>
+<div class="bg-rel-20 h-full w-[40%]" title="Relationships: 40%"></div>
+<div class="bg-border-color h-full w-[20%]" title="Formal: 0%"></div>
+</div>
+<div class="flex justify-between mt-1 text-[10px] font-mono text-muted">
+<span>OJT: 18/45h</span>
+<span>45% Overall</span>
+</div>
+</td>
+<td class="py-3 px-6 align-middle">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-success/10 border border-success/20 text-exp-70 text-[11px] font-medium">
+<span class="size-1.5 rounded-full bg-exp-70"></span> On Track
+              </span>
+</td>
+<td class="py-3 px-6 align-middle text-right">
+<button class="text-[11px] font-medium text-primary hover:text-primary/80 opacity-0 group-hover:opacity-100 transition-opacity">Drill In →</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-background-light/50 transition-colors group h-14">
+<td class="py-3 px-6 align-middle">
+<div class="flex items-center gap-3">
+<div class="size-6 bg-border-color rounded-none flex items-center justify-center text-[10px] font-medium text-text-main">AP</div>
+<span class="text-sm font-medium text-text-main">Aisha Patel</span>
+</div>
+</td>
+<td class="py-3 px-6 align-middle">
+<div class="w-full flex gap-1 h-2">
+<div class="bg-exp-70 h-full w-[85%]" title="Experience: 85%"></div>
+<div class="bg-rel-20 h-full w-[10%]" title="Relationships: 10%"></div>
+<div class="bg-form-10 h-full w-[5%]" title="Formal: 5%"></div>
+</div>
+<div class="flex justify-between mt-1 text-[10px] font-mono text-muted">
+<span>OJT: 55/60h</span>
+<span>92% Overall</span>
+</div>
+</td>
+<td class="py-3 px-6 align-middle">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-warning/10 border border-warning/20 text-rel-20 text-[11px] font-medium">
+<span class="size-1.5 rounded-full bg-rel-20"></span> Needs Adj.
+              </span>
+</td>
+<td class="py-3 px-6 align-middle text-right">
+<button class="text-[11px] font-medium text-primary hover:text-primary/80 opacity-0 group-hover:opacity-100 transition-opacity">Drill In →</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Validation Side-Panel (Triggered state) -->
+<div class="absolute top-0 bottom-0 right-[300px] w-[400px] bg-surface border-l border-border-color shadow-[-4px_0_24px_rgba(0,0,0,0.05)] z-20 flex flex-col transition-transform duration-300 transform translate-x-0">
+<!-- Header -->
+<div class="h-16 border-b border-border-color flex items-center justify-between px-6 bg-surface shrink-0">
+<div>
+<h2 class="font-display font-semibold text-base text-text-main">Review Evidence</h2>
+<div class="text-[11px] font-mono text-muted">ID: OJT-8924 • Sarah Chen</div>
+</div>
+<button class="text-muted hover:text-text-main">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Content Scrollable -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Context -->
+<div>
+<div class="text-[10px] font-mono text-muted mb-1 uppercase tracking-wider">Competency Target</div>
+<h3 class="text-sm font-medium text-text-main mb-2">Data Pipeline Optimization (L3)</h3>
+<p class="text-sm text-muted leading-relaxed">
+          "Successfully migrated legacy ETL batch processes to real-time streaming using Kafka, reducing data latency by 45% for the marketing analytics dashboard."
+        </p>
+</div>
+<!-- Artifact Embed (Simulated) -->
+<div class="border border-border-color rounded-none bg-background-light/50 p-4">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-muted" data-icon="link">link</span>
+<span class="text-xs font-mono font-medium">PR #4892: ETL Migration</span>
+</div>
+<span class="text-[10px] bg-surface border border-border-color px-1.5 py-0.5 rounded-sm">GitHub</span>
+</div>
+<div class="h-20 bg-surface border border-border-color border-dashed flex items-center justify-center text-xs text-muted">
+          External Artifact Viewer Placeholder
+        </div>
+</div>
+<!-- Rubric Grading -->
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="text-[10px] font-mono text-muted uppercase tracking-wider">Validation Rubric</div>
+<div class="text-[10px] font-mono text-primary">Required: Level 3+</div>
+</div>
+<div class="space-y-4">
+<!-- Criterion 1 -->
+<div>
+<div class="text-xs font-medium text-text-main mb-2">Technical Execution</div>
+<div class="flex w-full h-8 border border-border-color rounded-sm overflow-hidden">
+<button class="flex-1 text-xs font-mono border-r border-border-color hover:bg-background-light transition-colors text-muted">1</button>
+<button class="flex-1 text-xs font-mono border-r border-border-color hover:bg-background-light transition-colors text-muted">2</button>
+<button class="flex-1 text-xs font-mono border-r border-border-color bg-primary text-surface font-medium">3</button>
+<button class="flex-1 text-xs font-mono border-r border-border-color hover:bg-background-light transition-colors text-muted">4</button>
+<button class="flex-1 text-xs font-mono hover:bg-background-light transition-colors text-muted">5</button>
+</div>
+<div class="text-[10px] text-muted mt-1 text-center">Demonstrates functional implementation with minor oversight.</div>
+</div>
+<!-- Criterion 2 -->
+<div>
+<div class="text-xs font-medium text-text-main mb-2">Business Impact</div>
+<div class="flex w-full h-8 border border-border-color rounded-sm overflow-hidden">
+<button class="flex-1 text-xs font-mono border-r border-border-color hover:bg-background-light transition-colors text-muted">1</button>
+<button class="flex-1 text-xs font-mono border-r border-border-color hover:bg-background-light transition-colors text-muted">2</button>
+<button class="flex-1 text-xs font-mono border-r border-border-color hover:bg-background-light transition-colors text-muted">3</button>
+<button class="flex-1 text-xs font-mono border-r border-border-color bg-primary text-surface font-medium">4</button>
+<button class="flex-1 text-xs font-mono hover:bg-background-light transition-colors text-muted">5</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Notes -->
+<div>
+<label class="text-[10px] font-mono text-muted mb-1 uppercase tracking-wider block">Manager Notes (Optional)</label>
+<textarea class="w-full h-20 border border-border-color bg-surface text-sm p-2 rounded-none focus:outline-none focus:border-primary resize-none placeholder:text-muted" placeholder="Add feedback for Sarah..."></textarea>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="p-4 border-t border-border-color bg-background-light/30 flex gap-3 shrink-0">
+<button class="flex-1 h-10 border border-border-color bg-surface text-text-main text-sm font-medium hover:bg-background-light transition-colors rounded-sm">Request Changes</button>
+<button class="flex-1 h-10 bg-primary text-surface text-sm font-medium hover:bg-primary/90 transition-colors rounded-sm flex items-center justify-center gap-2">
+        Certify Validation
+      </button>
+</div>
+</div>
+<!-- Right Column: Progression Radar -->
+<div class="w-[300px] shrink-0 border-l border-border-color bg-background-light/30 flex flex-col h-full z-10 relative">
+<div class="h-12 border-b border-border-color flex items-center px-4 bg-background-light/50">
+<h3 class="font-display font-semibold text-sm uppercase tracking-wider text-text-main">Progression Radar</h3>
+</div>
+<div class="flex-1 p-4 flex flex-col items-center justify-center gap-6">
+<!-- Radar Chart Placeholder (CSS constructed) -->
+<div class="relative size-48 opacity-80">
+<!-- Grid lines -->
+<div class="absolute inset-0 rounded-full border border-border-color"></div>
+<div class="absolute inset-[15%] rounded-full border border-border-color"></div>
+<div class="absolute inset-[30%] rounded-full border border-border-color"></div>
+<div class="absolute inset-[45%] rounded-full border border-border-color"></div>
+<!-- Axes -->
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-full h-[1px] bg-border-color"></div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center rotate-45">
+<div class="w-full h-[1px] bg-border-color"></div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center -rotate-45">
+<div class="w-full h-[1px] bg-border-color"></div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center rotate-90">
+<div class="w-full h-[1px] bg-border-color"></div>
+</div>
+<!-- Data Polygon (Simulated with clip-path for structural feel) -->
+<div class="absolute inset-0 bg-primary/20 border border-primary z-10" style="clip-path: polygon(50% 10%, 80% 30%, 90% 60%, 70% 85%, 30% 90%, 15% 70%, 20% 35%);"></div>
+<!-- Labels -->
+<span class="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-muted uppercase">Tech</span>
+<span class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-muted uppercase">Ops</span>
+<span class="absolute top-1/2 -right-6 -translate-y-1/2 text-[9px] font-mono text-muted uppercase">Comms</span>
+<span class="absolute top-1/2 -left-8 -translate-y-1/2 text-[9px] font-mono text-muted uppercase">Ldrshp</span>
+</div>
+<div class="w-full space-y-3 mt-4">
+<div class="flex justify-between items-center text-xs">
+<span class="text-text-main font-medium">Coverage Density</span>
+<span class="font-mono text-muted">68%</span>
+</div>
+<div class="h-1.5 w-full bg-border-color rounded-none overflow-hidden">
+<div class="h-full bg-text-main w-[68%]"></div>
+</div>
+<div class="pt-4 border-t border-border-color">
+<div class="text-[10px] font-mono text-muted mb-2 uppercase tracking-wider">Primary Gap</div>
+<div class="text-sm font-medium text-text-main border border-border-color bg-surface p-2 text-center rounded-sm">
+            System Architecture (L2)
+          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

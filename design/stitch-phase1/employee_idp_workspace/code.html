@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Employee IDP Workspace - Grism Plus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4F46E5",
+                        "background-light": "#F8FAFC",
+                        "background-dark": "#121121",
+                        "surface": "#FFFFFF",
+                        "text": "#0F172A",
+                        "muted": "#64748B",
+                        "border": "#E2E8F0",
+                        "exp-70": "#10B981",
+                        "rel-20": "#F59E0B",
+                        "form-10": "#3B82F6",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["IBM Plex Sans", "sans-serif"],
+                        "mono": ["IBM Plex Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "sm": "4px",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    boxShadow: {
+                        'none': '0 0 #0000',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: #F8FAFC;
+            color: #0F172A;
+        }
+        h1, h2, h3, h4, h5, h6, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .font-mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Progress Ring Animation */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Tooltip positioning */
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-background-light h-screen overflow-hidden flex selection:bg-primary selection:text-white">
+<!-- Global Side-Nav -->
+<div class="relative flex h-full w-[240px] flex-col bg-surface border-r border-border group/design-root shrink-0 z-10">
+<div class="layout-container flex h-full grow flex-col">
+<div class="flex flex-col h-full justify-between p-4">
+<div class="flex flex-col gap-6">
+<!-- Brand / User -->
+<div class="flex gap-3 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-border" data-alt="professional corporate headshot of a person with neutral expression on solid background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuATSHbEPYKV1_GAK7tiCcl3XSNxn7N39aAI2EX-fbiAiiAmsTYhhifPKQ0Wie1NYD8yks3wOUS1jNHDlJ1i1biJ54Os3tjQP06GqbWipTdsCC3Jj9Qla9sr1vpOt6T7qZJIUrRcV8dh-uSeqRvY73SVN8GbqU0ww8P_JrtzaHelSmGbJo4yVPHJraLtpcYFOitbIJGELCtVfAb3OJ4HKnlfa7uWA4w6hM4F1a9WJgZSbb3hjZHlCCY4Y2pwTBVNmF4UUkxvzByXLD2z");'></div>
+<div class="flex flex-col">
+<h1 class="text-text text-sm font-semibold leading-tight font-display">Acme Corp</h1>
+<p class="text-muted text-xs font-mono leading-tight mt-0.5">L&amp;D Portal</p>
+</div>
+</div>
+<!-- Navigation -->
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-slate-50 transition-colors text-text group" href="#">
+<span class="material-symbols-outlined text-muted group-hover:text-primary transition-colors text-[20px]" data-icon="home">home</span>
+<span class="text-sm font-medium leading-normal">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm bg-indigo-50 border-l-[3px] border-primary text-primary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="track_changes" style="font-variation-settings: 'FILL' 1;">track_changes</span>
+<span class="text-sm font-medium leading-normal">Current IDP</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-slate-50 transition-colors text-text group" href="#">
+<span class="material-symbols-outlined text-muted group-hover:text-primary transition-colors text-[20px]" data-icon="folder_open">folder_open</span>
+<span class="text-sm font-medium leading-normal">Evidence History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-slate-50 transition-colors text-text group" href="#">
+<span class="material-symbols-outlined text-muted group-hover:text-primary transition-colors text-[20px]" data-icon="group">group</span>
+<span class="text-sm font-medium leading-normal">Mentorship</span>
+</a>
+</div>
+</div>
+<!-- Bottom Action -->
+<div class="pt-4 border-t border-border">
+<button class="flex items-center gap-2 px-3 py-2 w-full text-left text-muted hover:text-text transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+<span class="text-xs font-medium">Workspace Settings</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto relative bg-background-light">
+<div class="max-w-[1024px] mx-auto p-8 flex flex-col gap-8 pb-24">
+<!-- Page Header -->
+<header class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-3xl font-display font-bold text-text tracking-tight">Employee IDP Workspace</h1>
+<p class="text-muted text-sm mt-1">Manage your development goals and submit evidence.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-1 rounded-sm text-xs font-mono font-medium bg-indigo-50 text-primary border border-indigo-200">
+                            IDP-2024-Q3
+                        </span>
+<span class="inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Active
+                        </span>
+</div>
+</div>
+</header>
+<!-- 70/20/10 Telemetry Widget -->
+<section class="bg-surface border border-border p-6 rounded-sm flex flex-col gap-6">
+<div class="flex justify-between items-center border-b border-border pb-4">
+<h2 class="font-display font-semibold text-lg text-text">70/20/10 Telemetry</h2>
+<div class="text-sm font-mono text-muted">Total Progression: 62%</div>
+</div>
+<div class="flex justify-around items-center gap-4">
+<!-- 70% Experience -->
+<div @mouseenter="open = true" @mouseleave="open = false" class="flex flex-col items-center gap-3 relative group" x-data="{ open: false }">
+<div class="relative w-16 h-16">
+<svg class="w-16 h-16" viewbox="0 0 64 64">
+<circle class="text-slate-100" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-exp-70 progress-ring__circle" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.92" stroke-dashoffset="61.57" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-display font-semibold text-sm text-text">65%</div>
+</div>
+<div class="text-center">
+<p class="text-sm font-medium text-text">Experience (70%)</p>
+<p class="text-xs text-muted font-mono mt-0.5">OJT &amp; Projects</p>
+</div>
+<!-- Tooltip -->
+<div class="absolute top-[-50px] left-1/2 transform -translate-x-1/2 bg-text text-surface text-xs font-mono px-3 py-2 rounded-sm whitespace-nowrap z-20 shadow-none border border-slate-700" x-cloak="" x-show="open" x-transition.opacity="">
+                            130 / 200 Hours Complete
+                            <div class="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 rotate-45 w-2 h-2 bg-text"></div>
+</div>
+</div>
+<!-- 20% Relationships -->
+<div @mouseenter="open = true" @mouseleave="open = false" class="flex flex-col items-center gap-3 relative group" x-data="{ open: false }">
+<div class="relative w-16 h-16">
+<svg class="w-16 h-16" viewbox="0 0 64 64">
+<circle class="text-slate-100" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-rel-20 progress-ring__circle" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.92" stroke-dashoffset="105.55" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-display font-semibold text-sm text-text">40%</div>
+</div>
+<div class="text-center">
+<p class="text-sm font-medium text-text">Relationships (20%)</p>
+<p class="text-xs text-muted font-mono mt-0.5">Mentoring &amp; Coaching</p>
+</div>
+<!-- Tooltip -->
+<div class="absolute top-[-50px] left-1/2 transform -translate-x-1/2 bg-text text-surface text-xs font-mono px-3 py-2 rounded-sm whitespace-nowrap z-20 shadow-none border border-slate-700" x-cloak="" x-show="open" x-transition.opacity="">
+                            16 / 40 Hours Complete
+                            <div class="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 rotate-45 w-2 h-2 bg-text"></div>
+</div>
+</div>
+<!-- 10% Formal -->
+<div @mouseenter="open = true" @mouseleave="open = false" class="flex flex-col items-center gap-3 relative group" x-data="{ open: false }">
+<div class="relative w-16 h-16">
+<svg class="w-16 h-16" viewbox="0 0 64 64">
+<circle class="text-slate-100" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-form-10 progress-ring__circle" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.92" stroke-dashoffset="17.59" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-display font-semibold text-sm text-text">90%</div>
+</div>
+<div class="text-center">
+<p class="text-sm font-medium text-text">Formal (10%)</p>
+<p class="text-xs text-muted font-mono mt-0.5">Courses &amp; Certs</p>
+</div>
+<!-- Tooltip -->
+<div class="absolute top-[-50px] left-1/2 transform -translate-x-1/2 bg-text text-surface text-xs font-mono px-3 py-2 rounded-sm whitespace-nowrap z-20 shadow-none border border-slate-700" x-cloak="" x-show="open" x-transition.opacity="">
+                            18 / 20 Hours Complete
+                            <div class="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 rotate-45 w-2 h-2 bg-text"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- What's Next Action Strip -->
+<section class="flex flex-col gap-3">
+<h3 class="font-display font-semibold text-text text-base">What's Next</h3>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<!-- Task Card 1 -->
+<div class="min-w-[200px] w-[200px] bg-surface border border-border p-4 rounded-sm flex flex-col justify-between gap-4 shrink-0 hover:border-primary transition-colors">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono text-muted uppercase tracking-wider">TSK-892</span>
+<span class="w-2 h-2 rounded-full bg-exp-70 mt-1"></span>
+</div>
+<h4 class="text-sm font-medium text-text leading-tight">Data Pipeline Optimization</h4>
+</div>
+<button class="w-full bg-primary hover:bg-indigo-700 text-white text-xs font-medium py-2 px-3 rounded-sm transition-colors text-center border border-transparent">
+                            Submit Evidence
+                        </button>
+</div>
+<!-- Task Card 2 -->
+<div class="min-w-[200px] w-[200px] bg-surface border border-border p-4 rounded-sm flex flex-col justify-between gap-4 shrink-0 hover:border-primary transition-colors">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono text-muted uppercase tracking-wider">TSK-894</span>
+<span class="w-2 h-2 rounded-full bg-rel-20 mt-1"></span>
+</div>
+<h4 class="text-sm font-medium text-text leading-tight">Senior Dev Shadowing</h4>
+</div>
+<button class="w-full bg-surface hover:bg-slate-50 text-text text-xs font-medium py-2 px-3 rounded-sm transition-colors text-center border border-border">
+                            Schedule 1:1
+                        </button>
+</div>
+<!-- Task Card 3 -->
+<div class="min-w-[200px] w-[200px] bg-surface border border-border p-4 rounded-sm flex flex-col justify-between gap-4 shrink-0 hover:border-primary transition-colors">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono text-muted uppercase tracking-wider">TSK-895</span>
+<span class="w-2 h-2 rounded-full bg-form-10 mt-1"></span>
+</div>
+<h4 class="text-sm font-medium text-text leading-tight">AWS Cert Prep Course</h4>
+</div>
+<button class="w-full bg-surface hover:bg-slate-50 text-text text-xs font-medium py-2 px-3 rounded-sm transition-colors text-center border border-border">
+                            Update Progress
+                        </button>
+</div>
+</div>
+</section>
+<!-- Execution Feed (Action Stream) -->
+<section class="flex flex-col gap-4" x-data="{ showForm: false, activeTask: null }">
+<h3 class="font-display font-semibold text-text text-base border-b border-border pb-2">Execution Stream</h3>
+<div class="flex flex-col gap-0 border-l-2 border-border ml-3 pl-6 relative">
+<!-- Action Item 1 (Active, expandable) -->
+<div class="relative py-4 group">
+<div class="absolute -left-[31px] top-5 w-3 h-3 rounded-full bg-surface border-2 border-primary z-10"></div>
+<div class="bg-surface border border-border rounded-sm p-5 hover:border-slate-300 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-700 text-[10px] font-mono font-medium border border-emerald-100">70% EXP</span>
+<h4 class="text-base font-medium text-text font-display">Data Pipeline Optimization</h4>
+</div>
+<span class="text-xs font-mono text-muted">Due in 3 days</span>
+</div>
+<p class="text-sm text-muted mb-4 max-w-2xl">Refactor the legacy ETL pipeline using PySpark to improve throughput by 20%. Ensure logging and monitoring are implemented.</p>
+<!-- Toggle Button -->
+<button @click="showForm = !showForm; activeTask = 'TSK-892'" class="text-primary hover:text-indigo-700 text-sm font-medium flex items-center gap-1 transition-colors" x-show="!showForm">
+<span class="material-symbols-outlined text-[18px]" data-icon="upload">upload</span>
+                                Submit Evidence
+                            </button>
+<!-- Inline Form (Expands) -->
+<div class="mt-4 border-t border-border pt-4" x-cloak="" x-collapse="" x-show="showForm &amp;&amp; activeTask === 'TSK-892'">
+<form @submit.prevent="showForm = false" class="flex flex-col gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-text" for="url">Artifact URL (PR, Doc, Dashboard)</label>
+<input class="w-full border border-border rounded-sm px-3 py-2 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-shadow bg-surface" id="url" placeholder="https://github.com/acmecorp/repo/pull/123" required="" type="url"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-text" for="impact">Business Impact Summary</label>
+<textarea class="w-full border border-border rounded-sm px-3 py-2 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-shadow bg-surface resize-none" id="impact" placeholder="Describe how this work met the rubic criteria and impacted the business..." required="" rows="3"></textarea>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-text">Competencies Demonstrated</label>
+<div class="flex flex-wrap gap-2">
+<label class="flex items-center gap-2 border border-border px-3 py-1.5 rounded-sm bg-slate-50 cursor-pointer hover:bg-slate-100">
+<input class="rounded-sm text-primary focus:ring-primary border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-text">Data Engineering Lv 3</span>
+</label>
+<label class="flex items-center gap-2 border border-border px-3 py-1.5 rounded-sm bg-slate-50 cursor-pointer hover:bg-slate-100">
+<input class="rounded-sm text-primary focus:ring-primary border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-text">System Architecture</span>
+</label>
+<label class="flex items-center gap-2 border border-border px-3 py-1.5 rounded-sm bg-slate-50 cursor-pointer hover:bg-slate-100">
+<input class="rounded-sm text-primary focus:ring-primary border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-text">Python Mastery</span>
+</label>
+</div>
+</div>
+<div class="flex justify-end gap-3 mt-2">
+<button @click="showForm = false" class="px-4 py-2 text-sm font-medium text-text bg-surface border border-border rounded-sm hover:bg-slate-50 transition-colors" type="button">Cancel</button>
+<button class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-sm hover:bg-indigo-700 transition-colors flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[18px]" data-icon="send">send</span>
+                                            Submit for Validation
+                                        </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<!-- Action Item 2 (Completed) -->
+<div class="relative py-4 group">
+<div class="absolute -left-[31px] top-5 w-3 h-3 rounded-full bg-slate-300 border-2 border-background-light z-10"></div>
+<div class="bg-transparent border border-transparent rounded-sm py-2 group-hover:bg-surface group-hover:border-border transition-all px-4 -ml-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-exp-70 text-[18px]" data-icon="check_circle">check_circle</span>
+<h4 class="text-sm font-medium text-slate-500 line-through">API Gateway Implementation</h4>
+</div>
+<span class="text-xs font-mono text-muted">Validated Oct 12</span>
+</div>
+<div class="ml-6 mt-1 flex gap-2 items-center">
+<span class="text-xs text-muted">Validated by: Sarah J.</span>
+<a class="text-xs text-primary hover:underline flex items-center" href="#">
+                                    View Artifact <span class="material-symbols-outlined text-[14px] ml-0.5" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Action Item 3 (Completed) -->
+<div class="relative py-4 group">
+<div class="absolute -left-[31px] top-5 w-3 h-3 rounded-full bg-slate-300 border-2 border-background-light z-10"></div>
+<div class="bg-transparent border border-transparent rounded-sm py-2 group-hover:bg-surface group-hover:border-border transition-all px-4 -ml-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-form-10 text-[18px]" data-icon="check_circle">check_circle</span>
+<h4 class="text-sm font-medium text-slate-500 line-through">Cloud Security Basics Cert</h4>
+</div>
+<span class="text-xs font-mono text-muted">Validated Sep 28</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

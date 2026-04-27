@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Framework Editor - Grism Plus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4F46E5",
+                        background: "#F8FAFC",
+                        surface: "#FFFFFF",
+                        text: "#0F172A",
+                        muted: "#64748B",
+                        border: "#E2E8F0",
+                        "exp-70": "#10B981",
+                        "rel-20": "#F59E0B",
+                        "form-10": "#3B82F6"
+                    },
+                    fontFamily: {
+                        heading: ['Space Grotesk', 'sans-serif'],
+                        body: ['IBM Plex Sans', 'sans-serif'],
+                        mono: ['IBM Plex Mono', 'monospace'],
+                    },
+                    borderRadius: {
+                        none: "0px",
+                        component: "4px"
+                    },
+                    spacing: {
+                        base: "8px"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            background-color: theme('colors.background');
+        }
+        h1, h2, h3, h4, h5, h6, .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .font-mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Tree lines */
+        .tree-line::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: -14px;
+            bottom: 14px;
+            width: 1px;
+            background-color: #CBD5E1;
+        }
+        .tree-line::after {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 14px;
+            width: 12px;
+            height: 1px;
+            background-color: #CBD5E1;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="flex flex-col text-text text-sm">
+<!-- Minimal Header (Back-to-Main Exception) -->
+<header class="h-14 border-b border-border bg-surface flex items-center px-4 shrink-0 justify-between">
+<div class="flex items-center gap-3">
+<button class="text-muted hover:text-text transition-colors flex items-center justify-center size-8 rounded-component hover:bg-background">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<div class="h-4 w-[1px] bg-border"></div>
+<h1 class="font-heading font-semibold text-base">Framework Editor</h1>
+<span class="bg-background text-muted font-mono text-xs px-2 py-0.5 rounded-component border border-border ml-2">v2.4.1</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-muted text-xs">Last saved: 2 mins ago</span>
+<button class="bg-primary text-white px-4 py-1.5 rounded-component font-medium text-sm hover:bg-[#4338CA] transition-colors">Publish Taxonomy</button>
+</div>
+</header>
+<!-- 3-Pane Layout -->
+<main class="flex-1 flex overflow-hidden">
+<!-- Left Pane: Competency Tree -->
+<aside class="w-[280px] shrink-0 border-r border-border bg-surface flex flex-col h-full">
+<div class="p-3 border-b border-border bg-background/50 flex items-center justify-between">
+<h2 class="font-heading font-medium text-sm">Taxonomy Tree</h2>
+<div class="flex gap-1">
+<button class="text-muted hover:text-text p-1 rounded-component hover:bg-border transition-colors" title="Expand All">
+<span class="material-symbols-outlined text-[16px]">unfold_more</span>
+</button>
+<button class="text-muted hover:text-text p-1 rounded-component hover:bg-border transition-colors" title="Add Root Node">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<div class="p-3 border-b border-border">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-muted text-[16px]">search</span>
+<input class="w-full pl-8 pr-3 py-1.5 text-xs bg-background border border-border rounded-component focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Search competencies..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-2">
+<!-- Level 1 -->
+<div class="group flex items-center justify-between px-3 h-[28px] hover:bg-background cursor-pointer">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-muted">folder</span>
+<span class="font-medium text-[13px]">Engineering</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-muted hover:text-primary"><span class="material-symbols-outlined text-[14px]">add</span></button>
+</div>
+<!-- Level 2 -->
+<div class="relative pl-[24px]">
+<div class="tree-line"></div>
+<div class="group flex items-center justify-between pr-3 pl-2 h-[28px] hover:bg-background cursor-pointer">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-muted">folder_open</span>
+<span class="text-[13px]">Data Infrastructure</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-muted hover:text-primary"><span class="material-symbols-outlined text-[14px]">add</span></button>
+</div>
+<!-- Level 3 -->
+<div class="relative pl-[20px]">
+<div class="tree-line"></div>
+<div class="group flex items-center justify-between pr-3 pl-2 h-[28px] hover:bg-background cursor-pointer">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-muted">description</span>
+<span class="text-[13px]">ETL Architecture</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-muted hover:text-primary"><span class="material-symbols-outlined text-[14px]">add</span></button>
+</div>
+<!-- Active Node -->
+<div class="group flex items-center justify-between pr-3 pl-2 h-[28px] bg-[#EEF2FF] border-l-2 border-primary cursor-pointer -ml-[2px] z-10 relative">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary">description</span>
+<span class="text-[13px] font-medium text-primary">Data Pipeline Optimization</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-primary hover:text-primary"><span class="material-symbols-outlined text-[14px]">add</span></button>
+</div>
+<!-- Level 4 (Under Active) -->
+<div class="relative pl-[20px]">
+<div class="tree-line"></div>
+<div class="group flex items-center justify-between pr-3 pl-2 h-[28px] hover:bg-background cursor-pointer">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-muted">stat_minus_1</span>
+<span class="text-[13px] text-muted">L1: Basic Monitoring</span>
+</div>
+</div>
+<div class="group flex items-center justify-between pr-3 pl-2 h-[28px] hover:bg-background cursor-pointer">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-muted">stat_2</span>
+<span class="text-[13px] text-muted">L2: Bottleneck Identification</span>
+</div>
+</div>
+</div>
+<div class="group flex items-center justify-between pr-3 pl-2 h-[28px] hover:bg-background cursor-pointer mt-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-muted">description</span>
+<span class="text-[13px]">Stream Processing</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-muted hover:text-primary"><span class="material-symbols-outlined text-[14px]">add</span></button>
+</div>
+</div>
+</div>
+<!-- Level 1 (Another) -->
+<div class="group flex items-center justify-between px-3 h-[28px] hover:bg-background cursor-pointer mt-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-muted">folder</span>
+<span class="font-medium text-[13px]">Product Management</span>
+</div>
+<button class="opacity-0 group-hover:opacity-100 text-muted hover:text-primary"><span class="material-symbols-outlined text-[14px]">add</span></button>
+</div>
+</div>
+</aside>
+<!-- Middle Pane: Node Editor -->
+<section class="flex-1 bg-surface h-full flex flex-col min-w-[400px]">
+<div class="p-6 border-b border-border shrink-0">
+<div class="flex items-start justify-between mb-4">
+<div>
+<div class="flex items-center gap-2 text-muted mb-1 text-xs font-mono">
+<span>ID: CMP-ENG-084</span>
+<span class="w-1 h-1 bg-border rounded-full"></span>
+<span>Level: Competency</span>
+</div>
+<input class="font-heading text-2xl font-semibold bg-transparent border-none p-0 focus:ring-0 w-full text-text placeholder-muted" type="text" value="Data Pipeline Optimization"/>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 border border-border rounded-component text-sm font-medium hover:bg-background transition-colors">Discard</button>
+<button class="px-3 py-1.5 bg-primary text-white rounded-component text-sm font-medium hover:bg-[#4338CA] transition-colors">Save Node</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-medium text-muted mb-1 uppercase tracking-wider">Parent Cluster</label>
+<select class="w-full text-sm border-border rounded-component shadow-sm focus:border-primary focus:ring-primary bg-background">
+<option>Data Infrastructure</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-medium text-muted mb-1 uppercase tracking-wider">Status</label>
+<select class="w-full text-sm border-border rounded-component shadow-sm focus:border-primary focus:ring-primary bg-background">
+<option>Active</option>
+<option>Draft</option>
+<option>Deprecated</option>
+</select>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-8">
+<!-- Description -->
+<div>
+<label class="block text-sm font-heading font-medium mb-2">Definition</label>
+<textarea class="w-full text-sm border-border rounded-component shadow-sm focus:border-primary focus:ring-primary resize-none" rows="3">Ability to identify bottlenecks, tune queries, and restructure data flows to reduce latency and compute costs in large-scale data environments.</textarea>
+</div>
+<!-- Measurement Rubric -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<label class="block text-sm font-heading font-medium">Measurement Rubric</label>
+<button class="text-primary text-xs font-medium hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">add</span> Add Criteria
+                        </button>
+</div>
+<div class="border border-border rounded-component overflow-hidden">
+<table class="w-full text-left text-sm">
+<thead class="bg-background border-b border-border">
+<tr>
+<th class="px-4 py-2 font-medium text-muted w-1/4">Criterion</th>
+<th class="px-4 py-2 font-medium text-muted w-1/2">Description</th>
+<th class="px-4 py-2 font-medium text-muted w-1/4">Weight</th>
+<th class="px-4 py-2 w-8"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<tr>
+<td class="px-4 py-3 align-top">
+<input class="w-full text-sm border-border rounded-component p-1 focus:border-primary focus:ring-primary" type="text" value="Latency Reduction"/>
+</td>
+<td class="px-4 py-3 align-top">
+<textarea class="w-full text-sm border-border rounded-component p-1 focus:border-primary focus:ring-primary resize-none text-xs" rows="2">Demonstrated ability to reduce job execution time by at least 20%.</textarea>
+</td>
+<td class="px-4 py-3 align-top">
+<select class="w-full text-sm border-border rounded-component p-1 focus:border-primary focus:ring-primary">
+<option>High (40%)</option>
+<option>Medium (30%)</option>
+</select>
+</td>
+<td class="px-4 py-3 align-top text-center">
+<button class="text-muted hover:text-red-500 mt-1"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</td>
+</tr>
+<tr>
+<td class="px-4 py-3 align-top">
+<input class="w-full text-sm border-border rounded-component p-1 focus:border-primary focus:ring-primary" type="text" value="Cost Efficiency"/>
+</td>
+<td class="px-4 py-3 align-top">
+<textarea class="w-full text-sm border-border rounded-component p-1 focus:border-primary focus:ring-primary resize-none text-xs" rows="2">Optimized cluster usage reducing monthly compute spend.</textarea>
+</td>
+<td class="px-4 py-3 align-top">
+<select class="w-full text-sm border-border rounded-component p-1 focus:border-primary focus:ring-primary">
+<option>Medium (30%)</option>
+</select>
+</td>
+<td class="px-4 py-3 align-top text-center">
+<button class="text-muted hover:text-red-500 mt-1"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Associated Learning Signals -->
+<div>
+<label class="block text-sm font-heading font-medium mb-3">Associated Learning Signals (70/20/10)</label>
+<div class="space-y-2">
+<div class="flex items-center gap-3 p-3 border border-border rounded-component bg-background/50">
+<span class="w-2 h-2 rounded-full bg-exp-70 shrink-0"></span>
+<span class="font-mono text-xs text-muted w-16 shrink-0">OJT-412</span>
+<span class="text-sm truncate flex-1">Refactor legacy Airflow DAG</span>
+<button class="text-muted hover:text-text"><span class="material-symbols-outlined text-[16px]">close</span></button>
+</div>
+<div class="flex items-center gap-3 p-3 border border-border rounded-component bg-background/50">
+<span class="w-2 h-2 rounded-full bg-form-10 shrink-0"></span>
+<span class="font-mono text-xs text-muted w-16 shrink-0">CRS-088</span>
+<span class="text-sm truncate flex-1">Advanced Spark Tuning Certification</span>
+<button class="text-muted hover:text-text"><span class="material-symbols-outlined text-[16px]">close</span></button>
+</div>
+<button class="w-full py-2 border border-dashed border-border rounded-component text-sm text-muted hover:text-primary hover:border-primary hover:bg-[#EEF2FF] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">add_circle</span> Map New Signal
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Pane: Impact Warning -->
+<aside class="w-[300px] shrink-0 border-l border-border bg-background p-4 h-full overflow-y-auto">
+<h3 class="font-heading font-semibold text-sm mb-4 uppercase tracking-wider text-muted">Impact Analysis</h3>
+<div class="bg-[#FEF2F2] border border-[#FCA5A5] rounded-component p-4 shadow-sm mb-6">
+<div class="flex items-start gap-3 mb-3">
+<span class="material-symbols-outlined text-red-500 text-[20px] shrink-0">warning</span>
+<div>
+<h4 class="font-heading font-medium text-red-800 text-sm">High Downstream Impact</h4>
+<p class="text-xs text-red-700 mt-1 leading-relaxed">Modifying the rubric or definition of this competency will flag active IDPs for reassessment.</p>
+</div>
+</div>
+<div class="bg-white/60 rounded p-3 mt-3 border border-[#FCA5A5]/50">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-medium text-red-900">Active IDPs Affected</span>
+<span class="font-mono font-bold text-red-700">42</span>
+</div>
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-medium text-red-900">Pending Validations</span>
+<span class="font-mono font-bold text-red-700">14</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs font-medium text-red-900">Targeted by Roles</span>
+<span class="font-mono font-bold text-red-700">3</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="font-heading font-medium text-sm border-b border-border pb-1">Affected Roles</h4>
+<ul class="space-y-2 text-sm">
+<li class="flex items-center justify-between">
+<span class="truncate pr-2">Data Engineer II</span>
+<span class="text-xs bg-border px-1.5 py-0.5 rounded text-muted font-mono">Req</span>
+</li>
+<li class="flex items-center justify-between">
+<span class="truncate pr-2">Senior Data Engineer</span>
+<span class="text-xs bg-border px-1.5 py-0.5 rounded text-muted font-mono">Core</span>
+</li>
+<li class="flex items-center justify-between">
+<span class="truncate pr-2">ML Ops Engineer</span>
+<span class="text-xs bg-border px-1.5 py-0.5 rounded text-muted font-mono">Opt</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 border-t border-border pt-4">
+<button class="w-full py-2 border border-red-200 text-red-600 bg-white hover:bg-red-50 rounded-component text-sm font-medium transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">delete</span> Delete Node
+                </button>
+<p class="text-[11px] text-muted text-center mt-2">Requires Admin escalation.</p>
+</div>
+</aside>
+</main>
+</body></html>

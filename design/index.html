@@ -24,11 +24,10 @@
   <div class="eyebrow">Grism+ · Phase 1 design package</div>
   <h1>Real product screen wireframes</h1>
   <p>
-    Static HTML mockups for the four Phase 1 screens called out in <code>CLAUDE.md</code>.
-    Each one ships with a Stitch brief (paste into Stitch to regenerate) and an illustrative
-    mockup populated with the live demo seed (Arwa Energy — 21 users, 12 IDPs, 20 competencies).
-    Mockups are illustration-only — production styling will be Shadcn primitives in
-    <code>src/app/</code>.
+    Static HTML mockups and the reviewed Stitch Phase 1 export for the core product screens
+    called out in <code>CLAUDE.md</code>. The local mockups are populated with the live demo seed
+    (Arwa Energy — 21 users, 12 IDPs, 20 competencies). Stitch exports are a screen contract only:
+    production styling and behavior must be rebuilt with Shadcn primitives in <code>src/app/</code>.
   </p>
 </header>
 
@@ -79,6 +78,48 @@
 </section>
 
 <section>
+  <h2>Reviewed Stitch export snapshot</h2>
+  <div class="index-grid">
+    <a class="card" href="stitch-phase1/README.md">
+      <h3>stitch-phase1/README.md</h3>
+      <p>Source, usage rules, and implementation mapping for the Google Stitch export snapshot.</p>
+      <div class="meta">
+        <span class="pill ok"><span class="dot"></span>reviewed reference</span>
+        <span class="pill muted">not production code</span>
+      </div>
+    </a>
+    <a class="card" href="stitch-phase1/l_d_admin_idp_approval_queue/code.html">
+      <h3>Stitch: IDP Approval Queue</h3>
+      <p>L&amp;D admin approval queue and detail panel for 70/20/10 IDP review.</p>
+      <div class="meta">
+        <span class="pill muted">role: ld_admin</span>
+      </div>
+    </a>
+    <a class="card" href="stitch-phase1/employee_idp_workspace/code.html">
+      <h3>Stitch: Employee IDP Workspace</h3>
+      <p>Employee workspace with 70/20/10 telemetry, next actions, evidence, and execution stream.</p>
+      <div class="meta">
+        <span class="pill muted">role: employee</span>
+      </div>
+    </a>
+    <a class="card" href="stitch-phase1/manager_team_cockpit/code.html">
+      <h3>Stitch: Manager Team Cockpit</h3>
+      <p>Manager queue, team rollup, evidence validation panel, and progression radar.</p>
+      <div class="meta">
+        <span class="pill muted">role: manager</span>
+      </div>
+    </a>
+    <a class="card" href="stitch-phase1/framework_editor/code.html">
+      <h3>Stitch: Framework Editor</h3>
+      <p>Competency taxonomy editor with impact analysis and associated 70/20/10 signals.</p>
+      <div class="meta">
+        <span class="pill muted">role: ld_admin</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section>
   <h2>Stitch briefs</h2>
   <div class="index-grid">
     <a class="card" href="idp-approval.brief.md">
@@ -107,8 +148,8 @@
 <p class="footnote">
   Tokens mirror the Shadcn defaults already wired in <code>tailwind.config.ts</code>. None of these
   files are imported by the app — they're a design surface only. Per CLAUDE.md, before any of these
-  screens become real components, the corresponding <code>.pen</code> file must land in
-  <code>/design</code> via Stitch MCP.
+  screens become real components, the corresponding reviewed Stitch artifact must be present in
+  <code>/design</code>. Generated Stitch HTML is reference material, not production source.
 </p>
 </body>
 </html>

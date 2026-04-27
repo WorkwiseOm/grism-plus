@@ -2,6 +2,10 @@
 
 ## Phase 0 progress
 
+### 2026-04-27 - Stitch Phase 1 design snapshot captured
+
+Added the Google Stitch Phase 1 export under `design/stitch-phase1/` as a reviewed design reference for the L&D admin approval queue, employee IDP workspace, manager team cockpit, and framework editor. The snapshot is explicitly reference-only: production screens must be rebuilt with the existing Next.js/Shadcn/Supabase patterns rather than copying generated Stitch HTML into `src/`. `CLAUDE.md`, `README.md`, `design/index.html`, `docs/PHASE_1_PLAN.md`, and `docs/GRISM_PHASE1_SCOPE_ALIGNMENT.md` now point to the snapshot and describe the implementation rules.
+
 ### 2026-04-27 - Phase 1 schema planning started
 
 Added `docs/PHASE_1_SCHEMA_PLAN.md` to translate Grism's 70/20/10 and multi-signal progression feedback into a concrete migration direction. No SQL migration or cloud change was applied. The plan keeps existing Phase 0 tables intact and proposes a new Phase 1 development model layer: blend policies, IDP blend snapshots, action blend allocations, progression rules, progression events, and rollups.

@@ -12,12 +12,12 @@
 
 - **Phase 0 placeholder screens may be built directly in Shadcn without Stitch wireframes.** Auth screens, role-based landing pages, and similar infrastructure UIs are throwaway placeholders that will be replaced or significantly evolved in Phase 1. Designing them in Stitch would be wireframing for the bin.
 
-- **From Phase 1 onwards, every real product screen MUST have a Stitch design before code is written.** "Real product screen" means: a screen the user will actually use to do work (IDP approval, IDP view, manager coachee view, framework editor), or a screen that will be shown to a client or used in a demo. Workflow:
+- **From Phase 1 onwards, every real product screen MUST have a reviewed Stitch design before code is written.** "Real product screen" means: a screen the user will actually use to do work (IDP approval, IDP view, manager coachee view, framework editor), or a screen that will be shown to a client or used in a demo. Workflow:
   1. Write the brief in claude.ai (data shape, user goal, edge cases, error states)
-  2. Generate Stitch wireframe via MCP
-  3. Save .pen files to /design directory in this repo
+  2. Generate the design in Stitch
+  3. Save the reviewed design artifact to `/design` in this repo. Preferred artifact: `.pen` when a Stitch MCP/export is available. Acceptable artifact when MCP is unavailable: a Stitch export snapshot with `screen.png`, `code.html`, and a README that marks the HTML as reference-only.
   4. Review wireframe with Tariq (and Grism where their eLearning UX expertise applies)
-  5. Claude Code reads .pen via MCP and generates production components
+  5. Build production components from the reviewed design using the repo's Next.js, Shadcn/UI, Tailwind, route guards, data loaders, and RLS model. Generated Stitch HTML must not be copied wholesale into `src/`.
 
 - **Stitch is NOT required for:**
   - Modal confirmations, toast notifications, standard form validation states
@@ -25,7 +25,7 @@
   - Settings/profile pages with no novel interaction model
   - Any frontend work where the implementation is <200 lines and follows established patterns
 
-- **Hard stop:** No real product screen ships to pilot clients without a Stitch design file in /design at the corresponding commit.
+- **Hard stop:** No real product screen ships to pilot clients without a reviewed Stitch design artifact in `/design` at the corresponding commit.
 
 ## Current phase
 

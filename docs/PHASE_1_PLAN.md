@@ -66,6 +66,19 @@ Demo-data watch:
 
 - Before showing the wireframes to a prospective tenant, revise any side-panel or plan-summary metric that implies an inverse blend such as 70% eLearning / 20% OJT / 10% coaching. The demo should read closer to 70% experience / 20% relationships / 10% formal learning unless a skill-specific rationale says otherwise.
 
+## Design Source
+
+Current reviewed Stitch snapshot: [`../design/stitch-phase1/`](../design/stitch-phase1/).
+
+Use the Stitch snapshot as the Phase 1 screen contract for:
+
+- L&D admin IDP approval queue.
+- Employee IDP workspace.
+- Manager team cockpit and evidence validation.
+- Framework editor.
+
+The Stitch `code.html` files are reference-only static exports. Do not copy them into `src/`. Rebuild the screens with the existing Next.js App Router, Shadcn/UI, Tailwind configuration, route guards, server data loaders, and Supabase RLS posture. If a Google Stitch MCP or `.pen` export becomes available later, add that artifact beside the snapshot rather than replacing the implementation rules.
+
 ## Product Slices
 
 ### Slice 1 - Data Access and Route Foundations
@@ -101,6 +114,10 @@ Suggested route:
 - `/admin/idps`
 - `/admin/idps/[id]`
 
+Design reference:
+
+- `design/stitch-phase1/l_d_admin_idp_approval_queue/`
+
 Core screen:
 
 - Queue grouped by status: pending approval, draft, active, completed.
@@ -127,6 +144,10 @@ Suggested route:
 
 - `/employee/idp`
 - `/employee/idps/[id]`
+
+Design reference:
+
+- `design/stitch-phase1/employee_idp_workspace/`
 
 Core screen:
 
@@ -158,6 +179,10 @@ Suggested routes:
 - `/manager/team`
 - `/manager/team/[employeeId]`
 
+Design reference:
+
+- `design/stitch-phase1/manager_team_cockpit/`
+
 Core screen:
 
 - Team KPI strip.
@@ -184,6 +209,10 @@ Suggested route:
 
 - `/admin/frameworks`
 - `/admin/frameworks/[frameworkId]`
+
+Design reference:
+
+- `design/stitch-phase1/framework_editor/`
 
 Core screen:
 

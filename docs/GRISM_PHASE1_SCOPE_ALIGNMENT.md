@@ -72,3 +72,4 @@ This is especially important for Layla's sample IDP because HR leaders in Oman w
 - `docs/ojt-reference.md` now frames OJT as the 70% experience layer and a required skill-progression signal.
 - `docs/module-library.md` now frames eLearning as the 10% formal layer, not the dominant default.
 - `design/future-platform.html`, `design/idp-approval.html`, and `design/idp-view.html` now surface 70/20/10 blend expectations.
+- `design/stitch-phase1/` now preserves the reviewed Google Stitch export as the Phase 1 screen contract for the approval queue, employee workspace, manager cockpit, and framework editor. The generated HTML is reference-only and must not be copied into production app code.
