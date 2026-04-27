@@ -7,10 +7,17 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { updateCompetencyAction } from "@/app/admin/frameworks/actions"
 import { requireRole } from "@/lib/auth/require-role"
 import { getFrameworkTree } from "@/lib/data"
 import type { CompetencyNode, FrameworkTree } from "@/lib/data"
 import type { LoaderFailureReason } from "@/lib/data"
+import {
+  competencyEditErrorMessage,
+  FRAMEWORK_CATEGORIES,
+} from "@/lib/framework-editor/edit"
 import {
   buildFrameworkStats,
   categoryLabel,
@@ -22,7 +29,11 @@ import {
 import { cn } from "@/lib/utils"
 
 type PageProps = {
-  searchParams?: Promise<{ competency?: string | string[] }>
+  searchParams?: Promise<{
+    competency?: string | string[]
+    error?: string | string[]
+    updated?: string | string[]
+  }>
 }
 
 export default async function AdminFrameworksPage({
@@ -34,6 +45,10 @@ export default async function AdminFrameworksPage({
   const requestedCompetency = Array.isArray(params?.competency)
     ? params?.competency[0]
     : params?.competency
+  const error = Array.isArray(params?.error) ? params?.error[0] : params?.error
+  const updated = Array.isArray(params?.updated)
+    ? params?.updated[0]
+    : params?.updated
 
   const tree = await getFrameworkTree()
   if (!tree.ok) {
@@ -54,19 +69,23 @@ export default async function AdminFrameworksPage({
               Framework editor
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
-              Inspect the active competency framework and its taxonomy. Editing,
-              publishing, and versioning remain disabled until the framework
-              change model is decided.
+              Edit the active framework taxonomy for the current tenant.
+              Publishing, version history, and draft branches remain deferred
+              until the framework change model is finalized.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button disabled>Save node</Button>
+            <Button form="competency-edit-form" type="submit" disabled={!selected}>
+              Save node
+            </Button>
             <Button variant="outline" disabled>
               Publish taxonomy
             </Button>
           </div>
         </div>
       </header>
+
+      <FrameworkStatusBanner error={error} updated={updated} />
 
       <FrameworkOverview tree={tree.data} />
 
@@ -110,6 +129,32 @@ export default async function AdminFrameworksPage({
       </div>
     </div>
   )
+}
+
+function FrameworkStatusBanner({
+  error,
+  updated,
+}: {
+  error?: string
+  updated?: string
+}): JSX.Element | null {
+  if (updated === "competency_saved") {
+    return (
+      <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        Competency saved.
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {competencyEditErrorMessage(error)}
+      </div>
+    )
+  }
+
+  return null
 }
 
 function FrameworkOverview({ tree }: { tree: FrameworkTree }): JSX.Element {
@@ -187,54 +232,88 @@ function SelectedCompetency({ node }: { node: CompetencyNode }): JSX.Element {
           </span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 p-5">
-        <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h2 className="text-sm font-semibold text-slate-950">Definition</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-700">
-            {node.description ?? "No definition is stored for this competency yet."}
-          </p>
-        </section>
+      <CardContent className="p-5">
+        <form
+          id="competency-edit-form"
+          action={updateCompetencyAction}
+          className="space-y-6"
+        >
+          <input type="hidden" name="competencyId" value={node.id} />
 
-        <section>
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-950">
-              Proficiency levels
-            </h2>
-            <span className="text-xs text-slate-500">
-              {getProficiencyLevelCount(node)} stored
-            </span>
-          </div>
-          {levels.length > 0 ? (
-            <div className="mt-3 space-y-2">
-              {levels.map((level, index) => (
-                <div
-                  key={`${level}-${index}`}
-                  className="rounded-md border border-slate-200 px-3 py-2 text-sm"
-                >
-                  <span className="font-medium text-slate-950">
-                    L{index + 1}
-                  </span>{" "}
-                  <span className="text-slate-700">{level}</span>
-                </div>
-              ))}
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+            <div className="space-y-2">
+              <Label htmlFor="competency-name">Competency name</Label>
+              <Input
+                id="competency-name"
+                name="name"
+                defaultValue={node.name}
+                maxLength={120}
+                required
+              />
             </div>
-          ) : (
-            <p className="mt-2 text-sm text-slate-600">
-              No proficiency level labels are available for this node.
-            </p>
-          )}
-        </section>
+            <div className="space-y-2">
+              <Label htmlFor="competency-category">Category</Label>
+              <select
+                id="competency-category"
+                name="category"
+                defaultValue={node.category}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {FRAMEWORK_CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {categoryLabel(category)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-        <section className="rounded-lg border border-dashed border-slate-300 p-4">
-          <h2 className="text-sm font-semibold text-slate-950">
-            Associated learning signals
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            70/20/10 signal mapping and downstream IDP impact analysis will be
-            connected after the Phase 1 schema and framework change model are
-            verified.
-          </p>
-        </section>
+          <div className="space-y-2">
+            <Label htmlFor="competency-description">Definition</Label>
+            <textarea
+              id="competency-description"
+              name="description"
+              defaultValue={node.description ?? ""}
+              rows={5}
+              maxLength={1000}
+              className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-6 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="competency-levels">Proficiency levels</Label>
+              <span className="text-xs text-slate-500">
+                {getProficiencyLevelCount(node)} stored
+              </span>
+            </div>
+            <textarea
+              id="competency-levels"
+              name="proficiencyLevels"
+              defaultValue={levels.join("\n")}
+              rows={Math.max(4, Math.min(levels.length + 1, 8))}
+              className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-6 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            />
+            <p className="text-xs text-slate-500">
+              One level per line. The editor stores the labels on the current
+              active framework; draft publishing remains deferred.
+            </p>
+          </div>
+
+          <section className="rounded-lg border border-dashed border-slate-300 p-4">
+            <h2 className="text-sm font-semibold text-slate-950">
+              Associated learning signals
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              70/20/10 signal mapping and downstream IDP impact analysis remain
+              read-only here. This save path only updates taxonomy fields.
+            </p>
+          </section>
+
+          <div className="flex justify-end">
+            <Button type="submit">Save competency</Button>
+          </div>
+        </form>
       </CardContent>
     </>
   )
@@ -246,7 +325,7 @@ function ImpactPanel({ node }: { node: CompetencyNode | null }): JSX.Element {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Impact analysis</CardTitle>
-          <CardDescription>Read-only until edit flows land.</CardDescription>
+          <CardDescription>Read-only for active IDP impact.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <ImpactLine label="Selected node" value={node?.name ?? "None"} />
@@ -271,8 +350,8 @@ function ImpactPanel({ node }: { node: CompetencyNode | null }): JSX.Element {
           <CardTitle className="text-base">Open decisions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-slate-700">
-          <p>Keep proficiency levels as JSONB or normalize them?</p>
-          <p>Support draft versions in Phase 1 or edit current demo data only?</p>
+          <p>Normalize proficiency levels after the JSONB MVP?</p>
+          <p>Add draft framework versions and publish approvals?</p>
           <p>How should published changes affect active IDPs?</p>
         </CardContent>
       </Card>
