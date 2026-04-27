@@ -23,6 +23,13 @@ import {
   selectApprovalQueueRow,
   statusLabel,
 } from "@/lib/idp-approval/queue"
+import {
+  blendCategoryDescription,
+  blendGuardLabel,
+  blendGuardTone,
+  blendIssueSummary,
+  buildIdpBlendPreview,
+} from "@/lib/idp-blend/preview"
 import { cn } from "@/lib/utils"
 
 type PageProps = {
@@ -239,6 +246,8 @@ function SelectedIdpDetail({
   const actionMix = buildActionMix(detail)
   const milestoneCounts = countMilestonesByStatus(detail)
   const actionCount = countActions(detail)
+  const blendPreview = buildIdpBlendPreview(detail)
+  const blendIssue = blendIssueSummary(blendPreview.guard)
 
   return (
     <>
@@ -279,22 +288,35 @@ function SelectedIdpDetail({
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-sm font-semibold text-slate-950">
-                Development blend target
+                Development blend guard
               </h2>
               <p className="mt-1 text-xs text-slate-600">
-                The 70/20/10 snapshot is gated on migration 00013. This screen
-                shows the target model and the current action mix separately.
+                Computed from planned actions until approved blend snapshots are
+                available.
               </p>
             </div>
-            <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
-              Snapshot pending
+            <span
+              className={cn(
+                "rounded-full px-2 py-1 text-xs font-medium",
+                blendGuardBadgeClass(blendGuardTone(blendPreview.guard)),
+              )}
+            >
+              {blendGuardLabel(blendPreview.guard)}
             </span>
           </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            <BlendTarget label="Experience" value="70%" />
-            <BlendTarget label="Relationships" value="20%" />
-            <BlendTarget label="Formal" value="10%" />
+            {blendPreview.items.map((item) => (
+              <BlendTarget
+                key={item.category}
+                label={item.label}
+                value={`${item.actualPct}%`}
+                description={`${blendCategoryDescription(item.category)} · target ${item.targetPct}%`}
+              />
+            ))}
           </div>
+          {blendIssue ? (
+            <p className="mt-3 text-xs font-medium text-red-700">{blendIssue}</p>
+          ) : null}
         </section>
 
         <section>
@@ -413,14 +435,17 @@ function CompactFact({
 function BlendTarget({
   label,
   value,
+  description,
 }: {
   label: string
   value: string
+  description: string
 }): JSX.Element {
   return (
     <div className="rounded-md border border-slate-200 bg-white p-3">
       <p className="text-xs text-slate-500">{label}</p>
       <p className="mt-1 text-lg font-semibold text-slate-950">{value}</p>
+      <p className="mt-1 text-xs text-slate-500">{description}</p>
     </div>
   )
 }
@@ -504,5 +529,16 @@ function metricToneClass(tone: "slate" | "amber" | "blue" | "red"): string {
       return "text-red-700"
     default:
       return "text-slate-950"
+  }
+}
+
+function blendGuardBadgeClass(tone: "green" | "amber" | "red"): string {
+  switch (tone) {
+    case "green":
+      return "bg-emerald-100 text-emerald-800"
+    case "amber":
+      return "bg-amber-100 text-amber-800"
+    case "red":
+      return "bg-red-100 text-red-800"
   }
 }

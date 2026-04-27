@@ -20,6 +20,13 @@ import {
   selectEmployeeWorkspaceIdp,
   statusLabel,
 } from "@/lib/employee-idp/workspace"
+import {
+  blendCategoryDescription,
+  blendGuardLabel,
+  blendGuardTone,
+  blendIssueSummary,
+  buildIdpBlendPreview,
+} from "@/lib/idp-blend/preview"
 import { cn } from "@/lib/utils"
 
 type PageProps = {
@@ -109,6 +116,8 @@ function WorkspaceDetail({
   const stats = buildEmployeeIdpStats(detail)
   const completion = calculateMilestoneCompletionPercent(detail)
   const nextMilestone = getNextMilestone(detail)
+  const blendPreview = buildIdpBlendPreview(detail)
+  const blendIssue = blendIssueSummary(blendPreview.guard)
 
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_340px]">
@@ -162,19 +171,31 @@ function WorkspaceDetail({
                 70/20/10 development model
               </h2>
               <p className="mt-1 max-w-2xl text-sm text-slate-600">
-                Phase 1 will replace this target model with the approved IDP
-                blend snapshot after migration 00013 is verified.
+                Current mix based on the actions attached to this plan.
               </p>
             </div>
-            <span className="w-fit rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
-              Snapshot pending
+            <span
+              className={cn(
+                "w-fit rounded-full px-2 py-1 text-xs font-medium",
+                blendGuardBadgeClass(blendGuardTone(blendPreview.guard)),
+              )}
+            >
+              {blendGuardLabel(blendPreview.guard)}
             </span>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <BlendColumn label="Experience" value="70%" description="OJT, projects, field work" />
-            <BlendColumn label="Relationships" value="20%" description="Mentoring, coaching, shadowing" />
-            <BlendColumn label="Formal" value="10%" description="Courses, certifications, workshops" />
+            {blendPreview.items.map((item) => (
+              <BlendColumn
+                key={item.category}
+                label={item.label}
+                value={`${item.actualPct}%`}
+                description={`${blendCategoryDescription(item.category)} · target ${item.targetPct}%`}
+              />
+            ))}
           </div>
+          {blendIssue ? (
+            <p className="mt-3 text-xs font-medium text-red-700">{blendIssue}</p>
+          ) : null}
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -480,5 +501,16 @@ function statusBadgeClass(status: string): string {
       return "bg-red-100 text-red-800"
     default:
       return "bg-slate-100 text-slate-700"
+  }
+}
+
+function blendGuardBadgeClass(tone: "green" | "amber" | "red"): string {
+  switch (tone) {
+    case "green":
+      return "bg-emerald-100 text-emerald-800"
+    case "amber":
+      return "bg-amber-100 text-amber-800"
+    case "red":
+      return "bg-red-100 text-red-800"
   }
 }
