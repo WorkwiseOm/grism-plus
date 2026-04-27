@@ -2,6 +2,22 @@
 
 ## Phase 0 progress
 
+### 2026-04-27 — Step 9 partial: Vercel smoke deploy under personal scope
+
+First Vercel deploy completed under personal scope `tas770-9352s-projects/grism-plus`. `vercel deploy` (no `--prod`) auto-promoted to production on a fresh project, claiming the `grism-plus.vercel.app` alias — documented as expected Vercel CLI behaviour in `docs/STEP_9_DEPLOYMENT_GATES.md` § "Vercel deploy command behaviour".
+
+- Deploy ID: `dpl_BgYLHVJ78YxLE4CJXX1rfxqgXNV3`
+- URL (alias): `https://grism-plus.vercel.app`
+- URL (hash): `https://grism-plus-6r9dbmqko-tas770-9352s-projects.vercel.app`
+- Deployed commit: `19e1ed4`
+- Build: READY in ~1m, `iad1` builder, `bom1` edge
+
+Vercel SSO Deployment Protection blocked automated `curl` smoke checks (401 + `_vercel_sso_nonce` cookie on every path). Manual browser-side smoke against the same URLs confirmed application-level behaviour: `/auth/sign-in` renders; `/`, `/admin`, `/manager`, `/employee` all redirect to `/auth/sign-in` for an unauthenticated user. No sign-in attempt was made. Auth-gated read paths only; no write paths, MFA, rate limit, or AI-prompt code exercised on this deploy.
+
+Gate F (subprocessor activation, `00012_activate_vercel_subprocessor.sql`) stayed blocked and was not applied. Blockers: personal scope rather than the intended team scope, IP-trust signal still unverified from inside the function, smoke coverage limited to unauth read paths. No Supabase writes were performed.
+
+Next deploy must either move to a Tilqai/Grism team scope, or be re-run under personal scope with that choice intentionally confirmed; do not silently re-use the personal-scope project for a customer-facing deployment.
+
 ### 2026-04-26 - Grism Phase 1 scope feedback captured
 
 Reviewed Grism's `TDEP_Phase1_Scope_Alignment.html` feedback and updated Phase 1 planning/design artifacts. Phase 1 now explicitly includes 70/20/10 IDP blend logic, a multi-signal skill progression data model, and outcome-bearing OJT task/evidence/manager-validation flows. ILT pre/post-work, workshop reinforcement, peer learning circles, succession visualization, social learning, and coach-side session logs are tracked as Phase 2 unless pulled forward by pilot scope. See `docs/GRISM_PHASE1_SCOPE_ALIGNMENT.md`.
