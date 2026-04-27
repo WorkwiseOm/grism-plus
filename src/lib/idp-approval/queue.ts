@@ -14,6 +14,11 @@ export const APPROVAL_QUEUE_STATUS_ORDER: ReadonlyArray<IdpStatus> = [
   "archived",
 ]
 
+export const APPROVABLE_IDP_STATUSES: ReadonlyArray<IdpStatus> = [
+  "pending_approval",
+  "draft",
+]
+
 export type ApprovalQueueStats = {
   total: number
   pending: number
@@ -57,6 +62,10 @@ export function statusLabel(status: IdpStatus): string {
     default:
       return titleCase(status)
   }
+}
+
+export function canApproveIdpStatus(status: IdpStatus): boolean {
+  return APPROVABLE_IDP_STATUSES.includes(status)
 }
 
 export function milestoneStatusLabel(status: MilestoneStatus): string {

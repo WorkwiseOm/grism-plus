@@ -4,6 +4,7 @@ import type { IdpDetail, IdpSummaryRow } from "@/lib/data/idps"
 import {
   buildActionMix,
   buildApprovalQueueStats,
+  canApproveIdpStatus,
   countActions,
   countMilestonesByStatus,
   formatDate,
@@ -107,6 +108,17 @@ describe("buildApprovalQueueStats", () => {
       aiGenerated: 2,
       stalled: 1,
     })
+  })
+})
+
+describe("canApproveIdpStatus", () => {
+  it("allows draft and pending approval IDPs only", () => {
+    expect(canApproveIdpStatus("draft")).toBe(true)
+    expect(canApproveIdpStatus("pending_approval")).toBe(true)
+    expect(canApproveIdpStatus("active")).toBe(false)
+    expect(canApproveIdpStatus("completed")).toBe(false)
+    expect(canApproveIdpStatus("archived")).toBe(false)
+    expect(canApproveIdpStatus("stalled")).toBe(false)
   })
 })
 

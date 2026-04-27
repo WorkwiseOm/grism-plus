@@ -11,10 +11,12 @@ import { requireRole } from "@/lib/auth/require-role"
 import { getIdpDetail, getIdpSummaryList } from "@/lib/data/idps"
 import type { IdpDetail, IdpSummaryRow } from "@/lib/data/idps"
 import type { LoaderFailureReason } from "@/lib/data/types"
+import { approveIdpAction } from "./actions"
 import {
   APPROVAL_QUEUE_STATUS_ORDER,
   buildActionMix,
   buildApprovalQueueStats,
+  canApproveIdpStatus,
   countActions,
   countMilestonesByStatus,
   formatDate,
@@ -33,7 +35,11 @@ import {
 import { cn } from "@/lib/utils"
 
 type PageProps = {
-  searchParams?: Promise<{ idp?: string | string[] }>
+  searchParams?: Promise<{
+    idp?: string | string[]
+    updated?: string | string[]
+    error?: string | string[]
+  }>
 }
 
 export default async function AdminIdpsPage({
@@ -42,7 +48,9 @@ export default async function AdminIdpsPage({
   await requireRole(["ld_admin", "superadmin"])
 
   const params = await searchParams
-  const requestedId = Array.isArray(params?.idp) ? params?.idp[0] : params?.idp
+  const requestedId = firstParam(params?.idp)
+  const updated = firstParam(params?.updated)
+  const error = firstParam(params?.error)
   const summaries = await getIdpSummaryList()
 
   if (!summaries.ok) {
@@ -52,6 +60,10 @@ export default async function AdminIdpsPage({
   const stats = buildApprovalQueueStats(summaries.data)
   const selected = selectApprovalQueueRow(summaries.data, requestedId)
   const detail = selected ? await getIdpDetail(selected.id) : null
+  const canApproveSelected = selected
+    ? canApproveIdpStatus(selected.status)
+    : false
+  const notification = notificationFor(updated, error)
 
   return (
     <div className="flex flex-col gap-5">
@@ -71,13 +83,20 @@ export default async function AdminIdpsPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button disabled>Approve IDP</Button>
+            <form action={approveIdpAction}>
+              <input type="hidden" name="idpId" value={selected?.id ?? ""} />
+              <Button type="submit" disabled={!selected || !canApproveSelected}>
+                Approve IDP
+              </Button>
+            </form>
             <Button variant="outline" disabled>
               Request changes
             </Button>
           </div>
         </div>
       </header>
+
+      {notification ? <QueueNotification {...notification} /> : null}
 
       <section className="grid gap-3 md:grid-cols-4">
         <MetricCard label="Visible IDPs" value={stats.total} />
@@ -138,6 +157,27 @@ function MetricCard({
         </p>
       </CardContent>
     </Card>
+  )
+}
+
+function QueueNotification({
+  tone,
+  message,
+}: {
+  tone: "green" | "red"
+  message: string
+}): JSX.Element {
+  return (
+    <div
+      className={cn(
+        "rounded-lg border px-4 py-3 text-sm font-medium",
+        tone === "green"
+          ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+          : "border-red-200 bg-red-50 text-red-800",
+      )}
+    >
+      {message}
+    </div>
   )
 }
 
@@ -529,6 +569,41 @@ function metricToneClass(tone: "slate" | "amber" | "blue" | "red"): string {
       return "text-red-700"
     default:
       return "text-slate-950"
+  }
+}
+
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value
+}
+
+function notificationFor(
+  updated: string | undefined,
+  error: string | undefined,
+): { tone: "green" | "red"; message: string } | null {
+  if (updated === "approved") {
+    return { tone: "green", message: "IDP approved and moved to active." }
+  }
+
+  switch (error) {
+    case "missing_idp":
+      return { tone: "red", message: "Select an IDP before approving." }
+    case "not_found":
+      return {
+        tone: "red",
+        message: "The selected IDP could not be found or is no longer visible.",
+      }
+    case "not_approvable":
+      return {
+        tone: "red",
+        message: "Only draft or pending-approval IDPs can be approved.",
+      }
+    case "approve_failed":
+      return {
+        tone: "red",
+        message: "Approval failed. Refresh the queue and try again.",
+      }
+    default:
+      return null
   }
 }
 
