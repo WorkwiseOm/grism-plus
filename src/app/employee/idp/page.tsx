@@ -8,9 +8,20 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { requireRole } from "@/lib/auth/require-role"
-import { getCurrentEmployeeContext, getIdpDetail, getIdpSummaryList } from "@/lib/data"
-import type { IdpDetail, IdpDetailMilestone, IdpSummaryRow } from "@/lib/data"
-import type { LoaderFailureReason } from "@/lib/data"
+import {
+  getCurrentEmployeeContext,
+  getEmployeeOjtAssignments,
+  getIdpDetail,
+  getIdpSummaryList,
+} from "@/lib/data"
+import type {
+  IdpDetail,
+  IdpDetailMilestone,
+  IdpSummaryRow,
+  LoaderFailureReason,
+  LoaderResult,
+  OjtAssignmentDetail,
+} from "@/lib/data"
 import {
   buildEmployeeIdpStats,
   calculateMilestoneCompletionPercent,
@@ -56,6 +67,7 @@ export default async function EmployeeIdpPage({
     return <WorkspaceErrorState reason={summaries.reason} detail={summaries.detail} />
   }
 
+  const ojtAssignments = await getEmployeeOjtAssignments(context.data.employee.id)
   const selected = selectEmployeeWorkspaceIdp(summaries.data, requestedId)
   const detail = selected ? await getIdpDetail(selected.id) : null
 
@@ -90,6 +102,7 @@ export default async function EmployeeIdpPage({
           summaries={summaries.data}
           selected={selected}
           detail={detail.data}
+          ojtAssignments={ojtAssignments}
         />
       ) : selected && detail && !detail.ok ? (
         <WorkspaceErrorState
@@ -108,10 +121,12 @@ function WorkspaceDetail({
   summaries,
   selected,
   detail,
+  ojtAssignments,
 }: {
   summaries: IdpSummaryRow[]
   selected: IdpSummaryRow
   detail: IdpDetail
+  ojtAssignments: LoaderResult<OjtAssignmentDetail[]>
 }): JSX.Element {
   const stats = buildEmployeeIdpStats(detail)
   const completion = calculateMilestoneCompletionPercent(detail)
@@ -264,6 +279,8 @@ function WorkspaceDetail({
           </CardContent>
         </Card>
 
+        <OjtAssignmentsCard result={ojtAssignments} />
+
         <Card>
           <CardHeader>
             <CardTitle className="text-base">People</CardTitle>
@@ -294,6 +311,64 @@ function WorkspaceDetail({
         ) : null}
       </aside>
     </div>
+  )
+}
+
+function OjtAssignmentsCard({
+  result,
+}: {
+  result: LoaderResult<OjtAssignmentDetail[]>
+}): JSX.Element {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">OJT assignments</CardTitle>
+        <CardDescription>Experience-led work tied to this IDP.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {!result.ok ? (
+          <p className="text-sm text-slate-600">
+            OJT assignments could not be loaded.
+          </p>
+        ) : result.data.length === 0 ? (
+          <p className="text-sm text-slate-600">
+            No OJT assignments are visible yet.
+          </p>
+        ) : (
+          result.data.slice(0, 4).map((item) => (
+            <div
+              key={item.assignment.id}
+              className="rounded-lg border border-slate-200 p-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-950">
+                  {item.catalogue?.title ?? "OJT assignment"}
+                </p>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2 py-1 text-xs font-medium",
+                    ojtStatusBadgeClass(item.assignment.status),
+                  )}
+                >
+                  {ojtStatusLabel(item.assignment.status)}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                Due {formatDate(item.assignment.due_date)}
+                {item.catalogue
+                  ? ` · ${item.catalogue.effort_hours}h expected`
+                  : ""}
+              </p>
+              {item.latestEvidence ? (
+                <p className="mt-2 border-t border-slate-200 pt-2 text-xs text-slate-600">
+                  Evidence submitted {formatDate(item.latestEvidence.submitted_at)}
+                </p>
+              ) : null}
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -499,6 +574,39 @@ function statusBadgeClass(status: string): string {
     case "blocked":
     case "stalled":
       return "bg-red-100 text-red-800"
+    default:
+      return "bg-slate-100 text-slate-700"
+  }
+}
+
+function ojtStatusLabel(status: OjtAssignmentDetail["assignment"]["status"]): string {
+  switch (status) {
+    case "evidence_submitted":
+      return "Evidence submitted"
+    case "in_progress":
+      return "In progress"
+    default:
+      return status
+        .split("_")
+        .map((part, index) =>
+          index === 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part,
+        )
+        .join(" ")
+  }
+}
+
+function ojtStatusBadgeClass(
+  status: OjtAssignmentDetail["assignment"]["status"],
+): string {
+  switch (status) {
+    case "validated":
+      return "bg-emerald-100 text-emerald-800"
+    case "evidence_submitted":
+      return "bg-blue-100 text-blue-800"
+    case "rejected":
+      return "bg-red-100 text-red-800"
+    case "in_progress":
+      return "bg-amber-100 text-amber-800"
     default:
       return "bg-slate-100 text-slate-700"
   }

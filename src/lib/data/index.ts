@@ -48,3 +48,9 @@ export {
   type FrameworkTree,
   type CompetencyNode,
 } from "./framework"
+
+export {
+  getEmployeeOjtAssignments,
+  buildOjtAssignmentDetails,
+  type OjtAssignmentDetail,
+} from "./ojt"
