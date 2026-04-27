@@ -61,6 +61,37 @@ Vercel must have production-safe values for:
 
 Do not store database passwords, test passwords, or demo credentials in Vercel unless a specific workflow requires them.
 
+## Vercel deploy command behaviour
+
+The first deployment to a fresh Vercel project is **auto-promoted to production**, even when invoked without `--prod`. Observed 2026-04-27 against `tas770-9352s-projects/grism-plus`: `vercel deploy` (no flags) returned `"target": "production"` in the CLI JSON output and immediately claimed the `grism-plus.vercel.app` alias.
+
+This means a deploy intended as a throwaway smoke test will, by default, become the project's production deployment and claim the bare `<project>.vercel.app` alias.
+
+Mitigation when a true preview is wanted on a project that has not yet had a production deploy:
+
+```bash
+vercel deploy --target preview
+```
+
+Verify by checking that the CLI JSON returns `"target": "preview"` and that the project's bare alias is not assigned to the new deployment.
+
+For projects that already have a production deployment, plain `vercel deploy` produces a preview as expected; only the first deploy is special.
+
+Default deployment protection is also a surprise to be aware of: new projects under a Vercel team scope (including auto-named personal `*-projects` scopes) ship with **Vercel SSO** required on every deployment. External smoke checks via `curl` will receive 401 + `Set-Cookie: _vercel_sso_nonce=…` and never reach application code. This is correct behaviour for non-public deployments; opening the URL in a Vercel-authenticated browser bypasses it. For automated smoke checks, the supported path is a per-project Protection Bypass for Automation token rather than disabling SSO globally.
+
+## Branch protection (manual GitHub steps)
+
+The `CI / lint / typecheck / test / build` check is produced by `.github/workflows/ci.yml` and runs on every pull request and on every push to `master`. To require it as a merge gate on `master`:
+
+1. GitHub → repo → **Settings → Branches**
+2. Add a **branch protection rule** for `master`
+3. Tick **Require status checks to pass before merging**
+4. Select the check **`CI / lint / typecheck / test / build`**
+5. Tick **Require branches to be up to date before merging** if the option is available
+6. **Save changes**
+
+The required-check identifier is `<workflow-name> / <job-display-name>`; if either changes the rule must be re-pointed. The check only appears in the picker after the workflow has run at least once, so push first if the picker is empty. This is a repo-settings change, not a code change, and cannot be done via commit; the `gh` CLI is not installed on this machine, so the steps above are written as a clickable-UI runbook.
+
 ## Subprocessor Activation
 
 Do not mark Vercel active in the database before the Vercel project exists and is serving Grism Plus.
