@@ -418,6 +418,80 @@ export type Database = {
           },
         ]
       }
+      development_blend_policies: {
+        Row: {
+            id: string
+            tenant_id: string
+            scope: string
+            gap_category: Database["public"]["Enums"]["gap_category"] | null
+            competency_id: string | null
+            experience_pct: number
+            relationship_pct: number
+            formal_pct: number
+            rationale: string | null
+            is_active: boolean
+            created_by: string | null
+            created_at: string
+            updated_at: string
+            deleted_at: string | null
+        }
+        Insert: {
+            id?: string
+            tenant_id: string
+            scope: string
+            gap_category?: Database["public"]["Enums"]["gap_category"] | null
+            competency_id?: string | null
+            experience_pct: number
+            relationship_pct: number
+            formal_pct: number
+            rationale?: string | null
+            is_active?: boolean
+            created_by?: string | null
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+        }
+        Update: {
+            id?: string
+            tenant_id: string
+            scope: string
+            gap_category?: Database["public"]["Enums"]["gap_category"] | null
+            competency_id?: string | null
+            experience_pct: number
+            relationship_pct: number
+            formal_pct: number
+            rationale?: string | null
+            is_active?: boolean
+            created_by?: string | null
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_blend_policies_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_blend_policies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_blend_policies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
       elearning_catalogue: {
         Row: {
           competency_tags: string[]
@@ -668,6 +742,58 @@ export type Database = {
           },
         ]
       }
+      idp_action_blend_allocations: {
+        Row: {
+            id: string
+            tenant_id: string
+            idp_action_id: string
+            blend_category: Database["public"]["Enums"]["development_blend_category"]
+            effort_weight: number
+            classification_source: string
+            created_at: string
+            updated_at: string
+            deleted_at: string | null
+        }
+        Insert: {
+            id?: string
+            tenant_id: string
+            idp_action_id: string
+            blend_category: Database["public"]["Enums"]["development_blend_category"]
+            effort_weight?: number
+            classification_source: string
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+        }
+        Update: {
+            id?: string
+            tenant_id: string
+            idp_action_id: string
+            blend_category: Database["public"]["Enums"]["development_blend_category"]
+            effort_weight?: number
+            classification_source: string
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idp_action_blend_allocations_idp_action_id_fkey"
+            columns: ["idp_action_id"]
+            isOneToOne: false
+            referencedRelation: "idp_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idp_action_blend_allocations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
       idp_actions: {
         Row: {
           created_at: string
@@ -715,6 +841,84 @@ export type Database = {
           },
         ]
       }
+      idp_blend_snapshots: {
+        Row: {
+            id: string
+            tenant_id: string
+            idp_id: string
+            policy_id: string | null
+            experience_pct: number
+            relationship_pct: number
+            formal_pct: number
+            calculation_method: string
+            within_guardrail: boolean
+            guardrail_notes: string | null
+            created_by: string | null
+            created_at: string
+            deleted_at: string | null
+        }
+        Insert: {
+            id?: string
+            tenant_id: string
+            idp_id: string
+            policy_id?: string | null
+            experience_pct: number
+            relationship_pct: number
+            formal_pct: number
+            calculation_method: string
+            within_guardrail?: boolean
+            guardrail_notes?: string | null
+            created_by?: string | null
+            created_at?: string
+            deleted_at?: string | null
+        }
+        Update: {
+            id?: string
+            tenant_id: string
+            idp_id: string
+            policy_id?: string | null
+            experience_pct: number
+            relationship_pct: number
+            formal_pct: number
+            calculation_method: string
+            within_guardrail?: boolean
+            guardrail_notes?: string | null
+            created_by?: string | null
+            created_at?: string
+            deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idp_blend_snapshots_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idp_blend_snapshots_idp_id_fkey"
+            columns: ["idp_id"]
+            isOneToOne: false
+            referencedRelation: "idps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idp_blend_snapshots_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "development_blend_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idp_blend_snapshots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
       idp_milestones: {
         Row: {
           competency_id: string
@@ -1234,6 +1438,245 @@ export type Database = {
           },
         ]
       }
+      skill_progression_events: {
+        Row: {
+            id: string
+            tenant_id: string
+            employee_id: string
+            competency_id: string
+            signal_source: Database["public"]["Enums"]["progression_signal_source"]
+            source_table: string
+            source_id: string
+            signal_date: string
+            score_0_100: number | null
+            proficiency_delta: number | null
+            confidence_0_100: number | null
+            weight_applied: number | null
+            summary: string | null
+            created_by: string | null
+            data_classification: Database["public"]["Enums"]["data_classification"]
+            created_at: string
+            deleted_at: string | null
+        }
+        Insert: {
+            id?: string
+            tenant_id: string
+            employee_id: string
+            competency_id: string
+            signal_source: Database["public"]["Enums"]["progression_signal_source"]
+            source_table: string
+            source_id: string
+            signal_date: string
+            score_0_100?: number | null
+            proficiency_delta?: number | null
+            confidence_0_100?: number | null
+            weight_applied?: number | null
+            summary?: string | null
+            created_by?: string | null
+            data_classification?: Database["public"]["Enums"]["data_classification"]
+            created_at?: string
+            deleted_at?: string | null
+        }
+        Update: {
+            id?: string
+            tenant_id: string
+            employee_id: string
+            competency_id: string
+            signal_source: Database["public"]["Enums"]["progression_signal_source"]
+            source_table: string
+            source_id: string
+            signal_date: string
+            score_0_100?: number | null
+            proficiency_delta?: number | null
+            confidence_0_100?: number | null
+            weight_applied?: number | null
+            summary?: string | null
+            created_by?: string | null
+            data_classification?: Database["public"]["Enums"]["data_classification"]
+            created_at?: string
+            deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_progression_events_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_progression_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_progression_events_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_progression_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_progression_rules: {
+        Row: {
+            id: string
+            tenant_id: string
+            scope: string
+            gap_category: Database["public"]["Enums"]["gap_category"] | null
+            competency_id: string | null
+            assessment_weight: number
+            ojt_weight: number
+            coaching_weight: number
+            elearning_weight: number
+            min_distinct_sources: number
+            max_single_source_contribution: number
+            rationale: string | null
+            is_active: boolean
+            created_by: string | null
+            created_at: string
+            updated_at: string
+            deleted_at: string | null
+        }
+        Insert: {
+            id?: string
+            tenant_id: string
+            scope: string
+            gap_category?: Database["public"]["Enums"]["gap_category"] | null
+            competency_id?: string | null
+            assessment_weight: number
+            ojt_weight: number
+            coaching_weight: number
+            elearning_weight: number
+            min_distinct_sources?: number
+            max_single_source_contribution?: number
+            rationale?: string | null
+            is_active?: boolean
+            created_by?: string | null
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+        }
+        Update: {
+            id?: string
+            tenant_id: string
+            scope: string
+            gap_category?: Database["public"]["Enums"]["gap_category"] | null
+            competency_id?: string | null
+            assessment_weight: number
+            ojt_weight: number
+            coaching_weight: number
+            elearning_weight: number
+            min_distinct_sources?: number
+            max_single_source_contribution?: number
+            rationale?: string | null
+            is_active?: boolean
+            created_by?: string | null
+            created_at?: string
+            updated_at?: string
+            deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_progression_rules_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_progression_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_progression_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_progression_rollups: {
+        Row: {
+            id: string
+            tenant_id: string
+            employee_id: string
+            competency_id: string
+            current_score_0_100: number | null
+            target_score_0_100: number | null
+            convergence_status: Database["public"]["Enums"]["progression_convergence_status"]
+            distinct_signal_sources: number
+            contributing_sources: Database["public"]["Enums"]["progression_signal_source"][]
+            last_signal_at: string | null
+            calculated_at: string
+            deleted_at: string | null
+        }
+        Insert: {
+            id?: string
+            tenant_id: string
+            employee_id: string
+            competency_id: string
+            current_score_0_100?: number | null
+            target_score_0_100?: number | null
+            convergence_status?: Database["public"]["Enums"]["progression_convergence_status"]
+            distinct_signal_sources?: number
+            contributing_sources?: Database["public"]["Enums"]["progression_signal_source"][]
+            last_signal_at?: string | null
+            calculated_at?: string
+            deleted_at?: string | null
+        }
+        Update: {
+            id?: string
+            tenant_id: string
+            employee_id: string
+            competency_id: string
+            current_score_0_100?: number | null
+            target_score_0_100?: number | null
+            convergence_status?: Database["public"]["Enums"]["progression_convergence_status"]
+            distinct_signal_sources?: number
+            contributing_sources?: Database["public"]["Enums"]["progression_signal_source"][]
+            last_signal_at?: string | null
+            calculated_at?: string
+            deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_progression_rollups_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_progression_rollups_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_progression_rollups_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
       subprocessors: {
         Row: {
           added_at: string
@@ -1387,6 +1830,8 @@ export type Database = {
         | "ojt_recommender"
         | "coaching_brief"
       data_classification: "public" | "internal" | "confidential" | "restricted"
+      development_blend_category: "experience" | "relationship" | "formal"
+
       elearning_status: "enrolled" | "in_progress" | "completed" | "abandoned"
       gap_category: "knowledge" | "behavioural" | "technical"
       idp_status:
@@ -1416,6 +1861,9 @@ export type Database = {
         | "evidence_submitted"
         | "validated"
         | "rejected"
+      progression_convergence_status: "insufficient" | "emerging" | "ready_for_review" | "advanced"
+      progression_signal_source: "assessment" | "ojt_manager_feedback" | "coaching_feedback" | "elearning_completion"
+
       security_event_type:
         | "login_success"
         | "login_failure"
