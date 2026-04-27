@@ -2,6 +2,27 @@
 
 ## Phase 0 progress
 
+### 2026-04-27 - Phase 1 implementation pass started
+
+Phase 1 moved from planning into local product implementation while keeping database and external-service gates intact. The following local commits are now on `master` after `ba1d8a4`:
+
+- `f6e7cbc` — read-only L&D IDP approval queue.
+- `b0add5d` — read-only employee IDP workspace.
+- `6f426e3` — read-only manager team cockpit.
+- `10c0ead` — read-only framework editor.
+- `7a7c476` — pure 70/20/10 blend and multi-signal progression guardrails.
+- `ab1a089` — computed IDP blend preview surfaced in admin and employee screens.
+- `cead000` — structured AI-generated IDP draft validator.
+- `d5e00ed` — safe OJT recommendation and coaching-brief prompt payload builders.
+- `ed8192f` — mobile role-aware navigation for the authenticated app shell.
+- `9178a79` — narrow admin IDP approval server action using existing `idps_admin_write` RLS.
+- `97ebecf` — employee OJT assignment loader and read-only workspace panel.
+- `c946145` — manager OJT evidence queue loader and read-only cockpit panel.
+
+The work intentionally stayed inside local code: no Supabase migration was applied, no `supabase config push` was run, no Vercel/GitHub settings were changed, and no live AI calls were made. The pending Phase 1 schema draft remains local and uncommitted (`supabase/migrations/00013_phase1_development_model.sql` plus `scripts/verify_phase1_schema.ts`) until a real Postgres target can apply and verify it.
+
+Current blocker to completing Phase 1 write workflows: `ojt_evidence` has read RLS only in the Phase 0 schema. Employee evidence submission and manager evidence validation should not be enabled until a verified migration adds narrow insert/update policies or server-side RPCs for those flows. The UI therefore shows OJT assignments and submitted evidence as read-only context, with validation/submission controls still disabled.
+
 ### 2026-04-27 - Stitch Phase 1 design snapshot captured
 
 Added the Google Stitch Phase 1 export under `design/stitch-phase1/` as a reviewed design reference for the L&D admin approval queue, employee IDP workspace, manager team cockpit, and framework editor. The snapshot is explicitly reference-only: production screens must be rebuilt with the existing Next.js/Shadcn/Supabase patterns rather than copying generated Stitch HTML into `src/`. `CLAUDE.md`, `README.md`, `design/index.html`, `docs/PHASE_1_PLAN.md`, and `docs/GRISM_PHASE1_SCOPE_ALIGNMENT.md` now point to the snapshot and describe the implementation rules.
