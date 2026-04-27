@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { buildOjtAssignmentDetails } from "@/lib/data/ojt"
+import {
+  buildOjtAssignmentDetails,
+  buildOjtEvidenceQueueItems,
+} from "@/lib/data/ojt"
 
 describe("buildOjtAssignmentDetails", () => {
   it("normalises catalogue relation shape and attaches latest evidence", () => {
@@ -94,5 +97,86 @@ describe("buildOjtAssignmentDetails", () => {
 
     expect(result[0].catalogue).toBeNull()
     expect(result[0].latestEvidence).toBeNull()
+  })
+})
+
+describe("buildOjtEvidenceQueueItems", () => {
+  it("joins submitted evidence to assignments and direct reports", () => {
+    const result = buildOjtEvidenceQueueItems(
+      [
+        {
+          id: "assignment-1",
+          employee_id: "employee-1",
+          milestone_id: "milestone-1",
+          status: "evidence_submitted",
+          due_date: "2026-05-01",
+          assigned_at: "2026-04-01T00:00:00Z",
+          ai_recommendation_reasoning: null,
+          ojt_catalogue: {
+            title: "Run a handover review",
+            description: "Lead a supervised handover.",
+            deliverable_type: "handover_note",
+            effort_hours: 6,
+          },
+        },
+      ],
+      [
+        {
+          id: "evidence-1",
+          ojt_assignment_id: "assignment-1",
+          self_reflection: "I led the handover.",
+          submitted_at: "2026-04-03T00:00:00Z",
+          validation_status: null,
+          validated_at: null,
+          validation_notes: null,
+        },
+      ],
+      [
+        {
+          id: "employee-1",
+          full_name: "Direct Report",
+          role_title: "Operations Analyst",
+          department: "Operations",
+        },
+      ],
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      evidence: {
+        id: "evidence-1",
+        self_reflection: "I led the handover.",
+      },
+      assignment: {
+        id: "assignment-1",
+        status: "evidence_submitted",
+      },
+      employee: {
+        full_name: "Direct Report",
+      },
+      catalogue: {
+        title: "Run a handover review",
+      },
+    })
+  })
+
+  it("drops evidence rows whose assignment or employee is not visible", () => {
+    expect(
+      buildOjtEvidenceQueueItems(
+        [],
+        [
+          {
+            id: "evidence-1",
+            ojt_assignment_id: "missing-assignment",
+            self_reflection: "Hidden.",
+            submitted_at: "2026-04-03T00:00:00Z",
+            validation_status: null,
+            validated_at: null,
+            validation_notes: null,
+          },
+        ],
+        [],
+      ),
+    ).toEqual([])
   })
 })

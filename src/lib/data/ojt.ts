@@ -30,6 +30,23 @@ export type OjtAssignmentDetail = {
   } | null
 }
 
+export type OjtEvidenceQueueItem = {
+  evidence: {
+    id: string
+    self_reflection: string
+    submitted_at: string
+    validation_status: string | null
+  }
+  assignment: OjtAssignmentDetail["assignment"]
+  catalogue: OjtAssignmentDetail["catalogue"]
+  employee: {
+    id: string
+    full_name: string
+    role_title: string
+    department: string | null
+  }
+}
+
 type OjtAssignmentQueryRow = {
   id: string
   employee_id: string
@@ -62,6 +79,13 @@ type OjtEvidenceQueryRow = {
   validation_status: string | null
   validated_at: string | null
   validation_notes: string | null
+}
+
+type OjtEmployeeQueryRow = {
+  id: string
+  full_name: string
+  role_title: string
+  department: string | null
 }
 
 export async function getEmployeeOjtAssignments(
@@ -102,6 +126,79 @@ export async function getEmployeeOjtAssignments(
     buildOjtAssignmentDetails(
       assignments as OjtAssignmentQueryRow[],
       evidence ?? [],
+    ),
+  )
+}
+
+export async function getManagerOjtEvidenceQueue(): Promise<
+  LoaderResult<OjtEvidenceQueueItem[]>
+> {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return fail("not_authenticated")
+
+  const { data: profile, error: profileErr } = await supabase
+    .from("user_profiles")
+    .select("id")
+    .eq("id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle()
+  if (profileErr) return fail("query_error", profileErr.message)
+  if (!profile) return fail("profile_not_found")
+
+  const { data: callerEmployee, error: callerErr } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("user_profile_id", profile.id)
+    .is("deleted_at", null)
+    .maybeSingle()
+  if (callerErr) return fail("query_error", callerErr.message)
+  if (!callerEmployee) return fail("employee_not_found")
+
+  const { data: reports, error: reportsErr } = await supabase
+    .from("employees")
+    .select("id, full_name, role_title, department")
+    .eq("manager_id", callerEmployee.id)
+    .is("deleted_at", null)
+    .order("full_name", { ascending: true })
+  if (reportsErr) return fail("query_error", reportsErr.message)
+  if (!reports || reports.length === 0) return ok([])
+
+  const reportIds = reports.map((report) => report.id)
+  const { data: assignments, error: assignmentsErr } = await supabase
+    .from("ojt_assignments")
+    .select(
+      "id, employee_id, milestone_id, status, due_date, assigned_at, ai_recommendation_reasoning, ojt_catalogue(title, description, deliverable_type, effort_hours)",
+    )
+    .in("employee_id", reportIds)
+    .eq("status", "evidence_submitted")
+    .is("deleted_at", null)
+    .order("due_date", { ascending: true })
+
+  if (assignmentsErr) return fail("query_error", assignmentsErr.message)
+  if (!assignments || assignments.length === 0) return ok([])
+
+  const assignmentIds = assignments.map((assignment) => assignment.id)
+  const { data: evidence, error: evidenceErr } = await supabase
+    .from("ojt_evidence")
+    .select(
+      "id, ojt_assignment_id, self_reflection, submitted_at, validation_status, validated_at, validation_notes",
+    )
+    .in("ojt_assignment_id", assignmentIds)
+    .is("validated_at", null)
+    .is("deleted_at", null)
+    .order("submitted_at", { ascending: false })
+
+  if (evidenceErr) return fail("query_error", evidenceErr.message)
+
+  return ok(
+    buildOjtEvidenceQueueItems(
+      assignments as OjtAssignmentQueryRow[],
+      evidence ?? [],
+      reports,
     ),
   )
 }
@@ -153,5 +250,36 @@ export function buildOjtAssignmentDetails(
           }
         : null,
     }
+  })
+}
+
+export function buildOjtEvidenceQueueItems(
+  assignments: ReadonlyArray<OjtAssignmentQueryRow>,
+  evidence: ReadonlyArray<OjtEvidenceQueryRow>,
+  employees: ReadonlyArray<OjtEmployeeQueryRow>,
+): OjtEvidenceQueueItem[] {
+  const assignmentById = new Map(assignments.map((row) => [row.id, row]))
+  const employeeById = new Map(employees.map((row) => [row.id, row]))
+
+  return evidence.flatMap((row) => {
+    const assignment = assignmentById.get(row.ojt_assignment_id)
+    if (!assignment) return []
+    const employee = employeeById.get(assignment.employee_id)
+    if (!employee) return []
+
+    const [detail] = buildOjtAssignmentDetails([assignment], [row])
+    return [
+      {
+        evidence: {
+          id: row.id,
+          self_reflection: row.self_reflection,
+          submitted_at: row.submitted_at,
+          validation_status: row.validation_status,
+        },
+        assignment: detail.assignment,
+        catalogue: detail.catalogue,
+        employee,
+      },
+    ]
   })
 }

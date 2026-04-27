@@ -51,6 +51,9 @@ export {
 
 export {
   getEmployeeOjtAssignments,
+  getManagerOjtEvidenceQueue,
   buildOjtAssignmentDetails,
+  buildOjtEvidenceQueueItems,
   type OjtAssignmentDetail,
+  type OjtEvidenceQueueItem,
 } from "./ojt"

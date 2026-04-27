@@ -8,9 +8,13 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { requireRole } from "@/lib/auth/require-role"
-import { getManagerTeamRollup } from "@/lib/data"
-import type { TeamMemberRollup } from "@/lib/data"
-import type { LoaderFailureReason } from "@/lib/data"
+import { getManagerOjtEvidenceQueue, getManagerTeamRollup } from "@/lib/data"
+import type {
+  LoaderFailureReason,
+  LoaderResult,
+  OjtEvidenceQueueItem,
+  TeamMemberRollup,
+} from "@/lib/data"
 import {
   buildManagerCockpitStats,
   deriveMemberStatus,
@@ -38,8 +42,10 @@ export default async function ManagerTeamPage({
     return <CockpitErrorState reason={rollup.reason} detail={rollup.detail} />
   }
 
+  const evidenceQueue = await getManagerOjtEvidenceQueue()
   const stats = buildManagerCockpitStats(rollup.data)
   const selected = selectTeamMember(rollup.data, requestedEmployeeId)
+  const evidenceCount = evidenceQueue.ok ? evidenceQueue.data.length : 0
 
   return (
     <div className="flex flex-col gap-5">
@@ -73,7 +79,7 @@ export default async function ManagerTeamPage({
         ) : null}
       </header>
 
-      <section className="grid gap-3 md:grid-cols-5">
+      <section className="grid gap-3 md:grid-cols-6">
         <MetricCard label="Direct reports" value={stats.reports} />
         <MetricCard label="Active IDPs" value={stats.activeIdps} tone="green" />
         <MetricCard
@@ -83,7 +89,10 @@ export default async function ManagerTeamPage({
         />
         <MetricCard label="Stalled" value={stats.stalledIdps} tone="red" />
         <MetricCard label="No IDP" value={stats.reportsWithoutIdps} />
+        <MetricCard label="OJT evidence" value={evidenceCount} tone="blue" />
       </section>
+
+      <EvidenceQueuePanel result={evidenceQueue} />
 
       {rollup.data.length === 0 ? (
         <EmptyTeamState />
@@ -269,6 +278,68 @@ function SelectedTeamMember({ row }: { row: TeamMemberRollup }): JSX.Element {
   )
 }
 
+function EvidenceQueuePanel({
+  result,
+}: {
+  result: LoaderResult<OjtEvidenceQueueItem[]>
+}): JSX.Element {
+  return (
+    <Card>
+      <CardHeader className="border-b border-slate-200">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle className="text-base">OJT evidence queue</CardTitle>
+            <CardDescription>
+              Submitted direct-report evidence waiting for manager validation.
+            </CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button disabled>Certify validation</Button>
+            <Button variant="outline" disabled>
+              Request changes
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        {!result.ok ? (
+          <p className="p-4 text-sm text-slate-600">
+            OJT evidence could not be loaded.
+          </p>
+        ) : result.data.length === 0 ? (
+          <p className="p-4 text-sm text-slate-600">
+            No submitted OJT evidence is waiting for validation.
+          </p>
+        ) : (
+          <div className="divide-y divide-slate-200">
+            {result.data.slice(0, 5).map((item) => (
+              <div key={item.evidence.id} className="p-4">
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-950">
+                      {item.employee.full_name}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {item.catalogue?.title ?? "OJT assignment"} · submitted{" "}
+                      {formatDate(item.evidence.submitted_at)}
+                    </p>
+                  </div>
+                  <span className="w-fit rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                    Evidence submitted
+                  </span>
+                </div>
+                <p className="mt-3 line-clamp-2 text-sm text-slate-700">
+                  {item.evidence.self_reflection}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 function MetricCard({
   label,
   value,
@@ -276,7 +347,7 @@ function MetricCard({
 }: {
   label: string
   value: number
-  tone?: "slate" | "green" | "amber" | "red"
+  tone?: "slate" | "green" | "amber" | "red" | "blue"
 }): JSX.Element {
   return (
     <Card>
@@ -373,7 +444,9 @@ function statusToneClass(tone: "red" | "amber" | "green" | "slate"): string {
   }
 }
 
-function metricToneClass(tone: "slate" | "green" | "amber" | "red"): string {
+function metricToneClass(
+  tone: "slate" | "green" | "amber" | "red" | "blue",
+): string {
   switch (tone) {
     case "green":
       return "text-emerald-700"
@@ -381,6 +454,8 @@ function metricToneClass(tone: "slate" | "green" | "amber" | "red"): string {
       return "text-amber-700"
     case "red":
       return "text-red-700"
+    case "blue":
+      return "text-blue-700"
     default:
       return "text-slate-950"
   }
