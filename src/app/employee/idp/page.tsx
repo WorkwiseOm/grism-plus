@@ -39,6 +39,7 @@ import {
   buildIdpBlendPreview,
 } from "@/lib/idp-blend/preview"
 import { cn } from "@/lib/utils"
+import { submitOjtEvidenceAction } from "./actions"
 
 type PageProps = {
   searchParams?: Promise<{ idp?: string | string[] }>
@@ -84,15 +85,9 @@ export default async function EmployeeIdpPage({
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
               Track your active development plan, next actions, and evidence
-              tasks. Submission flows stay disabled until audited write paths
-              land.
+              tasks. OJT evidence is submitted through audited server-side
+              validation paths.
             </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button disabled>Submit evidence</Button>
-            <Button variant="outline" disabled>
-              Update progress
-            </Button>
           </div>
         </div>
       </header>
@@ -335,40 +330,66 @@ function OjtAssignmentsCard({
             No OJT assignments are visible yet.
           </p>
         ) : (
-          result.data.slice(0, 4).map((item) => (
-            <div
-              key={item.assignment.id}
-              className="rounded-lg border border-slate-200 p-3"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-semibold text-slate-950">
-                  {item.catalogue?.title ?? "OJT assignment"}
-                </p>
-                <span
-                  className={cn(
-                    "shrink-0 rounded-full px-2 py-1 text-xs font-medium",
-                    ojtStatusBadgeClass(item.assignment.status),
-                  )}
-                >
-                  {ojtStatusLabel(item.assignment.status)}
-                </span>
-              </div>
-              <p className="mt-2 text-xs text-slate-500">
-                Due {formatDate(item.assignment.due_date)}
-                {item.catalogue
-                  ? ` · ${item.catalogue.effort_hours}h expected`
-                  : ""}
-              </p>
-              {item.latestEvidence ? (
-                <p className="mt-2 border-t border-slate-200 pt-2 text-xs text-slate-600">
-                  Evidence submitted {formatDate(item.latestEvidence.submitted_at)}
-                </p>
-              ) : null}
-            </div>
-          ))
+          result.data
+            .slice(0, 4)
+            .map((item) => (
+              <OjtAssignmentCard key={item.assignment.id} item={item} />
+            ))
         )}
       </CardContent>
     </Card>
+  )
+}
+
+function OjtAssignmentCard({ item }: { item: OjtAssignmentDetail }): JSX.Element {
+  const canSubmit = ["assigned", "in_progress", "rejected"].includes(
+    item.assignment.status,
+  )
+
+  return (
+    <div className="rounded-lg border border-slate-200 p-3">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-semibold text-slate-950">
+          {item.catalogue?.title ?? "OJT assignment"}
+        </p>
+        <span
+          className={cn(
+            "shrink-0 rounded-full px-2 py-1 text-xs font-medium",
+            ojtStatusBadgeClass(item.assignment.status),
+          )}
+        >
+          {ojtStatusLabel(item.assignment.status)}
+        </span>
+      </div>
+      <p className="mt-2 text-xs text-slate-500">
+        Due {formatDate(item.assignment.due_date)}
+        {item.catalogue ? ` · ${item.catalogue.effort_hours}h expected` : ""}
+      </p>
+      {item.latestEvidence ? (
+        <p className="mt-2 border-t border-slate-200 pt-2 text-xs text-slate-600">
+          Evidence submitted {formatDate(item.latestEvidence.submitted_at)}
+          {item.latestEvidence.validation_status
+            ? ` · ${evidenceStatusLabel(item.latestEvidence.validation_status)}`
+            : ""}
+        </p>
+      ) : null}
+      {canSubmit ? (
+        <form action={submitOjtEvidenceAction} className="mt-3 space-y-2">
+          <input type="hidden" name="assignmentId" value={item.assignment.id} />
+          <textarea
+            name="selfReflection"
+            minLength={20}
+            required
+            rows={3}
+            placeholder="Summarise what you completed and what evidence the manager should review."
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+          />
+          <Button type="submit" size="sm">
+            Submit evidence
+          </Button>
+        </form>
+      ) : null}
+    </div>
   )
 }
 
@@ -592,6 +613,19 @@ function ojtStatusLabel(status: OjtAssignmentDetail["assignment"]["status"]): st
           index === 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part,
         )
         .join(" ")
+  }
+}
+
+function evidenceStatusLabel(status: string): string {
+  switch (status) {
+    case "approved":
+      return "Approved"
+    case "changes_requested":
+      return "Changes requested"
+    case "rejected":
+      return "Rejected"
+    default:
+      return status
   }
 }
 

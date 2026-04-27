@@ -1822,6 +1822,23 @@ export type Database = {
         Returns: boolean
       }
       current_tenant_id: { Args: never; Returns: string }
+      submit_ojt_evidence: {
+        Args: {
+          p_assignment_id: string
+          p_self_reflection: string
+          p_artifact_urls?: string[]
+        }
+        Returns: string
+      }
+      validate_ojt_evidence: {
+        Args: {
+          p_evidence_id: string
+          p_status: string
+          p_notes?: string | null
+          p_checklist?: Json | null
+        }
+        Returns: string
+      }
     }
     Enums: {
       ai_node:

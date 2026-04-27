@@ -23,6 +23,7 @@ import {
   statusLabel,
 } from "@/lib/manager-cockpit/rollup"
 import { cn } from "@/lib/utils"
+import { validateOjtEvidenceAction } from "./actions"
 
 type PageProps = {
   searchParams?: Promise<{ employee?: string | string[] }>
@@ -60,15 +61,9 @@ export default async function ManagerTeamPage({
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
               Monitor direct-report IDP execution and spot plans that need
-              follow-up. Evidence validation actions remain disabled until
-              audited write paths land.
+              follow-up. Evidence validation writes through audited server-side
+              controls and feeds skill progression.
             </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button disabled>Certify validation</Button>
-            <Button variant="outline" disabled>
-              Request changes
-            </Button>
           </div>
         </div>
         {gate.profile.role === "coach" ? (
@@ -293,12 +288,6 @@ function EvidenceQueuePanel({
               Submitted direct-report evidence waiting for manager validation.
             </CardDescription>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button disabled>Certify validation</Button>
-            <Button variant="outline" disabled>
-              Request changes
-            </Button>
-          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -331,6 +320,48 @@ function EvidenceQueuePanel({
                 <p className="mt-3 line-clamp-2 text-sm text-slate-700">
                   {item.evidence.self_reflection}
                 </p>
+                <form
+                  action={validateOjtEvidenceAction}
+                  className="mt-3 space-y-2"
+                >
+                  <input type="hidden" name="evidenceId" value={item.evidence.id} />
+                  <textarea
+                    name="notes"
+                    minLength={5}
+                    required
+                    rows={2}
+                    placeholder="Add concise validation notes for the employee record."
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="submit"
+                      name="status"
+                      value="approved"
+                      size="sm"
+                    >
+                      Certify validation
+                    </Button>
+                    <Button
+                      type="submit"
+                      name="status"
+                      value="changes_requested"
+                      size="sm"
+                      variant="outline"
+                    >
+                      Request changes
+                    </Button>
+                    <Button
+                      type="submit"
+                      name="status"
+                      value="rejected"
+                      size="sm"
+                      variant="outline"
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                </form>
               </div>
             ))}
           </div>

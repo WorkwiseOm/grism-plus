@@ -19,9 +19,9 @@ Phase 1 moved from planning into local product implementation while keeping data
 - `97ebecf` — employee OJT assignment loader and read-only workspace panel.
 - `c946145` — manager OJT evidence queue loader and read-only cockpit panel.
 
-The work intentionally stayed inside local code: no Supabase migration was applied, no `supabase config push` was run, no Vercel/GitHub settings were changed, and no live AI calls were made. The pending Phase 1 schema draft remains local and uncommitted (`supabase/migrations/00013_phase1_development_model.sql` plus `scripts/verify_phase1_schema.ts`) until a real Postgres target can apply and verify it.
+The Phase 1 schema blocker was removed against the approved Supabase dev database only. `00013_phase1_development_model.sql` applied cleanly, `scripts/verify_phase1_schema.ts` passed 66/66 checks, and `00012_activate_vercel_subprocessor.sql` remains unapplied. `supabase config push` was not run.
 
-Current blocker to completing Phase 1 write workflows: `ojt_evidence` has read RLS only in the Phase 0 schema. Employee evidence submission and manager evidence validation should not be enabled until a verified migration adds narrow insert/update policies or server-side RPCs for those flows. The UI therefore shows OJT assignments and submitted evidence as read-only context, with validation/submission controls still disabled.
+The OJT write-path blocker was also removed for the dev schema. `00014_ojt_evidence_write_flows.sql` adds narrow server-side RPCs for employee evidence submission and manager/admin validation; rollback-only verification confirmed employee submission, manager approval, progression-event creation, and two denial paths. The employee workspace and manager cockpit now expose those flows through server actions.
 
 ### 2026-04-27 - Stitch Phase 1 design snapshot captured
 
