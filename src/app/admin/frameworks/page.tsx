@@ -11,9 +11,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { updateCompetencyAction } from "@/app/admin/frameworks/actions"
 import { requireRole } from "@/lib/auth/require-role"
-import { getFrameworkTree } from "@/lib/data"
+import { getFrameworkImpactSummary, getFrameworkTree } from "@/lib/data"
 import type { CompetencyNode, FrameworkTree } from "@/lib/data"
 import type { LoaderFailureReason } from "@/lib/data"
+import type { FrameworkImpactSummary } from "@/lib/framework-editor/impact"
 import {
   competencyEditErrorMessage,
   FRAMEWORK_CATEGORIES,
@@ -23,6 +24,7 @@ import {
   categoryLabel,
   countDescendants,
   findCompetencyNode,
+  flattenCompetencies,
   getProficiencyLevelCount,
   getProficiencyLevelLabels,
 } from "@/lib/framework-editor/tree"
@@ -56,6 +58,13 @@ export default async function AdminFrameworksPage({
   }
 
   const selected = findCompetencyNode(tree.data.roots, requestedCompetency)
+  const selectedScope = selected ? flattenCompetencies([selected]) : []
+  const impact = selected
+    ? await getFrameworkImpactSummary({
+        competencyIds: selectedScope.map((node) => node.id),
+        competencyCodes: selectedScope.map((node) => node.code),
+      })
+    : null
 
   return (
     <div className="flex flex-col gap-5">
@@ -125,7 +134,11 @@ export default async function AdminFrameworksPage({
           )}
         </Card>
 
-        <ImpactPanel node={selected} />
+        <ImpactPanel
+          node={selected}
+          impact={impact?.ok ? impact.data : null}
+          impactError={impact && !impact.ok ? loaderReasonMessage(impact.reason) : null}
+        />
       </div>
     </div>
   )
@@ -319,7 +332,15 @@ function SelectedCompetency({ node }: { node: CompetencyNode }): JSX.Element {
   )
 }
 
-function ImpactPanel({ node }: { node: CompetencyNode | null }): JSX.Element {
+function ImpactPanel({
+  node,
+  impact,
+  impactError,
+}: {
+  node: CompetencyNode | null
+  impact: FrameworkImpactSummary | null
+  impactError: string | null
+}): JSX.Element {
   return (
     <aside className="flex flex-col gap-5">
       <Card>
@@ -337,11 +358,39 @@ function ImpactPanel({ node }: { node: CompetencyNode | null }): JSX.Element {
             label="Proficiency levels"
             value={node ? String(getProficiencyLevelCount(node)) : "0"}
           />
+          <ImpactLine
+            label="Affected competencies"
+            value={impact ? String(impact.competencyCount) : "0"}
+          />
+          <ImpactLine
+            label="IDP milestones"
+            value={impact ? String(impact.milestoneCount) : "0"}
+          />
+          <ImpactLine
+            label="Affected IDPs"
+            value={impact ? String(impact.idpCount) : "0"}
+          />
+          <ImpactLine
+            label="Affected employees"
+            value={impact ? String(impact.employeeCount) : "0"}
+          />
+          <ImpactLine
+            label="OJT catalogue"
+            value={impact ? String(impact.ojtCatalogueCount) : "0"}
+          />
+          <ImpactLine
+            label="eLearning catalogue"
+            value={impact ? String(impact.elearningCatalogueCount) : "0"}
+          />
           <p className="border-t border-slate-200 pt-3 text-xs text-slate-500">
-            Active IDP impact counts require a follow-up loader that joins IDP
-            milestones against competencies. This screen does not perform extra
-            admin-client reads.
+            Counts use the same authenticated Supabase client and RLS posture
+            as the page. No privileged admin reads are used.
           </p>
+          {impactError ? (
+            <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              {impactError}
+            </p>
+          ) : null}
         </CardContent>
       </Card>
 

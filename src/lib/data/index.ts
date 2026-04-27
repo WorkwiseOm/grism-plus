@@ -50,6 +50,11 @@ export {
 } from "./framework"
 
 export {
+  getFrameworkImpactSummary,
+  type FrameworkImpactInput,
+} from "./framework-impact"
+
+export {
   getEmployeeOjtAssignments,
   getManagerOjtEvidenceQueue,
   buildOjtAssignmentDetails,
