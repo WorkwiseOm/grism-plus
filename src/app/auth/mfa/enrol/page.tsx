@@ -41,9 +41,26 @@ export default function EnrolPage() {
     let cancelled = false
     async function initEnrol(): Promise<void> {
       const supabase = createClient()
+      const { data: factorsData, error: factorsError } =
+        await supabase.auth.mfa.listFactors()
+
+      if (cancelled) return
+      if (factorsError) {
+        setState({ status: "error", message: factorsError.message })
+        return
+      }
+
+      const hasVerifiedTotp =
+        factorsData?.totp?.some((factor) => factor.status === "verified") ??
+        false
+      if (hasVerifiedTotp) {
+        router.replace("/auth/mfa/challenge")
+        return
+      }
+
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName: "Grism Plus",
+        friendlyName: `Grism Plus ${Date.now()}`,
       })
       if (cancelled) return
       if (error) {
@@ -68,7 +85,7 @@ export default function EnrolPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [router])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault()
