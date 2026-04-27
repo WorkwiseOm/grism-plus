@@ -78,8 +78,8 @@ export default async function AdminIdpsPage({
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
               Review generated and manual development plans before they move
-              into execution. Approval actions stay disabled until the Phase 1
-              schema is applied and verified.
+              into execution. Approval stores the 70/20/10 snapshot before the
+              plan becomes active.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -601,6 +601,12 @@ function notificationFor(
       return {
         tone: "red",
         message: "Approval failed. Refresh the queue and try again.",
+      }
+    case "blend_snapshot_failed":
+      return {
+        tone: "red",
+        message:
+          "The 70/20/10 snapshot could not be stored, so the IDP was not approved.",
       }
     default:
       return null
