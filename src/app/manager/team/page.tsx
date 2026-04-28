@@ -32,7 +32,7 @@ type PageProps = {
 export default async function ManagerTeamPage({
   searchParams,
 }: PageProps): Promise<JSX.Element> {
-  const gate = await requireRole(["manager", "coach"])
+  await requireRole(["manager"])
   const params = await searchParams
   const requestedEmployeeId = Array.isArray(params?.employee)
     ? params?.employee[0]
@@ -66,12 +66,6 @@ export default async function ManagerTeamPage({
             </p>
           </div>
         </div>
-        {gate.profile.role === "coach" ? (
-          <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            Coach users currently share the manager shell, but coach-specific
-            assignment scoping is still blocked before pilot exposure.
-          </p>
-        ) : null}
       </header>
 
       <section className="grid gap-3 md:grid-cols-6">

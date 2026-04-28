@@ -103,7 +103,7 @@ describe("requireRole", () => {
     })
   })
 
-  it("/manager allow list ['manager','coach'] accepts a coach", async () => {
+  it("/manager allow list ['manager'] rejects a coach", async () => {
     getUserMock.mockResolvedValue({
       data: { user: { id: "u2", email: "coach@example.com" } },
     })
@@ -111,7 +111,18 @@ describe("requireRole", () => {
       data: { role: "coach", tenant_id: "t-1" },
       error: null,
     })
-    const result = await requireRole(["manager", "coach"])
+    await expectRedirect(requireRole(["manager"]), "/")
+  })
+
+  it("/coach allow list ['coach'] accepts a coach", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "u2", email: "coach@example.com" } },
+    })
+    profileSingleMock.mockResolvedValue({
+      data: { role: "coach", tenant_id: "t-1" },
+      error: null,
+    })
+    const result = await requireRole(["coach"])
     expect(result.profile.role).toBe("coach")
   })
 

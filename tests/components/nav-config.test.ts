@@ -35,10 +35,8 @@ describe("getNavItemsForRole", () => {
     ])
   })
 
-  it("coach sees the same manager nav as manager (Phase 1 mapping)", () => {
-    const manager = getNavItemsForRole("manager")
-    const coach = getNavItemsForRole("coach")
-    expect(coach).toEqual(manager)
+  it("coach has no product navigation until assignment-scoped RLS exists", () => {
+    expect(getNavItemsForRole("coach")).toEqual([])
   })
 
   it("employee sees the IDP workspace", () => {

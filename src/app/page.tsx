@@ -43,10 +43,9 @@ export default async function Home() {
     case "employee":
       redirect("/employee")
     case "manager":
-    case "coach":
-      // Coach uses the manager landing for slice 1; splitting into a
-      // dedicated /coach route tracked as a Phase 1 scope decision.
       redirect("/manager")
+    case "coach":
+      redirect("/coach")
     case "ld_admin":
     case "superadmin":
       redirect("/admin")

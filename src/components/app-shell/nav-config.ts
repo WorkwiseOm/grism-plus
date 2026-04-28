@@ -26,10 +26,9 @@ export type NavSection = {
  * Pure mapping from role to nav structure. Labels match the Stitch
  * snapshot vocabulary so screen contracts and shell stay aligned.
  *
- * Coach maps to the manager section for Phase 1, matching the existing
- * /manager landing decision in src/app/page.tsx and require-role.ts.
- * Coach gets its own RLS work + (potentially) its own /coach surface
- * later; for now the operational view is the manager cockpit.
+ * Coach intentionally has no product navigation until assigned-coachee
+ * RLS exists. This prevents coach users from inheriting manager tenant
+ * visibility through Phase 0 policies.
  *
  * Superadmin sees the L&D admin nav because /admin allows both roles
  * (require-role.ts allow-list). When a real cross-tenant superadmin
@@ -52,13 +51,14 @@ export function getNavItemsForRole(role: UserRole): NavSection[] {
         },
       ]
     case "manager":
-    case "coach":
       return [
         {
           heading: "Manager",
           items: [{ label: "Team Cockpit", href: "/manager/team" }],
         },
       ]
+    case "coach":
+      return []
     case "employee":
       return [
         {

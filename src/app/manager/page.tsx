@@ -8,9 +8,7 @@ import {
 import { requireRole } from "@/lib/auth/require-role"
 
 export default async function ManagerHome() {
-  // Coach uses the manager landing for slice 1; splitting into a
-  // dedicated /coach route is tracked as a Phase 1 scope decision.
-  await requireRole(["manager", "coach"])
+  await requireRole(["manager"])
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
