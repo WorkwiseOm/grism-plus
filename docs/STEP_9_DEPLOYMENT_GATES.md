@@ -67,15 +67,9 @@ The first deployment to a fresh Vercel project is **auto-promoted to production*
 
 This means a deploy intended as a throwaway smoke test will, by default, become the project's production deployment and claim the bare `<project>.vercel.app` alias.
 
-Mitigation when a true preview is wanted on a project that has not yet had a production deploy:
+Confirmed follow-up: `vercel deploy --target preview` did **not** avoid this on a second fresh team-scope project. Observed 2026-04-27 against `tilqai-grism/grism-plus-app`: the CLI still returned `"target": "production"` and claimed the `grism-plus-app.vercel.app` alias.
 
-```bash
-vercel deploy --target preview
-```
-
-Verify by checking that the CLI JSON returns `"target": "preview"` and that the project's bare alias is not assigned to the new deployment.
-
-For projects that already have a production deployment, plain `vercel deploy` produces a preview as expected; only the first deploy is special.
+Current working rule: assume the first deploy of any fresh Vercel project will become production regardless of `--target preview`. If a true preview-only smoke is required, create the project under a throwaway name/scope, accept the first auto-production deploy as isolated, then tear it down or recreate the intended production project after the smoke check. For projects that already have a production deployment, plain `vercel deploy` produces a preview as expected; only the first deploy is special.
 
 Default deployment protection is also a surprise to be aware of: new projects under a Vercel team scope (including auto-named personal `*-projects` scopes) ship with **Vercel SSO** required on every deployment. External smoke checks via `curl` will receive 401 + `Set-Cookie: _vercel_sso_nonce=…` and never reach application code. This is correct behaviour for non-public deployments; opening the URL in a Vercel-authenticated browser bypasses it. For automated smoke checks, the supported path is a per-project Protection Bypass for Automation token rather than disabling SSO globally.
 
