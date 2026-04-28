@@ -366,6 +366,8 @@ Minimum screen quality:
 
 ## Pilot Readiness Gates
 
+Closeout checklist: [`PHASE_1_READINESS_CHECKLIST.md`](PHASE_1_READINESS_CHECKLIST.md).
+
 Before any pilot user gets access:
 
 - CI is required in GitHub branch protection.
