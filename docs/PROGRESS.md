@@ -2,6 +2,24 @@
 
 ## Phase 0 progress
 
+### 2026-04-28 - Phase 1 implementation pass extended
+
+Phase 1 implementation continued past the first read-only screen pass. The following local commits are now on `master` after `c946145`:
+
+- `105124c` - audited OJT evidence write flows for employee submission and manager/admin validation.
+- `0e0914b` - IDP approval now persists Phase 1 blend snapshots and per-action allocations.
+- `96ee340` - sign-in now refreshes `last_activity_at` so immediate post-login idle checks do not expire fresh sessions.
+- `6dda66f` - MFA enrolment now handles pre-existing factors without trapping users on a missing-QR screen.
+- `9762a1a` - framework editor write policies tightened and recursion-safe helper applied.
+- `59d4cbd` - L&D framework editor can create and edit competency rows through audited server actions.
+- `d13637f` - framework editor shows impact counts before competency edits.
+- `8c5dd75` - guarded AI IDP draft generation added behind explicit L&D admin action, pseudonymisation, blend validation, and structured error logging.
+- `38a5681` - Unberry assessment import adapter added as a local validation/mapping layer only; no external Unberry call is wired.
+- `e4a1c54` - deterministic nudge planning helpers added for future email/notification queues; no email is sent yet.
+- `222800f` - coach users are routed to a gated coach workspace until assigned-coachee RLS exists, instead of inheriting manager screens.
+
+Verification on the latest tree passed: lint, typecheck, tests, and production build. The test suite currently reports 160 passing tests with 13 opt-in E2E tests skipped. `00012_activate_vercel_subprocessor.sql` remains unapplied, and `supabase config push` was not run.
+
 ### 2026-04-27 - Phase 1 implementation pass started
 
 Phase 1 moved from planning into local product implementation while keeping database and external-service gates intact. The following local commits are now on `master` after `ba1d8a4`:
