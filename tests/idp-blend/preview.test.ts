@@ -17,6 +17,7 @@ const baseDetail: IdpDetail = {
     version: 1,
     narrative: null,
     narrative_source: null,
+    ai_generation_metadata: null,
     generated_by_ai: true,
     target_completion_date: null,
     approved_at: null,

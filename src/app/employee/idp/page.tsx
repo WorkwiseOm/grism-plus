@@ -38,6 +38,7 @@ import {
   blendIssueSummary,
   buildIdpBlendPreview,
 } from "@/lib/idp-blend/preview"
+import { latestIdpReviewFeedback } from "@/lib/idp-approval/review"
 import { cn } from "@/lib/utils"
 import { submitOjtEvidenceAction } from "./actions"
 
@@ -128,6 +129,7 @@ function WorkspaceDetail({
   const nextMilestone = getNextMilestone(detail)
   const blendPreview = buildIdpBlendPreview(detail)
   const blendIssue = blendIssueSummary(blendPreview.guard)
+  const latestReview = latestIdpReviewFeedback(detail.idp.ai_generation_metadata)
 
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_340px]">
@@ -241,6 +243,8 @@ function WorkspaceDetail({
       </div>
 
       <aside className="flex flex-col gap-5">
+        {latestReview ? <LatestReviewFeedback entry={latestReview} /> : null}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-base">My IDPs</CardTitle>
@@ -306,6 +310,31 @@ function WorkspaceDetail({
         ) : null}
       </aside>
     </div>
+  )
+}
+
+function LatestReviewFeedback({
+  entry,
+}: {
+  entry: NonNullable<ReturnType<typeof latestIdpReviewFeedback>>
+}): JSX.Element {
+  return (
+    <Card className="border-amber-200 bg-amber-50">
+      <CardHeader>
+        <CardTitle className="text-base text-amber-950">
+          L&amp;D feedback
+        </CardTitle>
+        <CardDescription className="text-amber-800">
+          {entry.disposition === "rejected"
+            ? "Returned to draft"
+            : "Changes requested"}{" "}
+          on {formatDate(entry.reviewed_at)}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm leading-6 text-amber-950">{entry.comment}</p>
+      </CardContent>
+    </Card>
   )
 }
 

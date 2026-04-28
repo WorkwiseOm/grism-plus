@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import type { Database } from "@/lib/types/database"
+import type { Database, Json } from "@/lib/types/database"
 import { fail, ok, type LoaderResult } from "./types"
 
 type IdpStatus = Database["public"]["Enums"]["idp_status"]
@@ -166,6 +166,7 @@ export type IdpDetail = {
     version: number
     narrative: string | null
     narrative_source: string | null
+    ai_generation_metadata: Json | null
     generated_by_ai: boolean
     target_completion_date: string | null
     approved_at: string | null
@@ -201,7 +202,7 @@ export async function getIdpDetail(
   const { data: idp, error: idpErr } = await supabase
     .from("idps")
     .select(
-      "id, tenant_id, employee_id, status, version, narrative, narrative_source, generated_by_ai, target_completion_date, approved_at, approved_by, published_at, last_activity_at, created_at, updated_at",
+      "id, tenant_id, employee_id, status, version, narrative, narrative_source, ai_generation_metadata, generated_by_ai, target_completion_date, approved_at, approved_by, published_at, last_activity_at, created_at, updated_at",
     )
     .eq("id", idpId)
     .is("deleted_at", null)
@@ -279,6 +280,7 @@ export async function getIdpDetail(
       version: idp.version,
       narrative: idp.narrative,
       narrative_source: idp.narrative_source,
+      ai_generation_metadata: idp.ai_generation_metadata,
       generated_by_ai: idp.generated_by_ai,
       target_completion_date: idp.target_completion_date,
       approved_at: idp.approved_at,

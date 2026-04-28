@@ -11,7 +11,12 @@ import { requireRole } from "@/lib/auth/require-role"
 import { getIdpDetail, getIdpSummaryList } from "@/lib/data/idps"
 import type { IdpDetail, IdpSummaryRow } from "@/lib/data/idps"
 import type { LoaderFailureReason } from "@/lib/data/types"
-import { approveIdpAction, generateAiIdpDraftAction } from "./actions"
+import {
+  approveIdpAction,
+  generateAiIdpDraftAction,
+  rejectIdpAction,
+  requestIdpChangesAction,
+} from "./actions"
 import {
   APPROVAL_QUEUE_STATUS_ORDER,
   buildActionMix,
@@ -32,6 +37,7 @@ import {
   blendIssueSummary,
   buildIdpBlendPreview,
 } from "@/lib/idp-blend/preview"
+import { latestIdpReviewFeedback } from "@/lib/idp-approval/review"
 import { cn } from "@/lib/utils"
 
 type PageProps = {
@@ -95,9 +101,6 @@ export default async function AdminIdpsPage({
                 Approve IDP
               </Button>
             </form>
-            <Button variant="outline" disabled>
-              Request changes
-            </Button>
           </div>
         </div>
       </header>
@@ -294,6 +297,8 @@ function SelectedIdpDetail({
   const actionCount = countActions(detail)
   const blendPreview = buildIdpBlendPreview(detail)
   const blendIssue = blendIssueSummary(blendPreview.guard)
+  const latestReview = latestIdpReviewFeedback(detail.idp.ai_generation_metadata)
+  const canReturnForRevision = detail.idp.status === "pending_approval"
 
   return (
     <>
@@ -458,8 +463,80 @@ function SelectedIdpDetail({
             </p>
           </section>
         ) : null}
+
+        {latestReview ? <LatestReviewFeedback entry={latestReview} /> : null}
+
+        <section className="rounded-lg border border-slate-200 p-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold text-slate-950">
+              Return for revision
+            </h2>
+            <p className="text-xs text-slate-600">
+              Request changes keeps the IDP pending. Reject moves it back to
+              draft and increments the version.
+            </p>
+          </div>
+          {canReturnForRevision ? (
+            <form className="mt-3 space-y-3">
+              <input type="hidden" name="idpId" value={detail.idp.id} />
+              <textarea
+                name="reviewComment"
+                minLength={10}
+                maxLength={1200}
+                required
+                rows={3}
+                placeholder="Tell the author what needs to change before this plan can move forward."
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="submit"
+                  variant="outline"
+                  formAction={requestIdpChangesAction}
+                >
+                  Request changes
+                </Button>
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  formAction={rejectIdpAction}
+                >
+                  Reject to draft
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <p className="mt-3 text-sm text-slate-600">
+              Revision actions are available only while the IDP is pending
+              approval.
+            </p>
+          )}
+        </section>
       </CardContent>
     </>
+  )
+}
+
+function LatestReviewFeedback({
+  entry,
+}: {
+  entry: NonNullable<ReturnType<typeof latestIdpReviewFeedback>>
+}): JSX.Element {
+  return (
+    <section className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-sm font-semibold text-amber-950">
+          Latest review feedback
+        </h2>
+        <p className="text-xs text-amber-800">
+          {entry.disposition === "rejected"
+            ? "Rejected to draft"
+            : "Changes requested"}{" "}
+          on {formatDate(entry.reviewed_at)}.
+        </p>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-amber-950">{entry.comment}</p>
+    </section>
   )
 }
 
@@ -595,6 +672,18 @@ function notificationFor(
       message: "AI draft generated and stored for review.",
     }
   }
+  if (updated === "changes_requested") {
+    return {
+      tone: "green",
+      message: "Changes requested. The review comment is now on the IDP.",
+    }
+  }
+  if (updated === "rejected") {
+    return {
+      tone: "green",
+      message: "IDP rejected to draft with review feedback preserved.",
+    }
+  }
 
   switch (error) {
     case "missing_idp":
@@ -608,6 +697,26 @@ function notificationFor(
       return {
         tone: "red",
         message: "Only draft or pending-approval IDPs can be approved.",
+      }
+    case "not_reviewable":
+      return {
+        tone: "red",
+        message: "Only pending-approval IDPs can be returned for revision.",
+      }
+    case "review_comment_required":
+      return {
+        tone: "red",
+        message: "Add a short review comment before returning the IDP.",
+      }
+    case "review_comment_too_long":
+      return {
+        tone: "red",
+        message: "Review comment is too long. Keep it under 1,200 characters.",
+      }
+    case "review_update_failed":
+      return {
+        tone: "red",
+        message: "Review feedback could not be saved. Try again.",
       }
     case "approve_failed":
       return {

@@ -7,6 +7,11 @@ import { generateIdpDraft } from "@/lib/ai/idp-generation"
 import { classifyModalityForBlend } from "@/lib/ai/development-guards"
 import { getIdpDetail } from "@/lib/data"
 import { canApproveIdpStatus } from "@/lib/idp-approval/queue"
+import {
+  buildIdpReviewUpdate,
+  validateIdpReviewComment,
+  type IdpReviewDisposition,
+} from "@/lib/idp-approval/review"
 import { buildIdpBlendPreview } from "@/lib/idp-blend/preview"
 import { pseudonymiseEmployee } from "@/lib/security/pseudonymise"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -186,6 +191,87 @@ export async function approveIdpAction(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/idps")
   redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&updated=approved`)
+}
+
+export async function requestIdpChangesAction(
+  formData: FormData,
+): Promise<void> {
+  await reviewIdpAction(formData, "changes_requested")
+}
+
+export async function rejectIdpAction(formData: FormData): Promise<void> {
+  await reviewIdpAction(formData, "rejected")
+}
+
+async function reviewIdpAction(
+  formData: FormData,
+  disposition: IdpReviewDisposition,
+): Promise<void> {
+  const idpId = String(formData.get("idpId") ?? "").trim()
+  if (!idpId) redirect("/admin/idps?error=missing_idp")
+
+  const comment = validateIdpReviewComment(
+    String(formData.get("reviewComment") ?? ""),
+  )
+  if (!comment.ok) {
+    redirect(
+      `/admin/idps?idp=${encodeURIComponent(idpId)}&error=${comment.code}`,
+    )
+  }
+
+  const { user } = await requireRole(["ld_admin", "superadmin"])
+  const supabase = await createClient()
+
+  const { data: current, error: loadError } = await supabase
+    .from("idps")
+    .select("status, version, ai_generation_metadata")
+    .eq("id", idpId)
+    .is("deleted_at", null)
+    .single()
+
+  if (loadError || !current) {
+    redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&error=not_found`)
+  }
+
+  if (current.status !== "pending_approval") {
+    redirect(
+      `/admin/idps?idp=${encodeURIComponent(idpId)}&error=not_reviewable`,
+    )
+  }
+
+  const now = new Date().toISOString()
+  const reviewUpdate = buildIdpReviewUpdate({
+    disposition,
+    currentVersion: current.version,
+    existingMetadata: current.ai_generation_metadata,
+    entry: {
+      disposition,
+      comment: comment.comment,
+      reviewed_by: user.id,
+      reviewed_at: now,
+    },
+    now,
+  })
+
+  const { data: updated, error: updateError } = await supabase
+    .from("idps")
+    .update(reviewUpdate)
+    .eq("id", idpId)
+    .is("deleted_at", null)
+    .select("id")
+    .single()
+
+  if (updateError || !updated) {
+    redirect(
+      `/admin/idps?idp=${encodeURIComponent(idpId)}&error=review_update_failed`,
+    )
+  }
+
+  revalidatePath("/admin/idps")
+  revalidatePath("/employee/idp")
+  redirect(
+    `/admin/idps?idp=${encodeURIComponent(idpId)}&updated=${disposition}`,
+  )
 }
 
 async function logAiGenerationError({
