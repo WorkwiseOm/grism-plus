@@ -3,15 +3,138 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { requireRole } from "@/lib/auth/require-role"
+import { generateIdpDraft } from "@/lib/ai/idp-generation"
 import { classifyModalityForBlend } from "@/lib/ai/development-guards"
 import { getIdpDetail } from "@/lib/data"
 import { canApproveIdpStatus } from "@/lib/idp-approval/queue"
 import { buildIdpBlendPreview } from "@/lib/idp-blend/preview"
+import { pseudonymiseEmployee } from "@/lib/security/pseudonymise"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
 import type { Database } from "@/lib/types/database"
 
 type IdpStatus = Database["public"]["Enums"]["idp_status"]
+type Employee = Database["public"]["Tables"]["employees"]["Row"]
 type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>
+
+export async function generateAiIdpDraftAction(
+  formData: FormData,
+): Promise<void> {
+  const idpId = String(formData.get("idpId") ?? "").trim()
+  if (!idpId) redirect("/admin/idps?error=missing_idp")
+
+  await requireRole(["ld_admin", "superadmin"])
+  const supabase = await createClient()
+
+  const detail = await getIdpDetail(idpId)
+  if (!detail.ok) {
+    redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&error=not_found`)
+  }
+
+  const { data: employee, error: employeeError } = await supabase
+    .from("employees")
+    .select("*")
+    .eq("id", detail.data.idp.employee_id)
+    .is("deleted_at", null)
+    .single()
+
+  if (employeeError || !employee) {
+    await logAiGenerationError({
+      tenantId: detail.data.idp.tenant_id,
+      idpId,
+      reason: "employee_not_found",
+      message: employeeError?.message ?? "Employee row not found.",
+    })
+    redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&error=ai_employee_missing`)
+  }
+
+  const competencyGaps = detail.data.milestones
+    .filter((milestone) => milestone.competency !== null)
+    .map((milestone) => ({
+      competencyCode: milestone.competency?.code ?? "",
+      competencyName: milestone.competency?.name ?? "",
+      category: milestone.competency?.category ?? "technical",
+      currentProficiency: `Gap score at creation: ${milestone.milestone.gap_score_at_creation}/100`,
+      targetProficiency: "Target proficiency for this role",
+      gapScore0To100: milestone.milestone.gap_score_at_creation,
+    }))
+
+  if (competencyGaps.length === 0) {
+    await logAiGenerationError({
+      tenantId: detail.data.idp.tenant_id,
+      idpId,
+      reason: "no_competency_gaps",
+      message: "IDP has no competency-linked milestones.",
+    })
+    redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&error=ai_no_gaps`)
+  }
+
+  const generated = await generateIdpDraft({
+    employee: pseudonymiseEmployee(employee as Employee, idpId),
+    targetRoleTitle: employee.target_role_title,
+    competencyGaps,
+    constraints: {
+      maxMilestones: Math.max(1, detail.data.milestones.length),
+      preferredTargetDays: 90,
+    },
+  })
+
+  if (!generated.ok) {
+    await logAiGenerationError({
+      tenantId: detail.data.idp.tenant_id,
+      idpId,
+      reason: generated.reason,
+      message: generated.message,
+      validationIssues: generated.validation?.issues.map((issue) => ({
+        code: issue.code,
+        path: issue.path,
+        message: issue.message,
+      })),
+    })
+    redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&error=ai_generation_failed`)
+  }
+
+  const now = new Date().toISOString()
+  const metadata = {
+    node: "idp_generation",
+    generated_at: now,
+    model: generated.completion.model,
+    stop_reason: generated.completion.stopReason,
+    usage: generated.completion.usage,
+    validation: {
+      action_count: generated.validation.actionCount,
+      computed_blend: generated.validation.computedBlend,
+    },
+    draft: generated.draft,
+  } as unknown as Database["public"]["Tables"]["idps"]["Update"]["ai_generation_metadata"]
+
+  const { data: updated, error: updateError } = await supabase
+    .from("idps")
+    .update({
+      narrative: generated.draft.narrative ?? null,
+      narrative_source: "ai_generated",
+      generated_by_ai: true,
+      ai_generation_metadata: metadata,
+      last_activity_at: now,
+    })
+    .eq("id", idpId)
+    .is("deleted_at", null)
+    .select("id")
+    .single()
+
+  if (updateError || !updated) {
+    await logAiGenerationError({
+      tenantId: detail.data.idp.tenant_id,
+      idpId,
+      reason: "idp_update_failed",
+      message: updateError?.message ?? "IDP update failed.",
+    })
+    redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&error=ai_update_failed`)
+  }
+
+  revalidatePath("/admin/idps")
+  redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&updated=ai_draft_generated`)
+}
 
 export async function approveIdpAction(formData: FormData): Promise<void> {
   const idpId = String(formData.get("idpId") ?? "").trim()
@@ -63,6 +186,36 @@ export async function approveIdpAction(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/idps")
   redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&updated=approved`)
+}
+
+async function logAiGenerationError({
+  tenantId,
+  idpId,
+  reason,
+  message,
+  validationIssues,
+}: {
+  tenantId: string | null
+  idpId: string
+  reason: string
+  message: string
+  validationIssues?: Array<{ code: string; path: string; message: string }>
+}): Promise<void> {
+  try {
+    const admin = createAdminClient()
+    await admin.from("error_log").insert({
+      tenant_id: tenantId,
+      ai_node: "idp_generation",
+      error_message: message,
+      context: {
+        idp_id: idpId,
+        reason,
+        validation_issues: validationIssues ?? [],
+      },
+    })
+  } catch {
+    // Do not block the user-facing redirect if error logging itself fails.
+  }
 }
 
 async function persistIdpBlendArtifacts(

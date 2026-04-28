@@ -11,7 +11,7 @@ import { requireRole } from "@/lib/auth/require-role"
 import { getIdpDetail, getIdpSummaryList } from "@/lib/data/idps"
 import type { IdpDetail, IdpSummaryRow } from "@/lib/data/idps"
 import type { LoaderFailureReason } from "@/lib/data/types"
-import { approveIdpAction } from "./actions"
+import { approveIdpAction, generateAiIdpDraftAction } from "./actions"
 import {
   APPROVAL_QUEUE_STATUS_ORDER,
   buildActionMix,
@@ -83,6 +83,12 @@ export default async function AdminIdpsPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <form action={generateAiIdpDraftAction}>
+              <input type="hidden" name="idpId" value={selected?.id ?? ""} />
+              <Button type="submit" variant="outline" disabled={!selected}>
+                Generate AI draft
+              </Button>
+            </form>
             <form action={approveIdpAction}>
               <input type="hidden" name="idpId" value={selected?.id ?? ""} />
               <Button type="submit" disabled={!selected || !canApproveSelected}>
@@ -583,6 +589,12 @@ function notificationFor(
   if (updated === "approved") {
     return { tone: "green", message: "IDP approved and moved to active." }
   }
+  if (updated === "ai_draft_generated") {
+    return {
+      tone: "green",
+      message: "AI draft generated and stored for review.",
+    }
+  }
 
   switch (error) {
     case "missing_idp":
@@ -607,6 +619,28 @@ function notificationFor(
         tone: "red",
         message:
           "The 70/20/10 snapshot could not be stored, so the IDP was not approved.",
+      }
+    case "ai_employee_missing":
+      return {
+        tone: "red",
+        message: "AI draft generation could not find the employee context.",
+      }
+    case "ai_no_gaps":
+      return {
+        tone: "red",
+        message:
+          "AI draft generation needs at least one competency-linked milestone.",
+      }
+    case "ai_generation_failed":
+      return {
+        tone: "red",
+        message:
+          "AI draft generation failed or returned a draft outside the guardrails.",
+      }
+    case "ai_update_failed":
+      return {
+        tone: "red",
+        message: "AI draft was generated but could not be stored.",
       }
     default:
       return null
