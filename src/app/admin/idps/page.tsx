@@ -24,11 +24,14 @@ import {
   canApproveIdpStatus,
   countActions,
   countMilestonesByStatus,
+  filterApprovalQueueRows,
   formatDate,
   milestoneStatusLabel,
   modalityLabel,
+  parseApprovalQueueStatusFilter,
   selectApprovalQueueRow,
   statusLabel,
+  type ApprovalQueueStatusFilter,
 } from "@/lib/idp-approval/queue"
 import {
   blendCategoryDescription,
@@ -43,6 +46,7 @@ import { cn } from "@/lib/utils"
 type PageProps = {
   searchParams?: Promise<{
     idp?: string | string[]
+    status?: string | string[]
     updated?: string | string[]
     error?: string | string[]
   }>
@@ -55,6 +59,7 @@ export default async function AdminIdpsPage({
 
   const params = await searchParams
   const requestedId = firstParam(params?.idp)
+  const statusFilter = parseApprovalQueueStatusFilter(firstParam(params?.status))
   const updated = firstParam(params?.updated)
   const error = firstParam(params?.error)
   const summaries = await getIdpSummaryList()
@@ -64,7 +69,8 @@ export default async function AdminIdpsPage({
   }
 
   const stats = buildApprovalQueueStats(summaries.data)
-  const selected = selectApprovalQueueRow(summaries.data, requestedId)
+  const filteredRows = filterApprovalQueueRows(summaries.data, statusFilter)
+  const selected = selectApprovalQueueRow(filteredRows, requestedId)
   const detail = selected ? await getIdpDetail(selected.id) : null
   const canApproveSelected = selected
     ? canApproveIdpStatus(selected.status)
@@ -123,8 +129,15 @@ export default async function AdminIdpsPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <StatusSummary rows={summaries.data} />
-            <QueueList rows={summaries.data} selectedId={selected?.id ?? null} />
+            <StatusSummary
+              rows={summaries.data}
+              activeFilter={statusFilter}
+            />
+            <QueueList
+              rows={filteredRows}
+              selectedId={selected?.id ?? null}
+              statusFilter={statusFilter}
+            />
           </CardContent>
         </Card>
 
@@ -190,36 +203,77 @@ function QueueNotification({
   )
 }
 
-function StatusSummary({ rows }: { rows: IdpSummaryRow[] }): JSX.Element {
+function StatusSummary({
+  rows,
+  activeFilter,
+}: {
+  rows: IdpSummaryRow[]
+  activeFilter: ApprovalQueueStatusFilter
+}): JSX.Element {
   return (
     <div className="grid grid-cols-2 gap-2 border-b border-slate-200 bg-slate-50 p-3 text-xs sm:grid-cols-3">
-      {APPROVAL_QUEUE_STATUS_ORDER.map((status) => {
-        const count = rows.filter((row) => row.status === status).length
-        return (
-          <div
-            key={status}
-            className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-2 py-1.5"
-          >
-            <span className="text-slate-600">{statusLabel(status)}</span>
-            <span className="font-semibold text-slate-900">{count}</span>
-          </div>
-        )
-      })}
+      <StatusFilterLink
+        href="/admin/idps"
+        label="All"
+        count={rows.length}
+        active={activeFilter === "all"}
+      />
+      {APPROVAL_QUEUE_STATUS_ORDER.map((status) => (
+        <StatusFilterLink
+          key={status}
+          href={`/admin/idps?status=${status}`}
+          label={statusLabel(status)}
+          count={rows.filter((row) => row.status === status).length}
+          active={activeFilter === status}
+        />
+      ))}
     </div>
+  )
+}
+
+function StatusFilterLink({
+  href,
+  label,
+  count,
+  active,
+}: {
+  href: string
+  label: string
+  count: number
+  active: boolean
+}): JSX.Element {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex items-center justify-between rounded-md border px-2 py-1.5",
+        active
+          ? "border-slate-900 bg-slate-900 text-white"
+          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100",
+      )}
+    >
+      <span>{label}</span>
+      <span className={cn("font-semibold", active ? "text-white" : "text-slate-900")}>
+        {count}
+      </span>
+    </Link>
   )
 }
 
 function QueueList({
   rows,
   selectedId,
+  statusFilter,
 }: {
   rows: IdpSummaryRow[]
   selectedId: string | null
+  statusFilter: ApprovalQueueStatusFilter
 }): JSX.Element {
   if (rows.length === 0) {
     return (
       <div className="p-6 text-sm text-slate-600">
-        No IDPs are visible for this tenant yet.
+        No IDPs match this queue filter.
       </div>
     )
   }
@@ -239,7 +293,7 @@ function QueueList({
         return (
           <Link
             key={row.id}
-            href={`/admin/idps?idp=${row.id}`}
+            href={queueRowHref(row.id, statusFilter)}
             aria-current={active ? "page" : undefined}
             className={cn(
               "block p-4 transition-colors",
@@ -283,6 +337,15 @@ function QueueList({
       })}
     </div>
   )
+}
+
+function queueRowHref(
+  idpId: string,
+  statusFilter: ApprovalQueueStatusFilter,
+): string {
+  const params = new URLSearchParams({ idp: idpId })
+  if (statusFilter !== "all") params.set("status", statusFilter)
+  return `/admin/idps?${params.toString()}`
 }
 
 function SelectedIdpDetail({

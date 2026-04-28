@@ -7,9 +7,11 @@ import {
   canApproveIdpStatus,
   countActions,
   countMilestonesByStatus,
+  filterApprovalQueueRows,
   formatDate,
   milestoneStatusLabel,
   modalityLabel,
+  parseApprovalQueueStatusFilter,
   selectApprovalQueueRow,
   statusLabel,
 } from "@/lib/idp-approval/queue"
@@ -109,6 +111,31 @@ describe("buildApprovalQueueStats", () => {
       aiGenerated: 2,
       stalled: 1,
     })
+  })
+})
+
+describe("approval queue filters", () => {
+  it("parses known statuses and falls back to all", () => {
+    expect(parseApprovalQueueStatusFilter("pending_approval")).toBe(
+      "pending_approval",
+    )
+    expect(parseApprovalQueueStatusFilter("all")).toBe("all")
+    expect(parseApprovalQueueStatusFilter("unknown")).toBe("all")
+    expect(parseApprovalQueueStatusFilter(undefined)).toBe("all")
+  })
+
+  it("filters rows by status without mutating the source list", () => {
+    const rows = [
+      summary({ id: "a", status: "pending_approval" }),
+      summary({ id: "b", status: "active" }),
+      summary({ id: "c", status: "pending_approval" }),
+    ]
+
+    expect(
+      filterApprovalQueueRows(rows, "pending_approval").map((row) => row.id),
+    ).toEqual(["a", "c"])
+    expect(filterApprovalQueueRows(rows, "all")).toEqual(rows)
+    expect(filterApprovalQueueRows(rows, "all")).not.toBe(rows)
   })
 })
 

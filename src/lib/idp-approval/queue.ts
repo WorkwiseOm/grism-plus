@@ -26,6 +26,8 @@ export type ApprovalQueueStats = {
   stalled: number
 }
 
+export type ApprovalQueueStatusFilter = IdpStatus | "all"
+
 export function buildApprovalQueueStats(
   rows: ReadonlyArray<IdpSummaryRow>,
 ): ApprovalQueueStats {
@@ -53,6 +55,21 @@ export function selectApprovalQueueRow(
     rows.find((row) => row.status === "draft") ??
     rows[0]
   )
+}
+
+export function parseApprovalQueueStatusFilter(
+  value?: string | null,
+): ApprovalQueueStatusFilter {
+  if (!value || value === "all") return "all"
+  return isIdpStatus(value) ? value : "all"
+}
+
+export function filterApprovalQueueRows(
+  rows: ReadonlyArray<IdpSummaryRow>,
+  status: ApprovalQueueStatusFilter,
+): IdpSummaryRow[] {
+  if (status === "all") return [...rows]
+  return rows.filter((row) => row.status === status)
 }
 
 export function statusLabel(status: IdpStatus): string {
@@ -158,4 +175,8 @@ function titleCase(value: string): string {
       index === 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part,
     )
     .join(" ")
+}
+
+function isIdpStatus(value: string): value is IdpStatus {
+  return APPROVAL_QUEUE_STATUS_ORDER.includes(value as IdpStatus)
 }
