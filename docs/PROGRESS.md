@@ -2,6 +2,17 @@
 
 ## Phase 0 progress
 
+### 2026-04-28 - Phase 1 approval and cockpit polish
+
+Continued the Phase 1 product pass with four more local commits on `master`:
+
+- `1acab32` - L&D admins can request changes or reject pending IDPs with review feedback stored on the IDP metadata; rejected IDPs return to draft and increment version. Employee IDP view now shows the latest L&D feedback.
+- `131369f` - IDP approval queue gained clickable status filters while preserving selected-row context.
+- `f0ae658` - Step 9 deployment gate docs corrected after Vercel ignored the preview-target workaround on a fresh team-scope project.
+- `fa31fb7` - Manager cockpit no longer shows the stale disabled evidence-validation placeholder now that the real OJT evidence queue is wired.
+
+Latest verification remains green: lint, typecheck, tests, and production build. The test suite now reports 172 passing tests with 13 opt-in E2E tests skipped. No Supabase config push was run, and `00012_activate_vercel_subprocessor.sql` remains blocked/unapplied.
+
 ### 2026-04-28 - Phase 1 implementation pass extended
 
 Phase 1 implementation continued past the first read-only screen pass. The following local commits are now on `master` after `c946145`:
