@@ -34,7 +34,7 @@ Phase 1 is **not yet pilot-ready** because external deployment and governance ga
 
 ## Verification Snapshot
 
-Latest local verification on 2026-04-28:
+Local verification on 2026-04-28:
 
 - `npm run lint` - clean, with the known Next 15 `next lint` deprecation notice.
 - `npm run typecheck` - clean.
@@ -43,14 +43,19 @@ Latest local verification on 2026-04-28:
 
 Skipped tests are opt-in E2E tests that require live credentials and `RUN_E2E_TESTS=1`.
 
+Remote verification on 2026-04-28:
+
+- `master` is pushed to `origin/master` at `bab4f2c`.
+- GitHub Actions CI workflow `lint / typecheck / test / build` - green on `bab4f2c`.
+- CodeQL workflow `Analyze (javascript-typescript)` - green on `bab4f2c`.
+- Branch protection on `master` confirmed via GitHub API: 2 required status checks (CI + CodeQL), strict status checks, 1 required PR review with stale dismissal, conversation resolution required, force-pushes and deletions blocked, `enforce_admins: false` (solo-dev override on direct admin pushes; bypass is logged by GitHub).
+
 ## Open Blockers
 
 These are the remaining blockers before any pilot customer access.
 
 | Blocker | Owner | Required action |
 | --- | --- | --- |
-| GitHub branch protection | Tariq / repo admin | Require the CI check on `master` using the runbook in `docs/STEP_9_DEPLOYMENT_GATES.md`. |
-| Push local commits | Tariq or operator with GitHub access | Push the current `master` branch so CI runs on the 18+ local commits. |
 | Vercel app-code smoke | Operator with Vercel access | Use a Vercel-authenticated browser or automation bypass token to verify app routes reach Next.js, not just Vercel SSO. |
 | Client IP trust | Operator with Vercel access | Verify the trusted header source for rate limiting before public pilot. |
 | Subprocessor activation | Tariq approval | Apply `00012_activate_vercel_subprocessor.sql` only after the intended Vercel project is confirmed as active for Grism Plus. |
@@ -99,9 +104,7 @@ These are deliberately not part of the Phase 1 closeout:
 
 ## Recommended Next Steps
 
-1. Push the branch to GitHub and confirm CI is green.
-2. Enable GitHub branch protection.
-3. Perform the local manual product review checklist above.
-4. Close Vercel smoke/IP-trust checks.
-5. Decide whether to activate Vercel in the subprocessor register.
-6. Only then run a pilot-readiness review with Grism stakeholders.
+1. Perform the local manual product review checklist above.
+2. Close Vercel app-code smoke and client-IP-trust checks.
+3. Decide whether to activate Vercel in the subprocessor register.
+4. Only then run a pilot-readiness review with Grism stakeholders.
