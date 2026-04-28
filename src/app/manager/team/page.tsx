@@ -246,21 +246,15 @@ function SelectedTeamMember({ row }: { row: TeamMemberRollup }): JSX.Element {
           </div>
         </section>
 
-        <section className="rounded-lg border border-dashed border-slate-300 p-4">
+        <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-sm font-semibold text-slate-950">
-            Evidence validation
+            Evidence validation focus
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            This panel is reserved for OJT evidence review and manager feedback.
-            It will be wired once audited write flows and progression signals
-            are ready.
+            Submitted OJT evidence from direct reports appears in the evidence
+            queue above this team detail. Manager feedback is written through
+            the audited validation action and feeds progression signals.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button disabled>Certify validation</Button>
-            <Button variant="outline" disabled>
-              Request changes
-            </Button>
-          </div>
         </section>
       </CardContent>
     </>
