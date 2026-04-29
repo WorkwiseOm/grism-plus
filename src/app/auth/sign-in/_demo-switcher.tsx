@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { signInAsDemoPersona } from "./actions"
 import type { DemoPersonaPublic } from "@/lib/auth/demo-personas"
