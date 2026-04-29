@@ -1,5 +1,10 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
 import { Button } from "@/components/ui/button"
-import { signInAsDemoPersona } from "./actions"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { DemoPersonaPublic } from "@/lib/auth/demo-personas"
 
 type Props = {
@@ -15,12 +20,46 @@ type Props = {
  * the client — even if a stale page is replayed against a production
  * server, the action rejects.
  *
- * Each persona is its own form so the click directly submits with the
- * intended personaId; no client-side state, no JS event handler — pure
- * progressive enhancement on top of an HTML form action.
+ * Sends only the persona id to a local-only route handler. The route
+ * resolves the password server-side from .env.local, so no demo password
+ * is exposed to the browser.
  */
 export function DemoPersonaSwitcher({ personas }: Props): JSX.Element | null {
+  const router = useRouter()
+  const [pendingPersonaId, setPendingPersonaId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
   if (personas.length === 0) return null
+
+  async function signIn(personaId: string): Promise<void> {
+    setError(null)
+    setPendingPersonaId(personaId)
+    let response: Response
+    try {
+      response = await fetch("/api/auth/demo-sign-in", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ personaId }),
+      })
+    } catch {
+      setError("Demo sign-in could not reach the local app.")
+      setPendingPersonaId(null)
+      return
+    }
+
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string
+      ok?: boolean
+    }
+    if (!response.ok) {
+      setError(data.error ?? "Demo sign-in failed.")
+      setPendingPersonaId(null)
+      return
+    }
+
+    router.push("/")
+    router.refresh()
+  }
 
   return (
     <aside
@@ -36,19 +75,24 @@ export function DemoPersonaSwitcher({ personas }: Props): JSX.Element | null {
       </p>
       <div className="mt-3 flex flex-col gap-2">
         {personas.map((p) => (
-          <form key={p.id} action={signInAsDemoPersona}>
-            <input type="hidden" name="personaId" value={p.id} />
-            <Button
-              type="submit"
-              variant="outline"
-              suppressHydrationWarning
-              className="w-full justify-start border-amber-400 bg-white text-amber-900 hover:bg-amber-100"
-            >
-              {p.label}
-            </Button>
-          </form>
+          <Button
+            key={p.id}
+            type="button"
+            variant="outline"
+            suppressHydrationWarning
+            className="w-full justify-start border-amber-400 bg-white text-amber-900 hover:bg-amber-100"
+            disabled={pendingPersonaId !== null}
+            onClick={() => void signIn(p.id)}
+          >
+            {pendingPersonaId === p.id ? "Signing in..." : p.label}
+          </Button>
         ))}
       </div>
+      {error && (
+        <Alert variant="destructive" role="alert" className="mt-3">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
     </aside>
   )
 }
