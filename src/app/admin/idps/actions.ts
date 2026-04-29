@@ -1,11 +1,14 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { requireRole } from "@/lib/auth/require-role"
 import { generateIdpDraft } from "@/lib/ai/idp-generation"
+import { generateLocalDemoIdpDraft } from "@/lib/ai/local-demo-idp-draft"
 import { classifyModalityForBlend } from "@/lib/ai/development-guards"
 import { getIdpDetail } from "@/lib/data"
+import { isDemoAuthRelaxedFromEnv } from "@/lib/auth/demo-mode"
 import { canApproveIdpStatus } from "@/lib/idp-approval/queue"
 import {
   buildIdpReviewUpdate,
@@ -74,7 +77,7 @@ export async function generateAiIdpDraftAction(
     redirect(`/admin/idps?idp=${encodeURIComponent(idpId)}&error=ai_no_gaps`)
   }
 
-  const generated = await generateIdpDraft({
+  const promptInput = {
     employee: pseudonymiseEmployee(employee as Employee, idpId),
     targetRoleTitle: employee.target_role_title,
     competencyGaps,
@@ -82,7 +85,15 @@ export async function generateAiIdpDraftAction(
       maxMilestones: Math.max(1, detail.data.milestones.length),
       preferredTargetDays: 90,
     },
-  })
+  }
+
+  const h = await headers()
+  const generated = isDemoAuthRelaxedFromEnv(h.get("host"))
+    ? generateLocalDemoIdpDraft(
+        promptInput,
+        "Local demo mode used deterministic AI fallback.",
+      )
+    : await generateIdpDraft(promptInput)
 
   if (!generated.ok) {
     await logAiGenerationError({
@@ -117,7 +128,7 @@ export async function generateAiIdpDraftAction(
     .from("idps")
     .update({
       narrative: generated.draft.narrative ?? null,
-      narrative_source: "ai_generated",
+      narrative_source: "ai",
       generated_by_ai: true,
       ai_generation_metadata: metadata,
       last_activity_at: now,
