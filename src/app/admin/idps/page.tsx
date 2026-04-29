@@ -1,5 +1,15 @@
 import Link from "next/link"
 import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock3,
+  FileText,
+  ListChecks,
+  ShieldCheck,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -79,71 +89,106 @@ export default async function AdminIdpsPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-col gap-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          L&amp;D workspace
-        </p>
+      <header className="border-b border-slate-200 pb-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              L&amp;D workspace
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
               IDP approval queue
             </h1>
-            <p className="mt-1 max-w-2xl text-sm text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               Review generated and manual development plans before they move
               into execution. Approval stores the 70/20/10 snapshot before the
               plan becomes active.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <form action={generateAiIdpDraftAction}>
-              <input type="hidden" name="idpId" value={selected?.id ?? ""} />
-              <Button type="submit" variant="outline" disabled={!selected}>
-                Generate AI draft
-              </Button>
-            </form>
-            <form action={approveIdpAction}>
-              <input type="hidden" name="idpId" value={selected?.id ?? ""} />
-              <Button type="submit" disabled={!selected || !canApproveSelected}>
-                Approve IDP
-              </Button>
-            </form>
-          </div>
+          {selected ? (
+            <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                Selected plan
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-950">
+                {selected.employee_full_name ?? "Unnamed employee"}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                v{selected.version} · {statusLabel(selected.status)}
+              </p>
+            </div>
+          ) : null}
         </div>
       </header>
 
       {notification ? <QueueNotification {...notification} /> : null}
 
       <section className="grid gap-3 md:grid-cols-4">
-        <MetricCard label="Visible IDPs" value={stats.total} />
-        <MetricCard label="Pending approval" value={stats.pending} tone="amber" />
-        <MetricCard label="AI generated" value={stats.aiGenerated} tone="blue" />
-        <MetricCard label="Stalled" value={stats.stalled} tone="red" />
+        <MetricCard
+          label="Visible IDPs"
+          value={stats.total}
+          description="Readable in this tenant"
+          icon={FileText}
+        />
+        <MetricCard
+          label="Pending approval"
+          value={stats.pending}
+          description="Awaiting L&D decision"
+          tone="amber"
+          icon={Clock3}
+        />
+        <MetricCard
+          label="AI generated"
+          value={stats.aiGenerated}
+          description="Drafts with AI metadata"
+          tone="blue"
+          icon={Sparkles}
+        />
+        <MetricCard
+          label="Stalled"
+          value={stats.stalled}
+          description="Needs intervention"
+          tone="red"
+          icon={AlertTriangle}
+        />
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.4fr)]">
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b border-slate-200">
-            <CardTitle className="text-base">Queue</CardTitle>
-            <CardDescription>
-              RLS decides which IDPs this admin can read.
-            </CardDescription>
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(360px,0.78fr)_minmax(0,1.55fr)]">
+        <Card className="overflow-hidden xl:sticky xl:top-5">
+          <CardHeader className="border-b border-slate-200 bg-white">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-base">Review queue</CardTitle>
+                <CardDescription>
+                  {filteredRows.length} plan{filteredRows.length === 1 ? "" : "s"} in view.
+                </CardDescription>
+              </div>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                {statusFilter === "all" ? "All statuses" : statusLabel(statusFilter)}
+              </span>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <StatusSummary
               rows={summaries.data}
               activeFilter={statusFilter}
             />
-            <QueueList
-              rows={filteredRows}
-              selectedId={selected?.id ?? null}
-              statusFilter={statusFilter}
-            />
+            <div className="max-h-[calc(100vh-310px)] overflow-y-auto">
+              <QueueList
+                rows={filteredRows}
+                selectedId={selected?.id ?? null}
+                statusFilter={statusFilter}
+              />
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-hidden border-slate-200 shadow-sm">
           {selected && detail?.ok ? (
-            <SelectedIdpDetail summary={selected} detail={detail.data} />
+            <SelectedIdpDetail
+              summary={selected}
+              detail={detail.data}
+              canApproveSelected={canApproveSelected}
+            />
           ) : selected && detail && !detail.ok ? (
             <QueueErrorState
               reason={detail.reason}
@@ -162,21 +207,34 @@ export default async function AdminIdpsPage({
 function MetricCard({
   label,
   value,
+  description,
   tone = "slate",
+  icon: Icon,
 }: {
   label: string
   value: number
+  description: string
   tone?: "slate" | "amber" | "blue" | "red"
+  icon: LucideIcon
 }): JSX.Element {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-          {label}
-        </p>
-        <p className={cn("mt-2 text-2xl font-semibold", metricToneClass(tone))}>
-          {value}
-        </p>
+    <Card className="overflow-hidden border-slate-200 shadow-sm">
+      <CardContent className="p-0">
+        <div className={cn("h-1", metricAccentClass(tone))} />
+        <div className="flex items-start justify-between gap-3 p-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+              {label}
+            </p>
+            <p className={cn("mt-2 text-2xl font-semibold", metricToneClass(tone))}>
+              {value}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">{description}</p>
+          </div>
+          <span className={cn("rounded-md p-2", metricIconClass(tone))}>
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+        </div>
       </CardContent>
     </Card>
   )
@@ -192,13 +250,18 @@ function QueueNotification({
   return (
     <div
       className={cn(
-        "rounded-lg border px-4 py-3 text-sm font-medium",
+        "flex items-start gap-3 rounded-lg border px-4 py-3 text-sm font-medium shadow-sm",
         tone === "green"
           ? "border-emerald-200 bg-emerald-50 text-emerald-800"
           : "border-red-200 bg-red-50 text-red-800",
       )}
     >
-      {message}
+      {tone === "green" ? (
+        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      ) : (
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      )}
+      <span>{message}</span>
     </div>
   )
 }
@@ -247,14 +310,19 @@ function StatusFilterLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center justify-between rounded-md border px-2 py-1.5",
+        "flex items-center justify-between rounded-md border px-2.5 py-2 transition-colors",
         active
           ? "border-slate-900 bg-slate-900 text-white"
-          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100",
+          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-100",
       )}
     >
-      <span>{label}</span>
-      <span className={cn("font-semibold", active ? "text-white" : "text-slate-900")}>
+      <span className="truncate">{label}</span>
+      <span
+        className={cn(
+          "ml-2 font-semibold",
+          active ? "text-white" : "text-slate-900",
+        )}
+      >
         {count}
       </span>
     </Link>
@@ -296,40 +364,41 @@ function QueueList({
             href={queueRowHref(row.id, statusFilter)}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "block p-4 transition-colors",
-              active ? "bg-slate-900 text-white" : "hover:bg-slate-50",
+              "block border-l-4 p-4 transition-colors",
+              active
+                ? "border-l-slate-900 bg-slate-100"
+                : "border-l-transparent bg-white hover:bg-slate-50",
             )}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">
+                <p className="truncate text-sm font-semibold text-slate-950">
                   {row.employee_full_name ?? "Unnamed employee"}
                 </p>
-                <p
-                  className={cn(
-                    "mt-1 text-xs",
-                    active ? "text-slate-300" : "text-slate-500",
-                  )}
-                >
+                <p className="mt-1 text-xs text-slate-500">
                   IDP v{row.version} · target {formatDate(row.target_completion_date)}
                 </p>
               </div>
               <span
                 className={cn(
                   "shrink-0 rounded-full px-2 py-1 text-xs font-medium",
-                  active ? "bg-white/15 text-white" : statusBadgeClass(row.status),
+                  statusBadgeClass(row.status),
                 )}
               >
                 {statusLabel(row.status)}
               </span>
             </div>
-            <div
-              className={cn(
-                "mt-3 flex items-center gap-3 text-xs",
-                active ? "text-slate-300" : "text-slate-500",
-              )}
-            >
-              <span>{row.generated_by_ai ? "AI draft" : "Manual draft"}</span>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 font-medium",
+                  row.generated_by_ai
+                    ? "bg-blue-50 text-blue-700"
+                    : "bg-slate-100 text-slate-600",
+                )}
+              >
+                {row.generated_by_ai ? "AI draft" : "Manual draft"}
+              </span>
               <span>Last activity {formatDate(row.last_activity_at)}</span>
             </div>
           </Link>
@@ -351,9 +420,11 @@ function queueRowHref(
 function SelectedIdpDetail({
   summary,
   detail,
+  canApproveSelected,
 }: {
   summary: IdpSummaryRow
   detail: IdpDetail
+  canApproveSelected: boolean
 }): JSX.Element {
   const actionMix = buildActionMix(detail)
   const milestoneCounts = countMilestonesByStatus(detail)
@@ -365,10 +436,30 @@ function SelectedIdpDetail({
 
   return (
     <>
-      <CardHeader className="border-b border-slate-200">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <CardHeader className="border-b border-slate-200 bg-white">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <CardTitle className="text-xl">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span
+                className={cn(
+                  "w-fit rounded-full px-2.5 py-1 text-xs font-medium",
+                  statusBadgeClass(detail.idp.status),
+                )}
+              >
+                {statusLabel(detail.idp.status)}
+              </span>
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-1 text-xs font-medium",
+                  detail.idp.generated_by_ai
+                    ? "bg-blue-50 text-blue-700"
+                    : "bg-slate-100 text-slate-600",
+                )}
+              >
+                {detail.idp.generated_by_ai ? "AI draft" : "Manual draft"}
+              </span>
+            </div>
+            <CardTitle className="text-xl tracking-tight">
               {detail.employee?.full_name ?? summary.employee_full_name ?? "IDP"}
             </CardTitle>
             <CardDescription className="mt-1">
@@ -378,17 +469,25 @@ function SelectedIdpDetail({
                 : ""}
             </CardDescription>
           </div>
-          <span
-            className={cn(
-              "w-fit rounded-full px-2.5 py-1 text-xs font-medium",
-              statusBadgeClass(detail.idp.status),
-            )}
-          >
-            {statusLabel(detail.idp.status)}
-          </span>
+          <div className="flex flex-wrap gap-2">
+            <form action={generateAiIdpDraftAction}>
+              <input type="hidden" name="idpId" value={detail.idp.id} />
+              <Button type="submit" variant="outline" className="gap-2">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                Generate AI draft
+              </Button>
+            </form>
+            <form action={approveIdpAction}>
+              <input type="hidden" name="idpId" value={detail.idp.id} />
+              <Button type="submit" disabled={!canApproveSelected} className="gap-2">
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                Approve IDP
+              </Button>
+            </form>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 p-5">
+      <CardContent className="space-y-5 bg-white p-5">
         <section className="grid gap-3 md:grid-cols-3">
           <CompactFact label="Version" value={`v${detail.idp.version}`} />
           <CompactFact
@@ -401,7 +500,8 @@ function SelectedIdpDetail({
         <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold text-slate-950">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
+                <ListChecks className="h-4 w-4 text-slate-500" aria-hidden="true" />
                 Development blend guard
               </h2>
               <p className="mt-1 text-xs text-slate-600">
@@ -424,6 +524,9 @@ function SelectedIdpDetail({
                 key={item.category}
                 label={item.label}
                 value={`${item.actualPct}%`}
+                actualPct={item.actualPct}
+                targetPct={item.targetPct}
+                tone={blendCategoryTone(item.category)}
                 description={`${blendCategoryDescription(item.category)} · target ${item.targetPct}%`}
               />
             ))}
@@ -433,7 +536,7 @@ function SelectedIdpDetail({
           ) : null}
         </section>
 
-        <section>
+        <section className="rounded-lg border border-slate-200 p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-950">
               Current action mix
@@ -454,7 +557,7 @@ function SelectedIdpDetail({
                   </div>
                   <div className="h-2 rounded-full bg-slate-100">
                     <div
-                      className="h-2 rounded-full bg-slate-900"
+                      className="h-2 rounded-full bg-slate-900 transition-all"
                       style={{ width: `${item.percentage}%` }}
                     />
                   </div>
@@ -468,7 +571,7 @@ function SelectedIdpDetail({
           )}
         </section>
 
-        <section>
+        <section className="rounded-lg border border-slate-200 p-4">
           <h2 className="text-sm font-semibold text-slate-950">Milestones</h2>
           <div className="mt-3 grid gap-2 sm:grid-cols-5">
             {Object.entries(milestoneCounts).map(([status, count]) => (
@@ -483,7 +586,7 @@ function SelectedIdpDetail({
             {detail.milestones.map((milestone) => (
               <div
                 key={milestone.milestone.id}
-                className="rounded-lg border border-slate-200 p-4"
+                className="rounded-lg border border-slate-200 bg-white p-4"
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
@@ -519,8 +622,11 @@ function SelectedIdpDetail({
         </section>
 
         {detail.idp.narrative ? (
-          <section className="rounded-lg border border-slate-200 p-4">
-            <h2 className="text-sm font-semibold text-slate-950">Narrative</h2>
+          <section className="rounded-lg border border-blue-100 bg-blue-50/60 p-4">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
+              <Sparkles className="h-4 w-4 text-blue-600" aria-hidden="true" />
+              Narrative
+            </h2>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               {detail.idp.narrative}
             </p>
@@ -621,16 +727,31 @@ function CompactFact({
 function BlendTarget({
   label,
   value,
+  actualPct,
+  targetPct,
+  tone,
   description,
 }: {
   label: string
   value: string
+  actualPct: number
+  targetPct: number
+  tone: "emerald" | "blue" | "slate"
   description: string
 }): JSX.Element {
   return (
     <div className="rounded-md border border-slate-200 bg-white p-3">
-      <p className="text-xs text-slate-500">{label}</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs text-slate-500">{label}</p>
+        <p className="text-xs text-slate-400">Target {targetPct}%</p>
+      </div>
       <p className="mt-1 text-lg font-semibold text-slate-950">{value}</p>
+      <div className="mt-2 h-2 rounded-full bg-slate-100">
+        <div
+          className={cn("h-2 rounded-full", blendBarClass(tone))}
+          style={{ width: `${Math.min(100, Math.max(0, actualPct))}%` }}
+        />
+      </div>
       <p className="mt-1 text-xs text-slate-500">{description}</p>
     </div>
   )
@@ -715,6 +836,56 @@ function metricToneClass(tone: "slate" | "amber" | "blue" | "red"): string {
       return "text-red-700"
     default:
       return "text-slate-950"
+  }
+}
+
+function metricAccentClass(tone: "slate" | "amber" | "blue" | "red"): string {
+  switch (tone) {
+    case "amber":
+      return "bg-amber-500"
+    case "blue":
+      return "bg-blue-600"
+    case "red":
+      return "bg-red-500"
+    default:
+      return "bg-slate-900"
+  }
+}
+
+function metricIconClass(tone: "slate" | "amber" | "blue" | "red"): string {
+  switch (tone) {
+    case "amber":
+      return "bg-amber-50 text-amber-700"
+    case "blue":
+      return "bg-blue-50 text-blue-700"
+    case "red":
+      return "bg-red-50 text-red-700"
+    default:
+      return "bg-slate-100 text-slate-700"
+  }
+}
+
+function blendCategoryTone(
+  category: "experience" | "relationship" | "formal",
+): "emerald" | "blue" | "slate" {
+  switch (category) {
+    case "experience":
+      return "emerald"
+    case "relationship":
+      return "blue"
+    case "formal":
+      return "slate"
+  }
+}
+
+function blendBarClass(tone: "emerald" | "blue" | "slate"): string {
+  switch (tone) {
+    case "emerald":
+      return "bg-emerald-600"
+    case "blue":
+      return "bg-blue-600"
+    case "slate":
+      return "bg-slate-700"
   }
 }
 
