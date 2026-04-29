@@ -45,9 +45,9 @@ Skipped tests are opt-in E2E tests that require live credentials and `RUN_E2E_TE
 
 Remote verification on 2026-04-28:
 
-- `master` is pushed to `origin/master` at `bab4f2c`.
-- GitHub Actions CI workflow `lint / typecheck / test / build` - green on `bab4f2c`.
-- CodeQL workflow `Analyze (javascript-typescript)` - green on `bab4f2c`.
+- `master` is pushed to `origin/master` at `a382c28`.
+- GitHub Actions CI workflow `lint / typecheck / test / build` - green on `a382c28`.
+- CodeQL workflow `Analyze (javascript-typescript)` - green on `a382c28`.
 - Branch protection on `master` confirmed via GitHub API: 2 required status checks (CI + CodeQL), strict status checks, 1 required PR review with stale dismissal, conversation resolution required, force-pushes and deletions blocked, `enforce_admins: false` (solo-dev override on direct admin pushes; bypass is logged by GitHub).
 
 ## Open Blockers
