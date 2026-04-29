@@ -98,7 +98,7 @@ A vertical stack of milestone cards, one per `idp_milestones` row. Each card:
 
 - **Header row:**
   - Competency category color stripe (left edge, 4px)
-  - Competency code + name ("ANAL-RCA · Root Cause Analysis")
+  - Competency code + name ("ANLY-RCA · Root Cause Analysis")
   - Gap score chip: shows `current_proficiency → target_proficiency` (e.g. "L2 → L4" with a small
     bar visualizing the delta)
 - **Body:**

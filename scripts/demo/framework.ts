@@ -84,15 +84,15 @@ export const CATEGORIES: ReadonlyArray<CategoryDef> = [
     ],
   },
   {
-    code: "ANAL",
+    code: "ANLY",
     name: "Analytical & Problem Solving",
     description: "Structured thinking applied to operational and commercial problems.",
     gap_category: "knowledge",
     competencies: [
-      { code: "ANAL-CRIT", name: "Critical thinking", description: "Evaluates evidence, surfaces assumptions, weighs trade-offs.", gap_category: "knowledge" },
-      { code: "ANAL-RCA", name: "Root cause analysis", description: "Traces incidents and outcomes to their underlying drivers.", gap_category: "knowledge" },
-      { code: "ANAL-DEC", name: "Decision-making under uncertainty", description: "Makes timely, defensible calls with incomplete information.", gap_category: "knowledge" },
-      { code: "ANAL-PROC", name: "Process improvement", description: "Identifies inefficiencies and drives durable process change.", gap_category: "knowledge" },
+      { code: "ANLY-CRIT", name: "Critical thinking", description: "Evaluates evidence, surfaces assumptions, weighs trade-offs.", gap_category: "knowledge" },
+      { code: "ANLY-RCA", name: "Root cause analysis", description: "Traces incidents and outcomes to their underlying drivers.", gap_category: "knowledge" },
+      { code: "ANLY-DEC", name: "Decision-making under uncertainty", description: "Makes timely, defensible calls with incomplete information.", gap_category: "knowledge" },
+      { code: "ANLY-PROC", name: "Process improvement", description: "Identifies inefficiencies and drives durable process change.", gap_category: "knowledge" },
     ],
   },
   {

@@ -116,7 +116,7 @@ export const IDP_DEFINITIONS: ReadonlyArray<IdpDef> = [
     ],
   },
   {
-    // 4: Sultan — Process Engineer — ANAL-RCA, gap-2, Self, 4ms, Balanced
+    // 4: Sultan — Process Engineer — ANLY-RCA, gap-2, Self, 4ms, Balanced
     employee_email: "sultan.albattashi@grism-demo.local",
     status: "pending_approval",
     narrative_source: "manual",
@@ -126,11 +126,11 @@ export const IDP_DEFINITIONS: ReadonlyArray<IdpDef> = [
     lifecycle_state: null,
     completed_action_count: 0,
     milestones: [
-      { competency_code: "ANAL-RCA", title: "Root cause analysis fluency", description: "Apply structured RCA methods to real incidents.", gap_score: 40,
+      { competency_code: "ANLY-RCA", title: "Root cause analysis fluency", description: "Apply structured RCA methods to real incidents.", gap_score: 40,
         actions: [elearning("Root cause analysis fundamentals"), ojt("Lead a root-cause investigation of a recent incident")] },
-      { competency_code: "ANAL-CRIT", title: "Sharpen critical evaluation", description: "Distinguish evidence from assumption in analytical work.", gap_score: 30,
+      { competency_code: "ANLY-CRIT", title: "Sharpen critical evaluation", description: "Distinguish evidence from assumption in analytical work.", gap_score: 30,
         actions: [elearning("Decision-making under uncertainty")] },
-      { competency_code: "ANAL-PROC", title: "Drive process change to completion", description: "Turn analytical insight into a delivered process change.", gap_score: 35,
+      { competency_code: "ANLY-PROC", title: "Drive process change to completion", description: "Turn analytical insight into a delivered process change.", gap_score: 35,
         actions: [ojt("Write up a process improvement proposal")] },
       { competency_code: "TECH-WRIT", title: "Improve technical writing", description: "Produce clearer, more actionable technical documents.", gap_score: 25,
         actions: [coaching("Bi-weekly technical writing review with Maryam")] },
@@ -251,7 +251,7 @@ export const IDP_DEFINITIONS: ReadonlyArray<IdpDef> = [
 
   // ============ draft × 1 ============
   {
-    // 11: Noura — Field Ops Specialist — ANAL-DEC, Self draft
+    // 11: Noura — Field Ops Specialist — ANLY-DEC, Self draft
     employee_email: "noura.alwahaibi@grism-demo.local",
     status: "draft",
     narrative_source: "manual",
@@ -261,7 +261,7 @@ export const IDP_DEFINITIONS: ReadonlyArray<IdpDef> = [
     lifecycle_state: null,
     completed_action_count: 0,
     milestones: [
-      { competency_code: "ANAL-DEC", title: "Decision-making with partial information", description: "Practise making and explaining timely decisions in the field.", gap_score: 35,
+      { competency_code: "ANLY-DEC", title: "Decision-making with partial information", description: "Practise making and explaining timely decisions in the field.", gap_score: 35,
         actions: [elearning("Decision-making under uncertainty")] },
       { competency_code: "BIZ-RISK", title: "Risk identification habit", description: "Surface and escalate operational risks earlier.", gap_score: 30,
         actions: [ojt("Run a stakeholder mapping exercise for an upcoming initiative")] },
@@ -284,7 +284,7 @@ export const IDP_DEFINITIONS: ReadonlyArray<IdpDef> = [
         actions: [elearning("SAP for operations analysts"), ojt("Build and present a data-driven status report")] },
       { competency_code: "TECH-DATA", title: "Data analysis stretch", description: "Build first multi-source logistics dashboard.", gap_score: 25,
         actions: [elearning("Data analysis with Power BI")] },
-      { competency_code: "ANAL-PROC", title: "Process improvement deliverable", description: "One concrete process change shipped during cycle.", gap_score: 20,
+      { competency_code: "ANLY-PROC", title: "Process improvement deliverable", description: "One concrete process change shipped during cycle.", gap_score: 20,
         actions: [ojt("Write up a process improvement proposal")] },
     ],
   },

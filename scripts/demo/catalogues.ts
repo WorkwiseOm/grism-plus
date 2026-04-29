@@ -28,7 +28,7 @@ export const OJT_CATALOGUE: ReadonlyArray<OjtDef> = [
   {
     title: "Shadow a senior engineer for one operational shift",
     description: "Spend a full 8-hour shift alongside a senior engineer on the operational floor; document three observations afterwards.",
-    competency_codes: ["TECH-IND", "ANAL-CRIT"],
+    competency_codes: ["TECH-IND", "ANLY-CRIT"],
     effort_hours: 8,
     role_levels: ["Trainee", "Junior", "Coordinator"],
     deliverable_type: "written_observations",
@@ -44,7 +44,7 @@ export const OJT_CATALOGUE: ReadonlyArray<OjtDef> = [
   {
     title: "Write up a process improvement proposal",
     description: "Identify a recurring inefficiency in your team's process; document the issue, root cause, and proposed change.",
-    competency_codes: ["ANAL-PROC", "ANAL-RCA", "TECH-WRIT"],
+    competency_codes: ["ANLY-PROC", "ANLY-RCA", "TECH-WRIT"],
     effort_hours: 6,
     role_levels: ["Junior", "Senior", "Analyst", "Coordinator"],
     deliverable_type: "proposal_document",
@@ -52,7 +52,7 @@ export const OJT_CATALOGUE: ReadonlyArray<OjtDef> = [
   {
     title: "Facilitate a cross-functional alignment meeting",
     description: "Convene representatives from at least two functions, drive a documented decision on a shared issue.",
-    competency_codes: ["COMM-XFN", "ANAL-DEC", "LEAD-CONF"],
+    competency_codes: ["COMM-XFN", "ANLY-DEC", "LEAD-CONF"],
     effort_hours: 3,
     role_levels: ["Senior", "Coordinator", "Manager"],
     deliverable_type: "meeting_minutes",
@@ -76,7 +76,7 @@ export const OJT_CATALOGUE: ReadonlyArray<OjtDef> = [
   {
     title: "Lead a root-cause investigation of a recent incident",
     description: "Apply 5-Why or fishbone analysis to a real recent incident; produce a written RCA.",
-    competency_codes: ["ANAL-RCA", "ANAL-CRIT", "TECH-WRIT"],
+    competency_codes: ["ANLY-RCA", "ANLY-CRIT", "TECH-WRIT"],
     effort_hours: 8,
     role_levels: ["Junior", "Analyst", "Senior", "Engineer"],
     deliverable_type: "rca_document",
@@ -109,14 +109,14 @@ export const OJT_CATALOGUE: ReadonlyArray<OjtDef> = [
 
 export const ELEARNING_CATALOGUE: ReadonlyArray<ElearningDef> = [
   { title: "Effective stakeholder communication", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/stakeholder-comms", competency_codes: ["COMM-XFN", "COMM-EXT", "COMM-WRIT"], duration_minutes: 120 },
-  { title: "Root cause analysis fundamentals", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/rca-fundamentals", competency_codes: ["ANAL-RCA", "ANAL-CRIT"], duration_minutes: 90 },
+  { title: "Root cause analysis fundamentals", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/rca-fundamentals", competency_codes: ["ANLY-RCA", "ANLY-CRIT"], duration_minutes: 90 },
   { title: "SAP for operations analysts", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/sap-ops-analysts", competency_codes: ["TECH-TOOL", "TECH-DATA"], duration_minutes: 240 },
   { title: "Energy industry primer (GCC context)", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/energy-primer-gcc", competency_codes: ["TECH-IND", "BIZ-STRAT"], duration_minutes: 180 },
   { title: "Technical writing for engineers", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/tech-writing-engineers", competency_codes: ["TECH-WRIT", "COMM-WRIT"], duration_minutes: 150 },
   { title: "Coaching for first-time managers", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/coaching-first-managers", competency_codes: ["LEAD-COACH", "LEAD-PERF", "LEAD-MOTV"], duration_minutes: 200 },
-  { title: "Decision-making under uncertainty", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/decision-uncertainty", competency_codes: ["ANAL-DEC", "ANAL-CRIT", "BIZ-RISK"], duration_minutes: 90 },
+  { title: "Decision-making under uncertainty", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/decision-uncertainty", competency_codes: ["ANLY-DEC", "ANLY-CRIT", "BIZ-RISK"], duration_minutes: 90 },
   { title: "Data analysis with Power BI", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/powerbi-analysis", competency_codes: ["TECH-DATA", "TECH-TOOL"], duration_minutes: 300 },
-  { title: "Project management essentials", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/pm-essentials", competency_codes: ["BIZ-PM", "BIZ-RISK", "ANAL-PROC"], duration_minutes: 180 },
+  { title: "Project management essentials", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/pm-essentials", competency_codes: ["BIZ-PM", "BIZ-RISK", "ANLY-PROC"], duration_minutes: 180 },
   { title: "Financial literacy for non-finance professionals", provider: "Internal Academy", external_url: "https://academy.arwa.demo/courses/finlit-non-finance", competency_codes: ["BIZ-FIN", "BIZ-STRAT"], duration_minutes: 120 },
 ]
 

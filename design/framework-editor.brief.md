@@ -8,7 +8,7 @@
 Aisha owns the **Arwa Energy Core Competency Framework v1**. She needs to add new competencies,
 edit definitions, refine the proficiency-level descriptors, recategorise leaves under different
 parents, deprecate things that no longer apply, and publish a new version when she wants the
-changes to take effect. The current framework is 5 parent categories (TECH, LEAD, COMM, ANAL, BIZ)
+changes to take effect. The current framework is 5 parent categories (TECH, LEAD, COMM, ANLY, BIZ)
 with 20 leaf competencies. Each competency has 5 proficiency levels (Awareness → Expert) with a
 `gap_category` enum (knowledge / behavioural / technical) used downstream by the AI recommender.
 
@@ -73,11 +73,11 @@ COMM · Communication (4)
   COMM-WRIT  Written Communication
   COMM-XFN   Cross-Functional Communication
   COMM-EXT   External Stakeholder Communication
-ANAL · Analytical (4)
-  ANAL-RCA   Root Cause Analysis
-  ANAL-CRIT  Critical Thinking
-  ANAL-PROC  Process Optimisation
-  ANAL-DEC   Data-Driven Decision-Making
+ANLY · Analytical (4)
+  ANLY-RCA   Root Cause Analysis
+  ANLY-CRIT  Critical Thinking
+  ANLY-PROC  Process Optimisation
+  ANLY-DEC   Data-Driven Decision-Making
 BIZ · Business (4)
   BIZ-PM     Project Management
   BIZ-RISK   Risk Management
