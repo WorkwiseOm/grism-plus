@@ -90,6 +90,24 @@ Use the local app and the seeded demo personas to review:
 - `/coach`
   - coach sees the gated message, not manager data.
 
+## Local Demo Mode Caveat
+
+A local-only persona switcher is wired into `/auth/sign-in` to reduce auth friction during Phase 1 review. It is **strictly localhost-only** and **must not be enabled in any deployed environment**.
+
+Activation requires all three of the following at the same time:
+
+- `NODE_ENV` is not `production` (Vercel sets `production` on every deploy, so this fails on Vercel by definition).
+- `DEMO_AUTH_RELAXED=true` in `.env.local` (off by default).
+- The request's Host header resolves to a loopback address (`localhost`, `127.0.0.1`, or `::1`).
+
+When all three hold, the sign-in page surfaces a "Local demo only" panel with one button per seeded persona, and middleware MFA enforcement is skipped so L&D admin / superadmin screens are reviewable without TOTP. The persona switcher only lists personas whose password env var is actually set; missing entries are silently hidden, never error.
+
+Persona passwords come from per-persona env vars in `.env.local` (placeholders documented in `.env.local.example`). The committed code holds only the persona id, label, and email — never the password. The seed script (`scripts/seed_phase1_demo.ts`) rotates these passwords on every run; copy the values from the seed's stdout tempfile into `.env.local` after each rotation.
+
+Defence-in-depth tests live in `tests/auth/demo-mode.test.ts`, `tests/auth/demo-personas.test.ts`, and `tests/auth/demo-action.test.ts` — they assert the gate stays closed for every Vercel-style host, every `NODE_ENV=production` combination, and every missing/wrong-cased flag value. The server action also re-evaluates the gate at submit time, so a stale page rendered on localhost cannot be replayed against a deployed server.
+
+This shortcut **does not weaken production auth**: deployed Vercel builds never satisfy the gate, normal Supabase Auth + MFA + role guards remain in force, and no fake roles are injected at the application layer.
+
 ## Deferred From Phase 1
 
 These are deliberately not part of the Phase 1 closeout:

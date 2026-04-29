@@ -40,6 +40,7 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { isDemoAuthRelaxedFromEnv } from "@/lib/auth/demo-mode"
 
 type IdleCheckResult = {
   idle_expired: boolean
@@ -154,7 +155,14 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // endpoint and future auth API routes stay reachable). The RPC
   // returns true only when the user's role is in their tenant's
   // mfa_required_roles AND current AAL is aal1.
-  if (user && !isAuthRoute && !isApiRoute) {
+  //
+  // Local demo mode also bypasses this branch so reviewers can switch
+  // into ld_admin / superadmin personas without a TOTP enrolment loop.
+  // Triple-gated by isDemoAuthRelaxedFromEnv: NODE_ENV != "production",
+  // DEMO_AUTH_RELAXED == "true", and Host is loopback. All three must
+  // hold; otherwise normal MFA enforcement runs unchanged.
+  const demoRelaxed = isDemoAuthRelaxedFromEnv(request.headers.get("host"))
+  if (user && !isAuthRoute && !isApiRoute && !demoRelaxed) {
     const { data: rawMfaRequired } = await supabase.rpc(
       "user_mfa_required_but_missing",
     )
