@@ -41,6 +41,7 @@ export function DemoPersonaSwitcher({ personas }: Props): JSX.Element | null {
             <Button
               type="submit"
               variant="outline"
+              suppressHydrationWarning
               className="w-full justify-start border-amber-400 bg-white text-amber-900 hover:bg-amber-100"
             >
               {p.label}
