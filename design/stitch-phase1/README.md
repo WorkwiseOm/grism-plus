@@ -26,6 +26,27 @@ Each screen folder contains:
 - `screen.png` - visual reference.
 - `code.html` - static Stitch export for layout inspection only.
 
+## Implementation Status
+
+The Stitch screens above were polished into production Next.js components on 2026-04-29 / 2026-04-30. The original Stitch capture (PNG + HTML in each folder) is preserved unchanged as the design contract. As-built captures of the running implementation are tracked separately to keep the design contract immutable.
+
+| Stitch folder | Implementation polish commit | Polish date | As-built capture |
+| --- | --- | --- | --- |
+| `l_d_admin_idp_approval_queue/` | `82ab20a` polish: refine L&D IDP approval queue UI | 2026-04-29 | (pending — drop into `as-built.png` next to `screen.png`) |
+| `manager_team_cockpit/` | `b41ecc9` polish: refine manager team cockpit UI | 2026-04-30 | (pending) |
+| `employee_idp_workspace/` | `372d2bb` polish: refine employee IDP workspace UI | 2026-04-30 | (pending) |
+| `framework_editor/` | `db855a8` polish: refine framework editor UI | 2026-04-30 | (pending) |
+
+All four polish commits share the same visual contract:
+
+- Page header: eyebrow ("L&D workspace" / "Manager workspace" / "Employee workspace") + h1 + descriptive blurb + selected-X summary card on the right + border-bottom rule.
+- Metric cards: coloured top accent bar, lucide-react icon in a tinted square, large numeric, short description.
+- Two- or three-column layout with `xl:sticky xl:top-5` on side panels and `max-h-[calc(100vh-310px)] overflow-y-auto` on long lists.
+- Banner messages with lucide icons (`CheckCircle2` / `AlertTriangle`).
+- Card chrome: `border-slate-200 shadow-sm` with white-bg `CardHeader` separated from body by a 1px border.
+
+If you regenerate the Stitch designs from Google Stitch later, drop the new exports into the existing folders and update the `Captured:` date at the top of this README. The implementation does not need to be reverted to match the new export — instead, log the divergence here and decide whether to polish the implementation forward.
+
 ## Implementation Rules
 
 - Use these exports as a screen contract, not as app code.
@@ -42,3 +63,15 @@ This snapshot aligns with the Grism Phase 1 feedback captured in `docs/GRISM_PHA
 - 70% experience, 20% relationships, 10% formal learning is visible in IDP surfaces.
 - OJT is represented as an evidence-bearing workflow with manager validation.
 - Skill progression is treated as a multi-signal operational workflow rather than a single completion percentage.
+
+## Adding As-Built Captures
+
+To add a screenshot of the running implementation alongside a Stitch design:
+
+1. Sign in to the local dev server (`npm run dev` + the demo persona switcher).
+2. Navigate to the implementation route for the screen.
+3. Take a full-page screenshot.
+4. Save it as `as-built.png` (or `as-built-<variant>.png` for additional captures) inside the matching `design/stitch-phase1/<folder>/` directory.
+5. Update the "As-built capture" column in the Implementation Status table above with the filename.
+
+Do not overwrite the original `screen.png` — it is the design-contract artifact and should not be replaced unless a new Stitch capture deliberately supersedes it.
