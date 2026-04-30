@@ -27,6 +27,11 @@ export const PRINTED_PERSONA_EMAILS = new Set([
   "khalid.alharthy@grism-demo.local",
   "fatima.allawati@grism-demo.local",
   "omar.almahrouqi@grism-demo.local",
+  // Employee persona — added so the local demo switcher can sign in as
+  // a regular employee (Saif owns an active IDP, so he is the natural
+  // fixture for /employee/idp review). Must be re-seeded to rotate his
+  // password into the printable set.
+  "saif.alhabsi@grism-demo.local",
 ])
 
 export type DemoUser = {

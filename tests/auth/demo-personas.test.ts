@@ -34,9 +34,9 @@ afterEach(() => {
 })
 
 describe("publicPersonaList", () => {
-  it("returns all five personas without secrets", () => {
+  it("returns all six personas without secrets", () => {
     const list = publicPersonaList()
-    expect(list).toHaveLength(5)
+    expect(list).toHaveLength(6)
     for (const p of list) {
       expect(p).toHaveProperty("id")
       expect(p).toHaveProperty("label")

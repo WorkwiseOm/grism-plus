@@ -69,6 +69,12 @@ export const DEMO_PERSONAS: ReadonlyArray<DemoPersonaDescriptor> = [
     email: "omar.almahrouqi@grism-demo.local",
     envKey: "DEMO_PERSONA_OMAR_PASSWORD",
   },
+  {
+    id: "saif",
+    label: "Saif Al-Habsi (employee)",
+    email: "saif.alhabsi@grism-demo.local",
+    envKey: "DEMO_PERSONA_SAIF_PASSWORD",
+  },
 ] as const
 
 /** Public-safe view of a persona for client rendering: id + label only. */
