@@ -1,5 +1,15 @@
 import Link from "next/link"
 import {
+  AlertTriangle,
+  ClipboardCheck,
+  ClipboardList,
+  Inbox,
+  TrendingUp,
+  UserCheck,
+  Users,
+  type LucideIcon,
+} from "lucide-react"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -50,35 +60,79 @@ export default async function ManagerTeamPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-col gap-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Manager workspace
-        </p>
+      <header className="border-b border-slate-200 pb-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Manager workspace
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
               Team cockpit
             </h1>
-            <p className="mt-1 max-w-2xl text-sm text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               Monitor direct-report IDP execution and spot plans that need
               follow-up. Evidence validation writes through audited server-side
               controls and feeds skill progression.
             </p>
           </div>
+          {selected ? (
+            <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                Selected report
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-950">
+                {selected.employee.full_name}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                {selected.total_idps} IDP{selected.total_idps === 1 ? "" : "s"} ·{" "}
+                {deriveMemberStatus(selected).label}
+              </p>
+            </div>
+          ) : null}
         </div>
       </header>
 
-      <section className="grid gap-3 md:grid-cols-6">
-        <MetricCard label="Direct reports" value={stats.reports} />
-        <MetricCard label="Active IDPs" value={stats.activeIdps} tone="green" />
+      <section className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <MetricCard
+          label="Direct reports"
+          value={stats.reports}
+          description="Linked under your employee record"
+          icon={Users}
+        />
+        <MetricCard
+          label="Active IDPs"
+          value={stats.activeIdps}
+          description="In execution"
+          tone="green"
+          icon={TrendingUp}
+        />
         <MetricCard
           label="Needs review"
           value={stats.pendingApproval}
+          description="Awaiting L&D decision"
           tone="amber"
+          icon={ClipboardList}
         />
-        <MetricCard label="Stalled" value={stats.stalledIdps} tone="red" />
-        <MetricCard label="No IDP" value={stats.reportsWithoutIdps} />
-        <MetricCard label="OJT evidence" value={evidenceCount} tone="blue" />
+        <MetricCard
+          label="Stalled"
+          value={stats.stalledIdps}
+          description="Manager attention"
+          tone="red"
+          icon={AlertTriangle}
+        />
+        <MetricCard
+          label="No IDP"
+          value={stats.reportsWithoutIdps}
+          description="Reports without a plan"
+          icon={UserCheck}
+        />
+        <MetricCard
+          label="OJT evidence"
+          value={evidenceCount}
+          description="Awaiting validation"
+          tone="blue"
+          icon={Inbox}
+        />
       </section>
 
       <EvidenceQueuePanel result={evidenceQueue} />
@@ -86,25 +140,78 @@ export default async function ManagerTeamPage({
       {rollup.data.length === 0 ? (
         <EmptyTeamState />
       ) : (
-        <div className="grid gap-5 xl:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.3fr)]">
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b border-slate-200">
-              <CardTitle className="text-base">Team rollup</CardTitle>
-              <CardDescription>
-                Direct reports only. RLS remains the boundary.
-              </CardDescription>
+        <div className="grid items-start gap-5 xl:grid-cols-[minmax(360px,0.78fr)_minmax(0,1.55fr)]">
+          <Card className="overflow-hidden border-slate-200 shadow-sm xl:sticky xl:top-5">
+            <CardHeader className="border-b border-slate-200 bg-white">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base">Team rollup</CardTitle>
+                  <CardDescription>
+                    {rollup.data.length} direct report
+                    {rollup.data.length === 1 ? "" : "s"} in view.
+                  </CardDescription>
+                </div>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                  Manager-scoped
+                </span>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
-              <TeamList rows={rollup.data} selectedId={selected?.employee.id ?? null} />
+              <div className="max-h-[calc(100vh-310px)] overflow-y-auto">
+                <TeamList
+                  rows={rollup.data}
+                  selectedId={selected?.employee.id ?? null}
+                />
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            {selected ? <SelectedTeamMember row={selected} /> : <EmptyTeamState />}
+          <Card className="overflow-hidden border-slate-200 shadow-sm">
+            {selected ? (
+              <SelectedTeamMember row={selected} />
+            ) : (
+              <EmptyDetailState />
+            )}
           </Card>
         </div>
       )}
     </div>
+  )
+}
+
+function MetricCard({
+  label,
+  value,
+  description,
+  tone = "slate",
+  icon: Icon,
+}: {
+  label: string
+  value: number
+  description: string
+  tone?: "slate" | "green" | "amber" | "red" | "blue"
+  icon: LucideIcon
+}): JSX.Element {
+  return (
+    <Card className="overflow-hidden border-slate-200 shadow-sm">
+      <CardContent className="p-0">
+        <div className={cn("h-1", metricAccentClass(tone))} />
+        <div className="flex items-start justify-between gap-3 p-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+              {label}
+            </p>
+            <p className={cn("mt-2 text-2xl font-semibold", metricToneClass(tone))}>
+              {value}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">{description}</p>
+          </div>
+          <span className={cn("rounded-md p-2", metricIconClass(tone))}>
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -160,7 +267,9 @@ function TeamList({
                 active ? "text-slate-300" : "text-slate-500",
               )}
             >
-              <span>{row.total_idps} IDP{row.total_idps === 1 ? "" : "s"}</span>
+              <span>
+                {row.total_idps} IDP{row.total_idps === 1 ? "" : "s"}
+              </span>
               <span>{row.idp_counts.active} active</span>
               <span>{row.idp_counts.pending_approval} pending</span>
               <span>{row.idp_counts.stalled} stalled</span>
@@ -178,25 +287,28 @@ function SelectedTeamMember({ row }: { row: TeamMemberRollup }): JSX.Element {
 
   return (
     <>
-      <CardHeader className="border-b border-slate-200">
+      <CardHeader className="border-b border-slate-200 bg-white">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <CardTitle className="text-xl">{row.employee.full_name}</CardTitle>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-xl">{row.employee.full_name}</CardTitle>
+              <span
+                className={cn(
+                  "rounded-full px-2 py-1 text-xs font-medium",
+                  statusToneClass(status.tone),
+                )}
+              >
+                {status.label}
+              </span>
+            </div>
             <CardDescription className="mt-1">
               {row.employee.role_title}
               {row.employee.target_role_title
-                ? ` -> ${row.employee.target_role_title}`
+                ? ` → ${row.employee.target_role_title}`
                 : ""}
+              {row.employee.department ? ` · ${row.employee.department}` : ""}
             </CardDescription>
           </div>
-          <span
-            className={cn(
-              "w-fit rounded-full px-2.5 py-1 text-xs font-medium",
-              statusToneClass(status.tone),
-            )}
-          >
-            {status.label}
-          </span>
         </div>
       </CardHeader>
       <CardContent className="space-y-6 p-5">
@@ -207,10 +319,15 @@ function SelectedTeamMember({ row }: { row: TeamMemberRollup }): JSX.Element {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h2 className="text-sm font-semibold text-slate-950">Most recent IDP</h2>
+          <h2 className="text-sm font-semibold text-slate-950">
+            Most recent IDP
+          </h2>
           {recent ? (
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <DetailFact label="Status" value={statusLabel(recent.status)} />
+              <DetailFact
+                label="Status"
+                value={statusLabel(recent.status)}
+              />
               <DetailFact
                 label="Target"
                 value={formatDate(recent.target_completion_date)}
@@ -233,7 +350,7 @@ function SelectedTeamMember({ row }: { row: TeamMemberRollup }): JSX.Element {
             {Object.entries(row.idp_counts).map(([statusKey, count]) => (
               <div
                 key={statusKey}
-                className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2"
+                className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2"
               >
                 <span className="text-sm text-slate-600">
                   {statusLabel(statusKey as keyof typeof row.idp_counts)}
@@ -247,14 +364,21 @@ function SelectedTeamMember({ row }: { row: TeamMemberRollup }): JSX.Element {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h2 className="text-sm font-semibold text-slate-950">
-            Evidence validation focus
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Submitted OJT evidence from direct reports appears in the evidence
-            queue above this team detail. Manager feedback is written through
-            the audited validation action and feeds progression signals.
-          </p>
+          <div className="flex items-start gap-3">
+            <span className="rounded-md bg-blue-100 p-2 text-blue-700">
+              <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-950">
+                Evidence validation focus
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Submitted OJT evidence from direct reports appears in the
+                evidence queue above. Manager feedback is written through the
+                audited validation action and feeds progression signals.
+              </p>
+            </div>
+          </div>
         </section>
       </CardContent>
     </>
@@ -266,9 +390,10 @@ function EvidenceQueuePanel({
 }: {
   result: LoaderResult<OjtEvidenceQueueItem[]>
 }): JSX.Element {
+  const ready = result.ok ? result.data : []
   return (
-    <Card>
-      <CardHeader className="border-b border-slate-200">
+    <Card className="overflow-hidden border-slate-200 shadow-sm">
+      <CardHeader className="border-b border-slate-200 bg-white">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <CardTitle className="text-base">OJT evidence queue</CardTitle>
@@ -276,6 +401,9 @@ function EvidenceQueuePanel({
               Submitted direct-report evidence waiting for manager validation.
             </CardDescription>
           </div>
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+            {ready.length} pending
+          </span>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -283,13 +411,13 @@ function EvidenceQueuePanel({
           <p className="p-4 text-sm text-slate-600">
             OJT evidence could not be loaded.
           </p>
-        ) : result.data.length === 0 ? (
+        ) : ready.length === 0 ? (
           <p className="p-4 text-sm text-slate-600">
             No submitted OJT evidence is waiting for validation.
           </p>
         ) : (
           <div className="divide-y divide-slate-200">
-            {result.data.slice(0, 5).map((item) => (
+            {ready.slice(0, 5).map((item) => (
               <div key={item.evidence.id} className="p-4">
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -312,7 +440,11 @@ function EvidenceQueuePanel({
                   action={validateOjtEvidenceAction}
                   className="mt-3 space-y-2"
                 >
-                  <input type="hidden" name="evidenceId" value={item.evidence.id} />
+                  <input
+                    type="hidden"
+                    name="evidenceId"
+                    value={item.evidence.id}
+                  />
                   <textarea
                     name="notes"
                     minLength={5}
@@ -359,29 +491,6 @@ function EvidenceQueuePanel({
   )
 }
 
-function MetricCard({
-  label,
-  value,
-  tone = "slate",
-}: {
-  label: string
-  value: number
-  tone?: "slate" | "green" | "amber" | "red" | "blue"
-}): JSX.Element {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-          {label}
-        </p>
-        <p className={cn("mt-2 text-2xl font-semibold", metricToneClass(tone))}>
-          {value}
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
-
 function DetailFact({
   label,
   value,
@@ -394,6 +503,14 @@ function DetailFact({
       <p className="text-xs text-slate-500">{label}</p>
       <p className="mt-1 text-sm font-semibold text-slate-950">{value}</p>
     </div>
+  )
+}
+
+function EmptyDetailState(): JSX.Element {
+  return (
+    <CardContent className="p-8 text-center text-sm text-slate-600">
+      Select a direct report from the rollup to see their plan summary.
+    </CardContent>
   )
 }
 
@@ -463,6 +580,23 @@ function statusToneClass(tone: "red" | "amber" | "green" | "slate"): string {
   }
 }
 
+function metricAccentClass(
+  tone: "slate" | "green" | "amber" | "red" | "blue",
+): string {
+  switch (tone) {
+    case "green":
+      return "bg-emerald-500"
+    case "amber":
+      return "bg-amber-500"
+    case "red":
+      return "bg-red-500"
+    case "blue":
+      return "bg-blue-500"
+    default:
+      return "bg-slate-900"
+  }
+}
+
 function metricToneClass(
   tone: "slate" | "green" | "amber" | "red" | "blue",
 ): string {
@@ -477,5 +611,22 @@ function metricToneClass(
       return "text-blue-700"
     default:
       return "text-slate-950"
+  }
+}
+
+function metricIconClass(
+  tone: "slate" | "green" | "amber" | "red" | "blue",
+): string {
+  switch (tone) {
+    case "green":
+      return "bg-emerald-100 text-emerald-700"
+    case "amber":
+      return "bg-amber-100 text-amber-700"
+    case "red":
+      return "bg-red-100 text-red-700"
+    case "blue":
+      return "bg-blue-100 text-blue-700"
+    default:
+      return "bg-slate-100 text-slate-700"
   }
 }
