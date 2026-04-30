@@ -1,5 +1,15 @@
 import Link from "next/link"
 import {
+  AlertTriangle,
+  Brain,
+  CheckCircle2,
+  GitBranch,
+  ListTree,
+  ShieldCheck,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -68,28 +78,47 @@ export default async function AdminFrameworksPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-col gap-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          L&amp;D workspace
-        </p>
+      <header className="border-b border-slate-200 pb-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              L&amp;D workspace
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
               Framework editor
             </h1>
-            <p className="mt-1 max-w-2xl text-sm text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               Edit the active framework taxonomy for the current tenant.
               Publishing, version history, and draft branches remain deferred
               until the framework change model is finalized.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button form="competency-edit-form" type="submit" disabled={!selected}>
-              Save node
-            </Button>
-            <Button variant="outline" disabled>
-              Publish taxonomy
-            </Button>
+          <div className="flex flex-wrap items-stretch gap-2 lg:flex-col lg:items-end">
+            {selected ? (
+              <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Selected node
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-950">
+                  {selected.name}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {selected.code} · {categoryLabel(selected.category)}
+                </p>
+              </div>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                form="competency-edit-form"
+                type="submit"
+                disabled={!selected}
+              >
+                Save node
+              </Button>
+              <Button variant="outline" disabled>
+                Publish taxonomy
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -98,17 +127,24 @@ export default async function AdminFrameworksPage({
 
       <FrameworkOverview tree={tree.data} />
 
-      <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)_320px]">
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b border-slate-200">
-            <CardTitle className="text-base">Taxonomy tree</CardTitle>
-            <CardDescription>
-              {tree.data.framework.name} · v{tree.data.framework.version}
-            </CardDescription>
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(300px,0.66fr)_minmax(0,1.5fr)_minmax(280px,0.55fr)]">
+        <Card className="overflow-hidden border-slate-200 shadow-sm xl:sticky xl:top-5">
+          <CardHeader className="border-b border-slate-200 bg-white">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-base">Taxonomy tree</CardTitle>
+                <CardDescription>
+                  {tree.data.framework.name} · v{tree.data.framework.version}
+                </CardDescription>
+              </div>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                {tree.data.framework.is_active ? "Active" : "Inactive"}
+              </span>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             {tree.data.roots.length > 0 ? (
-              <div className="divide-y divide-slate-100">
+              <div className="max-h-[calc(100vh-310px)] overflow-y-auto divide-y divide-slate-100">
                 {tree.data.roots.map((root) => (
                   <CompetencyTreeItem
                     key={root.id}
@@ -126,7 +162,7 @@ export default async function AdminFrameworksPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-hidden border-slate-200 shadow-sm">
           {selected ? (
             <SelectedCompetency node={selected} />
           ) : (
@@ -137,7 +173,9 @@ export default async function AdminFrameworksPage({
         <ImpactPanel
           node={selected}
           impact={impact?.ok ? impact.data : null}
-          impactError={impact && !impact.ok ? loaderReasonMessage(impact.reason) : null}
+          impactError={
+            impact && !impact.ok ? loaderReasonMessage(impact.reason) : null
+          }
         />
       </div>
     </div>
@@ -153,16 +191,24 @@ function FrameworkStatusBanner({
 }): JSX.Element | null {
   if (updated === "competency_saved") {
     return (
-      <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-        Competency saved.
+      <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm">
+        <CheckCircle2
+          className="mt-0.5 h-4 w-4 shrink-0"
+          aria-hidden="true"
+        />
+        <span>Competency saved.</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        {competencyEditErrorMessage(error)}
+      <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800 shadow-sm">
+        <AlertTriangle
+          className="mt-0.5 h-4 w-4 shrink-0"
+          aria-hidden="true"
+        />
+        <span>{competencyEditErrorMessage(error)}</span>
       </div>
     )
   }
@@ -173,12 +219,40 @@ function FrameworkStatusBanner({
 function FrameworkOverview({ tree }: { tree: FrameworkTree }): JSX.Element {
   const stats = buildFrameworkStats(tree)
   return (
-    <section className="grid gap-3 md:grid-cols-5">
-      <MetricCard label="Competencies" value={stats.totalCompetencies} />
-      <MetricCard label="Root nodes" value={stats.rootCount} />
-      <MetricCard label="Technical" value={stats.technical} tone="blue" />
-      <MetricCard label="Behavioural" value={stats.behavioural} tone="green" />
-      <MetricCard label="Knowledge" value={stats.knowledge} tone="amber" />
+    <section className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <MetricCard
+        label="Competencies"
+        value={stats.totalCompetencies}
+        description="Active leaf + parent nodes"
+        icon={ListTree}
+      />
+      <MetricCard
+        label="Root nodes"
+        value={stats.rootCount}
+        description="Top-level groupings"
+        icon={GitBranch}
+      />
+      <MetricCard
+        label="Technical"
+        value={stats.technical}
+        description="Hard-skill scope"
+        tone="blue"
+        icon={Wrench}
+      />
+      <MetricCard
+        label="Behavioural"
+        value={stats.behavioural}
+        description="Conduct + leadership"
+        tone="green"
+        icon={ShieldCheck}
+      />
+      <MetricCard
+        label="Knowledge"
+        value={stats.knowledge}
+        description="Domain literacy"
+        tone="amber"
+        icon={Brain}
+      />
     </section>
   )
 }
@@ -230,18 +304,29 @@ function CompetencyTreeItem({
 
 function SelectedCompetency({ node }: { node: CompetencyNode }): JSX.Element {
   const levels = getProficiencyLevelLabels(node)
+  const descendants = countDescendants(node)
   return (
     <>
-      <CardHeader className="border-b border-slate-200">
+      <CardHeader className="border-b border-slate-200 bg-white">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <CardTitle className="text-xl">{node.name}</CardTitle>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-xl">{node.name}</CardTitle>
+              <span
+                className={cn(
+                  "rounded-full px-2 py-1 text-xs font-medium",
+                  categoryBadgeClass(node.category),
+                )}
+              >
+                {categoryLabel(node.category)}
+              </span>
+            </div>
             <CardDescription className="mt-1">
-              {node.code} · {categoryLabel(node.category)}
+              {node.code}
             </CardDescription>
           </div>
           <span className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-            {countDescendants(node)} descendant{countDescendants(node) === 1 ? "" : "s"}
+            {descendants} descendant{descendants === 1 ? "" : "s"}
           </span>
         </div>
       </CardHeader>
@@ -313,7 +398,7 @@ function SelectedCompetency({ node }: { node: CompetencyNode }): JSX.Element {
             </p>
           </div>
 
-          <section className="rounded-lg border border-dashed border-slate-300 p-4">
+          <section className="rounded-lg border border-dashed border-slate-300 bg-slate-50/40 p-4">
             <h2 className="text-sm font-semibold text-slate-950">
               Associated learning signals
             </h2>
@@ -342,13 +427,15 @@ function ImpactPanel({
   impactError: string | null
 }): JSX.Element {
   return (
-    <aside className="flex flex-col gap-5">
-      <Card>
-        <CardHeader>
+    <aside className="flex flex-col gap-5 xl:sticky xl:top-5 xl:self-start">
+      <Card className="overflow-hidden border-slate-200 shadow-sm">
+        <CardHeader className="border-b border-slate-200 bg-white">
           <CardTitle className="text-base">Impact analysis</CardTitle>
-          <CardDescription>Read-only for active IDP impact.</CardDescription>
+          <CardDescription>
+            Read-only counts via the same RLS posture.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
+        <CardContent className="space-y-3 p-5 text-sm">
           <ImpactLine label="Selected node" value={node?.name ?? "None"} />
           <ImpactLine
             label="Descendants"
@@ -394,11 +481,14 @@ function ImpactPanel({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden border-slate-200 shadow-sm">
+        <CardHeader className="border-b border-slate-200 bg-white">
           <CardTitle className="text-base">Open decisions</CardTitle>
+          <CardDescription>
+            Deferred until the framework change model is finalised.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-slate-700">
+        <CardContent className="space-y-2 p-5 text-sm text-slate-700">
           <p>Normalize proficiency levels after the JSONB MVP?</p>
           <p>Add draft framework versions and publish approvals?</p>
           <p>How should published changes affect active IDPs?</p>
@@ -411,21 +501,34 @@ function ImpactPanel({
 function MetricCard({
   label,
   value,
+  description,
   tone = "slate",
+  icon: Icon,
 }: {
   label: string
   value: number
-  tone?: "slate" | "blue" | "green" | "amber"
+  description: string
+  tone?: "slate" | "blue" | "green" | "amber" | "red"
+  icon: LucideIcon
 }): JSX.Element {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-          {label}
-        </p>
-        <p className={cn("mt-2 text-2xl font-semibold", metricToneClass(tone))}>
-          {value}
-        </p>
+    <Card className="overflow-hidden border-slate-200 shadow-sm">
+      <CardContent className="p-0">
+        <div className={cn("h-1", metricAccentClass(tone))} />
+        <div className="flex items-start justify-between gap-3 p-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+              {label}
+            </p>
+            <p className={cn("mt-2 text-2xl font-semibold", metricToneClass(tone))}>
+              {value}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">{description}</p>
+          </div>
+          <span className={cn("rounded-md p-2", metricIconClass(tone))}>
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+        </div>
       </CardContent>
     </Card>
   )
@@ -448,14 +551,16 @@ function ImpactLine({
 
 function EmptyCompetencyState(): JSX.Element {
   return (
-    <>
-      <CardHeader>
-        <CardTitle className="text-base">No competency selected</CardTitle>
-        <CardDescription>
-          Select a node from the taxonomy tree to inspect it.
-        </CardDescription>
-      </CardHeader>
-    </>
+    <CardContent className="flex min-h-[20rem] flex-col items-center justify-center p-8 text-center text-sm text-slate-600">
+      <span className="rounded-md bg-slate-100 p-3 text-slate-500">
+        <ListTree className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <p className="mt-3 font-medium text-slate-950">No competency selected</p>
+      <p className="mt-1 max-w-xs text-slate-500">
+        Pick a node from the taxonomy tree to inspect or edit its definition,
+        category, and proficiency levels.
+      </p>
+    </CardContent>
   )
 }
 
@@ -494,7 +599,41 @@ function loaderReasonMessage(reason: LoaderFailureReason): string {
   }
 }
 
-function metricToneClass(tone: "slate" | "blue" | "green" | "amber"): string {
+function categoryBadgeClass(
+  category: CompetencyNode["category"],
+): string {
+  switch (category) {
+    case "technical":
+      return "bg-blue-100 text-blue-800"
+    case "behavioural":
+      return "bg-emerald-100 text-emerald-800"
+    case "knowledge":
+      return "bg-amber-100 text-amber-800"
+    default:
+      return "bg-slate-100 text-slate-700"
+  }
+}
+
+function metricAccentClass(
+  tone: "slate" | "blue" | "green" | "amber" | "red",
+): string {
+  switch (tone) {
+    case "blue":
+      return "bg-blue-500"
+    case "green":
+      return "bg-emerald-500"
+    case "amber":
+      return "bg-amber-500"
+    case "red":
+      return "bg-red-500"
+    default:
+      return "bg-slate-900"
+  }
+}
+
+function metricToneClass(
+  tone: "slate" | "blue" | "green" | "amber" | "red",
+): string {
   switch (tone) {
     case "blue":
       return "text-blue-700"
@@ -502,7 +641,26 @@ function metricToneClass(tone: "slate" | "blue" | "green" | "amber"): string {
       return "text-emerald-700"
     case "amber":
       return "text-amber-700"
+    case "red":
+      return "text-red-700"
     default:
       return "text-slate-950"
+  }
+}
+
+function metricIconClass(
+  tone: "slate" | "blue" | "green" | "amber" | "red",
+): string {
+  switch (tone) {
+    case "blue":
+      return "bg-blue-100 text-blue-700"
+    case "green":
+      return "bg-emerald-100 text-emerald-700"
+    case "amber":
+      return "bg-amber-100 text-amber-700"
+    case "red":
+      return "bg-red-100 text-red-700"
+    default:
+      return "bg-slate-100 text-slate-700"
   }
 }
