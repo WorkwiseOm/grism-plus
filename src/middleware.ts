@@ -156,11 +156,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // returns true only when the user's role is in their tenant's
   // mfa_required_roles AND current AAL is aal1.
   //
-  // Local demo mode also bypasses this branch so reviewers can switch
-  // into ld_admin / superadmin personas without a TOTP enrolment loop.
-  // Triple-gated by isDemoAuthRelaxedFromEnv: NODE_ENV != "production",
-  // DEMO_AUTH_RELAXED == "true", and Host is loopback. All three must
-  // hold; otherwise normal MFA enforcement runs unchanged.
+  // Demo mode also bypasses this branch so reviewers can switch into
+  // ld_admin / superadmin personas without a TOTP enrolment loop.
+  // Gated by isDemoAuthRelaxedFromEnv, which has two open paths (local
+  // loopback or deployed-behind-Deployment-Protection); see
+  // src/lib/auth/demo-mode.ts for the full conditions. Outside both
+  // paths, normal MFA enforcement runs unchanged.
   const demoRelaxed = isDemoAuthRelaxedFromEnv(request.headers.get("host"))
   if (user && !isAuthRoute && !isApiRoute && !demoRelaxed) {
     const { data: rawMfaRequired } = await supabase.rpc(

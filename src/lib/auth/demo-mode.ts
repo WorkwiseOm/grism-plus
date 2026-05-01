@@ -1,25 +1,36 @@
 /**
- * Local-only demo mode gate.
+ * Demo-mode gate. Both the persona switcher UI and the middleware MFA
+ * bypass live behind this single helper so the security posture is
+ * explicit in one file. The gate has TWO mutually exclusive open paths:
  *
- * The demo persona switcher and the middleware MFA bypass are both
- * gated behind this single helper so the security posture is explicit
- * in one file. Three conditions must all hold:
+ *   Path 1 — Local development.
+ *     Requires all three:
+ *       a. NODE_ENV != "production"
+ *       b. DEMO_AUTH_RELAXED == "true"
+ *       c. Host is a loopback address (localhost / 127.0.0.1 / ::1)
+ *     The host check cannot be spoofed by a client header on a deployed
+ *     server: the production server's actual hostname is *.vercel.app or
+ *     a custom domain, never localhost.
  *
- *   1. NODE_ENV is not "production".
- *      Vercel sets NODE_ENV=production on every build/deploy, so this
- *      eliminates every Vercel preview and production deployment.
- *   2. DEMO_AUTH_RELAXED env is exactly the string "true".
- *      Off by default. Must be opted into per-environment.
- *   3. The request's Host header resolves to a loopback address
- *      (localhost / 127.0.0.1 / ::1).
- *      Cannot be spoofed by a client header on a deployed server: the
- *      production server's actual hostname is *.vercel.app or a custom
- *      domain, never localhost. This is the strongest layer of the
- *      three — even if NODE_ENV/env flag misset, real production traffic
- *      doesn't carry localhost in its Host header.
+ *   Path 2 — Deployed behind operator-verified Deployment Protection.
+ *     Requires all three:
+ *       a. DEMO_AUTH_RELAXED == "true"
+ *       b. DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION == "true"  (NEW)
+ *       c. Host is NOT a loopback address (rules out test/local fixtures
+ *          accidentally opening the deployed path).
+ *     The second flag is a deliberate two-key acknowledgment: a single
+ *     DEMO_AUTH_RELAXED leak cannot expose one-click admin sign-in in a
+ *     deployed environment. Setting both flags is the operator's signed
+ *     statement that they have verified Vercel Deployment Protection
+ *     (or an equivalent network-layer auth gate) is enabled for ALL
+ *     deployment URLs of this project, including the bare project alias.
+ *     For Vercel projects this means
+ *     `ssoProtection.deploymentType === "all"` — the default
+ *     `"all_except_custom_domains"` is NOT enough because the bare alias
+ *     is publicly reachable under that setting.
  *
- * All three are evaluated server-side. The helper is pure so it can be
- * unit-tested with synthetic Host values without spinning up Next.
+ * All conditions are evaluated server-side. The pure helper accepts
+ * context-as-arguments so it can be unit-tested without spinning up Next.
  */
 
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"])
@@ -31,6 +42,12 @@ export type DemoModeContext = {
   nodeEnv: string | undefined
   /** process.env.DEMO_AUTH_RELAXED. Pass-in for purity. */
   relaxedFlag: string | undefined
+  /**
+   * process.env.DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION. Optional second
+   * acknowledgment that opens the deployed path when the host is non-loopback.
+   * Pass-in for purity.
+   */
+  deployedBehindProtectionFlag?: string | undefined
 }
 
 /**
@@ -52,21 +69,36 @@ function normalizeHostname(host: string): string {
 }
 
 export function isDemoAuthRelaxed(ctx: DemoModeContext): boolean {
-  if (ctx.nodeEnv === "production") return false
+  // Primary toggle. Off by default in every environment.
   if (ctx.relaxedFlag !== "true") return false
   if (!ctx.host) return false
-  return LOOPBACK_HOSTS.has(normalizeHostname(ctx.host))
+
+  const isLoopback = LOOPBACK_HOSTS.has(normalizeHostname(ctx.host))
+
+  // Path 1 — local development.
+  if (ctx.nodeEnv !== "production" && isLoopback) return true
+
+  // Path 2 — deployed behind operator-verified Deployment Protection.
+  // The non-loopback constraint keeps this path mutually exclusive with
+  // path 1, so a misconfigured local fixture can never open the deployed
+  // gate inside test runs.
+  if (ctx.deployedBehindProtectionFlag === "true" && !isLoopback) return true
+
+  return false
 }
 
 /**
- * Convenience wrapper that reads NODE_ENV and DEMO_AUTH_RELAXED from
- * process.env. Use from server components / server actions / middleware.
- * Tests should prefer the pure isDemoAuthRelaxed() with explicit context.
+ * Convenience wrapper that reads NODE_ENV, DEMO_AUTH_RELAXED, and
+ * DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION from process.env. Use from server
+ * components / server actions / middleware. Tests should prefer the pure
+ * isDemoAuthRelaxed() with explicit context.
  */
 export function isDemoAuthRelaxedFromEnv(host: string | null): boolean {
   return isDemoAuthRelaxed({
     host,
     nodeEnv: process.env.NODE_ENV,
     relaxedFlag: process.env.DEMO_AUTH_RELAXED,
+    deployedBehindProtectionFlag:
+      process.env.DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION,
   })
 }
