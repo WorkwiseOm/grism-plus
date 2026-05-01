@@ -1,0 +1,30 @@
+# Local-only files that should never reach Vercel infra.
+# This file is ignored by git itself (in .gitignore) — it's just here
+# to keep `vercel deploy` uploads clean of local notes / tooling state.
+#
+# Patterns are leading-slash-rooted at repo root so they don't match
+# nested directories with the same name (e.g. `supabase/` would
+# otherwise also match `src/lib/supabase/` and break the build).
+
+# Claude Code local state
+/.claude/
+
+# Local notes / drafts that aren't part of the application
+/TalentIQ_Build_Brief_v1.2.docx
+/demo cr.txt
+
+# Design folder is reference-only and not needed at runtime
+/design/
+
+# Docs are not consumed at runtime
+/docs/
+
+# Scripts are dev/seed-only
+/scripts/
+
+# Tests are not deployed
+/tests/
+
+# Supabase migrations are applied via the Supabase CLI, not Vercel.
+# Leading-slash anchor avoids matching src/lib/supabase/.
+/supabase/
