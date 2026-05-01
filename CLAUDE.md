@@ -29,20 +29,33 @@
 
 ## Current phase
 
-**Phase 0 — Foundation** (~90% complete as of 2026-04-25).
+**Phase 0 — Closed 2026-05-01.** All ten steps shipped (history below).
 
-Completed:
+**Phase 1 — Execution.** Core L&D / employee / manager / framework workflows are locally functional and visually polished against the Stitch design contract; demo is live at https://grism-plus-app.vercel.app behind an app-level passcode gate. Schema migrations 00013 (development model) and 00014 (OJT evidence write flows) applied to the dev Supabase project. Open work tracked in `docs/PHASE_1_READINESS_CHECKLIST.md`.
+
+Phase 0 step history:
 
 - Step 1 — Next.js 14 + Shadcn baseline
 - Step 2 — Cloud Supabase provisioning (`grism-plus-dev`, Sydney, Free tier)
 - Step 3A — v2 schema applied to cloud (23 tables, RLS, audit triggers)
 - Step 3B — CI scaffolding (Dependabot, CodeQL, CODEOWNERS, PR template), SOC 2 security posture docs, PII pseudonymisation utility, auth hardening docs reconciled with Free-tier constraints
 - Step 3C — SOC 2 subprocessor register seeded (5 vendors)
-- Step 4 — Auth + middleware + MFA + idle timeout + login rate limit + password policy validator. Slices 1 (sign-in + role-routing baseline) and 2 (MFA, idle, rate limit) both closed. Manual end-to-end MFA verification confirmed 2026-04-24.
-- Step 5 — Arwa Energy demo seed (`scripts/seed_phase1_demo.ts` + `scripts/demo/`): 1 tenant, 21 users, 20 competencies, 12 IDPs (8 pending_approval / 2 active / 1 draft / 1 completed), 10+10 catalogues, idempotent + deterministic. Audit trigger child-table tenant resolution fix landed in 00010 alongside.
+- Step 4 — Auth + middleware + MFA + idle timeout + login rate limit + password policy validator. Manual end-to-end MFA verification confirmed 2026-04-24.
+- Step 5 — Arwa Energy demo seed: 1 tenant, 21 users, 20 competencies, 12 IDPs, 10+10 catalogues; idempotent and deterministic.
+- Step 6 — Anthropic AI client wrapper (`src/lib/ai/`) with prompt-safety guards, pseudonymised employee context, and mocked tests.
+- Step 7 — Docs pass (README replacement, OJT + module-library skeletons, env-reference refresh).
+- Step 8 — CI hardening: branch protection on `master` with 2 required status checks (`lint / typecheck / test / build` + `Analyze (javascript-typescript)`), strict status checks, force-push and deletion blocked.
+- Step 9 — First Vercel deployment closed 2026-05-01 at https://grism-plus-app.vercel.app (iad1 region, behind app-level passcode gate against the dev Supabase project). Subprocessor activation migration 00012 applied with iad1 location.
+- Step 10 — Phase 1 execution plan (`docs/PHASE_1_PLAN.md`).
 
-Remaining for Phase 0: Step 6 (AI client wrapper), Steps 7–10 (docs, CI, deploy, Phase 1 plan).
+## Live deployment
+
+- URL: https://grism-plus-app.vercel.app (Vercel `iad1`, US East / Washington DC).
+- Access gate: app-level passcode gate (`src/lib/auth/demo-gate.ts`) enforced by middleware step 0 when both `DEMO_AUTH_RELAXED=true` and `DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION=true` are set in Vercel production env. Vercel Pro doesn't include Deployment Protection on production aliases on this plan, so the app-level gate is the network-layer protection.
+- Demo persona switcher renders behind the passcode gate; signs in via `/api/auth/demo-sign-in`, resolves password from per-persona env var server-side, never exposes credentials to the client.
+- Maintenance: persona passwords rotate every time `scripts/seed_phase1_demo.ts` runs locally. Re-sync to Vercel with `npx tsx scripts/sync-demo-passwords-to-vercel.ts --redeploy`.
 
 ## Design decisions log
 
 - 2026-04 — Cloud Supabase project provisioned in Sydney region. Accepted for MVP dev despite Muscat-to-Sydney latency (~150ms+). Region will be reconsidered when production deployment is scoped.
+- 2026-05-01 — First Vercel deployment shipped to `iad1` (Vercel's default for the team), not Frankfurt as originally documented in `00002_seed_subprocessors.sql` and `docs/subprocessors.md`. Reconciled because the deploy is internal-demo-only behind a passcode gate against the dev Supabase project; subprocessor register now reflects iad1 reality. Frankfurt move is framed as the future production-pilot decision against the first customer contract's data-residency requirements; would land as a follow-up subprocessor migration.

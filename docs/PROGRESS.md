@@ -2,6 +2,22 @@
 
 ## Phase 0 progress
 
+### 2026-05-01 — Phase 0 closeout, Phase 1 demo live
+
+Phase 0 closed. The remaining open items (first Vercel deployment, subprocessor activation, doc cleanup) all landed today. Phase 1 product UI is polished against the Stitch design contract for all four core screens, captured as as-built PNGs alongside the original designs, and live for stakeholder review at https://grism-plus-app.vercel.app behind a passcode gate.
+
+Today's commits:
+
+- `9ac268f` — captured as-built PNGs of all four polished Phase 1 screens via a new Puppeteer script (`scripts/capture-as-built.ts`); CI skips the Chromium download since the script is local-only.
+- `eabd87a` — extended the demo-mode gate with a deployed-protection path: two-key acknowledgment via `DEMO_AUTH_RELAXED` + the new `DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION` env var, mutually exclusive with the local-loopback path on the host check.
+- `b2f86c5` — added an app-level passcode gate (`/demo-gate` page + middleware step 0 enforcement + HMAC-signed cookie helpers using Web Crypto for edge-portability). Compensates for Vercel Pro not including Deployment Protection on production aliases.
+- `84ec219` — deploy infrastructure: `.vercelignore` (leading-slash-anchored to avoid colliding with `src/lib/supabase/`) and `scripts/sync-demo-passwords-to-vercel.ts` so post-seed resync to Vercel is one command.
+- `6d02b98` — applied `00012_activate_vercel_subprocessor.sql` to `grism-plus-dev`. Migration text + `docs/subprocessors.md` reconciled from Frankfurt to `iad1`/Washington DC to match the actual deploy region; Vercel subprocessor row verified `is_active=true, reviewed_at=2026-05-01T14:16Z`.
+
+Verification: lint, typecheck, 255 tests passing (13 skipped), production build, all post-deploy smoke checks green (`/` and protected routes 307 → `/demo-gate?next=…`; `/demo-gate` 200 with passcode form; demo switcher hidden until passcode cookie is set). Production deployment id `dpl_597Lh5tWP7R7DiVJQ7Hm55RgJPp4`.
+
+Open Phase 1 work continues per `docs/PHASE_1_READINESS_CHECKLIST.md`: coach assigned-coachee RLS, multi-signal weighted convergence rule, Anthropic data-retention setting, live AI smoke, Unberry production shape, Resend activation. None of these gate Phase 0 closeout.
+
 ### 2026-04-28 - Phase 1 approval and cockpit polish
 
 Continued the Phase 1 product pass with four more local commits on `master`:
