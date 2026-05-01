@@ -26,12 +26,13 @@ The corresponding `subprocessors` table in the production database holds the mac
 
 - **Purpose:** Next.js application hosting, serverless function execution, edge caching, custom domain TLS
 - **Data categories:** request payloads in transit, server-side rendering payloads (may include PII), environment variables (secrets)
-- **Hosting region:** Not yet provisioned. Intended hosting region: Frankfurt (production). Will be activated in the migration that provisions the Vercel project (Phase 0 Step 9). Until then, no Grism Plus customer data flows through Vercel.
+- **Hosting region:** Washington, D.C., USA (Vercel `iad1` region). Demo deployment at https://grism-plus-app.vercel.app, behind an app-level passcode gate (`src/lib/auth/demo-gate.ts`) and pointing at the development Supabase project — no production customer data flows through Vercel. Production-pilot region to be re-evaluated against the first customer contract's data-residency requirements (likely Frankfurt for GCC proximity); a region change at that point would land as a follow-up subprocessor migration.
 - **SOC 2 status:** Type II certified
 - **GDPR status:** compliant, DPA executed
 - **DPA:** https://vercel.com/legal/dpa
 - **Added:** 2026-04
-- **Status:** Inactive (documented in register as non-processing) until Step 9 provisioning.
+- **Activated:** 2026-05-01 (migration `00012_activate_vercel_subprocessor.sql`)
+- **Status:** Active — demo deployment only. Production-pilot review pending first customer contract.
 
 ### Anthropic (Anthropic PBC)
 
