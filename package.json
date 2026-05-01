@@ -38,7 +38,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "15.5.15",
+    "eslint-config-next": "16.2.4",
     "pg": "^8.20.0",
     "postcss": "8.5.10",
     "puppeteer": "^24.42.0",
