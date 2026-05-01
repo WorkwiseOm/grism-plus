@@ -4,6 +4,10 @@
  * Chain order (each guard may short-circuit with a redirect/429 before
  * the next runs):
  *
+ *   0. Deployed demo gate — runs only when DEMO_AUTH_RELAXED=true AND
+ *      DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION=true. Redirects every
+ *      request without a valid demo_gate cookie to /demo-gate, with
+ *      /demo-gate itself exempted so the passcode form is reachable.
  *   1. Supabase SSR client + session cookie refresh
  *   2. Login rate limit — POST /api/auth/sign-in only
  *   3. getUser() → session resolved
@@ -13,7 +17,7 @@
  *      → redirect to /auth/mfa/challenge (factor verified) or
  *        /auth/mfa/enrol (no verified factor yet)
  *   6. Unauthenticated → /auth/sign-in (allowlist: /auth/sign-in,
- *      /api/auth/*)
+ *      /api/auth/*, /demo-gate)
  *   7. Authenticated hitting /auth/sign-in → /
  *
  * Invariants:
@@ -24,6 +28,8 @@
  *   - /api/auth/* is exempt from rules 5 and 6 so pre-auth endpoints
  *     (sign-in) and authenticated event-writing endpoints stay
  *     reachable.
+ *   - /demo-gate is exempt from rules 0 and 6; it has no auth context
+ *     of its own and runs the passcode-cookie set as a server action.
  *
  * Loop audit (scenario map):
  *   A. unauth → /            → 307 /auth/sign-in → pass
@@ -35,12 +41,19 @@
  *   G. aal1 employee → /     → MFA check false → root page → /employee
  *   H. authed → /api/auth/mfa/event → rule 5 skipped → handler
  *   J. authed → /auth/sign-in → 307 / → Scenario D or F (no loop)
+ *   K. demo-gated, no cookie → / → 307 /demo-gate?next=/ → page renders
+ *   L. demo-gated, cookie OK → /          → step 0 passes → Scenario A/D/F
  */
 
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { isDemoAuthRelaxedFromEnv } from "@/lib/auth/demo-mode"
+import {
+  DEMO_GATE,
+  isDeployedDemoGateEnabledFromEnv,
+  verifyDemoGateCookie,
+} from "@/lib/auth/demo-gate"
 
 type IdleCheckResult = {
   idle_expired: boolean
@@ -57,6 +70,40 @@ function ipFromRequest(request: NextRequest): string | null {
 }
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
+  const pathname = request.nextUrl.pathname
+
+  // Step 0 — Deployed demo gate. When the operator has explicitly
+  // enabled the deployed demo path (DEMO_AUTH_RELAXED=true AND
+  // DEMO_AUTH_DEPLOYED_BEHIND_PROTECTION=true), every request must
+  // carry a valid demo_gate cookie before reaching any app code.
+  // Vercel Pro doesn't include Deployment Protection on production
+  // aliases, so this is the network-layer gate that keeps the bare
+  // alias from being publicly browsable.
+  //
+  // /demo-gate itself is exempt so the passcode form is reachable.
+  // The action that sets the cookie lives at the same path and is
+  // a server action invoked from the page.
+  if (
+    isDeployedDemoGateEnabledFromEnv() &&
+    !pathname.startsWith("/demo-gate")
+  ) {
+    const cookieValue = request.cookies.get(DEMO_GATE.cookieName)?.value
+    const valid = await verifyDemoGateCookie(cookieValue)
+    if (!valid) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/demo-gate"
+      url.search = ""
+      // Preserve the original target so the user lands where they
+      // intended after entering the passcode. Sanitisation happens
+      // again on the server-action side.
+      const original = `${pathname}${request.nextUrl.search}`
+      if (original.length > 1) {
+        url.searchParams.set("next", original)
+      }
+      return NextResponse.redirect(url)
+    }
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -80,7 +127,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     },
   )
 
-  const pathname = request.nextUrl.pathname
   const isAuthRoute = pathname.startsWith("/auth/")
   const isApiRoute = pathname.startsWith("/api/")
 
@@ -183,13 +229,16 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
   }
 
-  // 6. Unauthenticated → sign-in. Allowlist is narrow: only
-  // /auth/sign-in and /api/auth/*. /auth/mfa/* require an authenticated
-  // context and are NOT in the allowlist.
+  // 6. Unauthenticated → sign-in. Allowlist is narrow: /auth/sign-in,
+  // /api/auth/*, and /demo-gate (the deployed-demo passcode page,
+  // which by definition is reached before any Supabase auth happens).
+  // /auth/mfa/* require an authenticated context and are NOT in the
+  // allowlist.
   if (
     !user &&
     pathname !== "/auth/sign-in" &&
-    !pathname.startsWith("/api/auth/")
+    !pathname.startsWith("/api/auth/") &&
+    !pathname.startsWith("/demo-gate")
   ) {
     const url = request.nextUrl.clone()
     url.pathname = "/auth/sign-in"
